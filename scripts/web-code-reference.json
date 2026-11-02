@@ -1,0 +1,393 @@
+[
+  {
+    "id": "b12",
+    "title": "B1.2 共享会议室数据分析",
+    "sub": "pandas 数据处理 · 真题代码填空（M1~M4）",
+    "src": "B1.2.ipynb",
+    "note": "按 booking_id 去重后排除已取消预约；爽约率 = 爽约数 ÷ 有效预约数；座位利用率 = 参会人数 ÷ 核定座位。",
+    "snippet": "import pandas as pd\n\n# 读取数据\nbookings = pd.read_csv('meeting_bookings.csv', encoding='utf-8-sig')\nrooms = pd.read_csv('meeting_rooms.csv', encoding='utf-8-sig')\n\n# M1（1分）：数据准备\n# 按booking_id去重，再排除已取消预约\nclean = {{0}}\nvalid = {{1}}\n\nprint('数据准备结果')\nprint('去重后预约数：', len(clean))\nprint('有效预约数：', len(valid))\n\n# M2（2分）：识别爽约高发时段\n# 统计各时段的有效预约数、爽约数和爽约率，并按爽约率降序排列\nvalid['is_no_show'] = {{2}}\nslot_summary = {{3}}\n\nprint('\\n各时段爽约情况')\nprint(slot_summary)\n\n# M3（2分）：分析会议室容量匹配\n# 只分析已使用预约，关联会议室容量，统计使用场次和平均座位利用率\nused = {{4}}\nused['seat_util'] = used[\"attendees\"] / used[\"capacity\"]\nroom_summary = {{5}}\n\nprint('\\n各会议室空间利用情况')\nprint(room_summary)\n\n# M4（1分）：输出空间匹配优化候选清单\n# 筛选容量不少于12、实际使用不少于20场、平均座位利用率低于40%的会议室\ncandidates = {{6}}\n\nprint('\\n空间匹配优化候选清单')\nprint(candidates)",
+    "blanks": [
+      {
+        "i": 0,
+        "label": "M1-去重",
+        "score": 0.5,
+        "task": "按 booking_id 去重",
+        "ref": [
+          "bookings.drop_duplicates(subset='booking_id')",
+          "bookings.drop_duplicates(subset=\"booking_id\")",
+          "bookings.drop_duplicates('booking_id')"
+        ],
+        "keys": [
+          "drop_duplicates",
+          "booking_id"
+        ],
+        "hint": "drop_duplicates 指定 subset 为预约编号列"
+      },
+      {
+        "i": 1,
+        "label": "M1-排除取消",
+        "score": 0.5,
+        "task": "排除已取消预约",
+        "ref": [
+          "clean[clean['status'] != '已取消']",
+          "clean[clean['status'].isin(['已使用','爽约'])]",
+          "clean[clean[\"status\"] != \"已取消\"]"
+        ],
+        "keys": [
+          "clean",
+          "status"
+        ],
+        "hint": "按 status 列过滤掉「已取消」（或只保留已使用/爽约）"
+      },
+      {
+        "i": 2,
+        "label": "M2-爽约标记",
+        "score": 1.0,
+        "task": "构造爽约标记列 is_no_show",
+        "ref": [
+          "(valid['status'] == '爽约').astype(int)",
+          "(valid['status'] == '爽约') * 1",
+          "valid['status'].apply(lambda x: 1 if x == '爽约' else 0)"
+        ],
+        "keys": [
+          "status",
+          "爽约"
+        ],
+        "hint": "status 等于「爽约」时取 1，否则 0，转整型便于求和求均值"
+      },
+      {
+        "i": 3,
+        "label": "M2-时段汇总",
+        "score": 1.0,
+        "task": "按 time_slot 汇总有效预约数、爽约数、爽约率并降序",
+        "ref": [
+          "valid.groupby('time_slot').agg(有效预约数=('is_no_show','count'), 爽约数=('is_no_show','sum'), 爽约率=('is_no_show','mean')).sort_values('爽约率', ascending=False)"
+        ],
+        "keys": [
+          "groupby",
+          "time_slot",
+          "agg",
+          "sort_values"
+        ],
+        "hint": "groupby('time_slot') + agg 命名聚合（count / sum / mean）+ sort_values 降序"
+      },
+      {
+        "i": 4,
+        "label": "M3-关联容量",
+        "score": 1.0,
+        "task": "取已使用预约并关联会议室表获得容量",
+        "ref": [
+          "valid[valid['status'] == '已使用'].merge(rooms, on='room_id')",
+          "valid[valid['status']=='已使用'].merge(rooms, on='room_id', how='left')"
+        ],
+        "keys": [
+          "merge",
+          "已使用"
+        ],
+        "hint": "先筛 status == '已使用'，再 merge rooms（on='room_id'）"
+      },
+      {
+        "i": 5,
+        "label": "M3-会议室汇总",
+        "score": 1.0,
+        "task": "按会议室统计使用场次与平均座位利用率",
+        "ref": [
+          "used.groupby(['room_id','room_name','capacity']).agg(使用场次=('booking_id','count'), 平均座位利用率=('seat_util','mean')).reset_index()"
+        ],
+        "keys": [
+          "groupby",
+          "agg",
+          "seat_util"
+        ],
+        "hint": "groupby 会议室维度 + agg（count 场次、mean 利用率）+ reset_index"
+      },
+      {
+        "i": 6,
+        "label": "M4-候选筛选",
+        "score": 1.0,
+        "task": "筛选容量≥12、使用场次≥20、平均座位利用率<40%",
+        "ref": [
+          "room_summary[(room_summary['capacity'] >= 12) & (room_summary['使用场次'] >= 20) & (room_summary['平均座位利用率'] < 0.4)]"
+        ],
+        "keys": [
+          "capacity",
+          "使用场次",
+          "平均座位利用率"
+        ],
+        "hint": "三个条件用 & 连接，注意每个条件各自加括号"
+      }
+    ],
+    "blankCount": 7,
+    "totalScore": 6.0
+  },
+  {
+    "id": "b2",
+    "title": "B2 冷链温控预警算法测试",
+    "sub": "pandas + scikit-learn · 真题代码填空（清洗→建模→评估）",
+    "src": "B2.ipynb",
+    "note": "75%/25% 分层划分；随机森林 100 棵树、最大深度 6、平衡类别权重；评估看精确率/召回率/F1/混淆矩阵与分群召回。",
+    "snippet": "import pandas as pd\nimport numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix\n\n# 读取与清洗数据\ndf = pd.read_csv('cold_chain_shipments.csv')\n\n# 转换发车时间并提取发车小时\ndf['depart_time'] = {{0}}\ndf['depart_hour'] = {{1}}\n\n# 按运输单号去重，并删除运输时长或传感器缺失率不合法的记录\ndf = {{2}}\ndf = {{3}}\n\n# 按货物类型的中位数填补 avg_temp 缺失值\ndf['avg_temp'] = {{4}}\n\nprint('清洗后记录数：', len(df))\n\n# 统计不同货物类型、不同线路区域的样本数、报警率和平均传感器缺失率\ncargo_region_summary = {{5}}\nprint(cargo_region_summary)\n\nfeature_cols = [\n    'route_region', 'vehicle_type', 'cargo_type', 'planned_hours',\n    'outside_temp', 'avg_temp', 'max_temp', 'door_open_count',\n    'sensor_missing_rate', 'driver_experience_years', 'depart_hour'\n]\ncategory_cols = ['route_region', 'vehicle_type', 'cargo_type']\n\n# 构造特征矩阵与目标变量，并对分类字段进行独热编码\nX = {{6}}\ny = {{7}}\n\n# 按 75%/25% 划分训练集和测试集，按 y 分层，random_state=42\nX_train, X_test, y_train, y_test = {{8}}\n\n# 构建随机森林分类器并完成训练和预测\n# 参数：决策树的数量为100，最大深度是6，采用平衡类别权重，random_state=42\nmodel = {{9}}\n{{10}}\ny_pred = {{11}}\n\n# 计算精确率、召回率、F1值和混淆矩阵\nprecision = {{12}}\nrecall = {{13}}\nf1 = {{14}}\ncm = {{15}}\nprint('precision=', round(precision, 3))\nprint('recall=', round(recall, 3))\nprint('f1=', round(f1, 3))\nprint('confusion matrix=\\n', cm)\n\n# 计算测试集中不同货物类型的召回率\ntest_result = df.loc[X_test.index, ['shipment_id', 'cargo_type']].copy()\ntest_result['actual'] = y_test.to_numpy()\ntest_result['predicted'] = y_pred\ncargo_recall = {{16}}\nprint(cargo_recall)",
+    "blanks": [
+      {
+        "i": 0,
+        "label": "时间转换",
+        "score": 1,
+        "task": "把 depart_time 转为 datetime 类型",
+        "ref": [
+          "pd.to_datetime(df['depart_time'])",
+          "pd.to_datetime(df[\"depart_time\"])"
+        ],
+        "keys": [
+          "to_datetime",
+          "depart_time"
+        ],
+        "hint": "pd.to_datetime(...)"
+      },
+      {
+        "i": 1,
+        "label": "提取小时",
+        "score": 1,
+        "task": "从发车时间中提取小时数",
+        "ref": [
+          "df['depart_time'].dt.hour",
+          "df[\"depart_time\"].dt.hour"
+        ],
+        "keys": [
+          "dt.hour"
+        ],
+        "hint": "Series.dt.hour"
+      },
+      {
+        "i": 2,
+        "label": "去重",
+        "score": 1,
+        "task": "按运输单号去重",
+        "ref": [
+          "df.drop_duplicates(subset='shipment_id')",
+          "df.drop_duplicates(subset=\"shipment_id\")"
+        ],
+        "keys": [
+          "drop_duplicates",
+          "shipment_id"
+        ],
+        "hint": "drop_duplicates(subset=...)"
+      },
+      {
+        "i": 3,
+        "label": "清除非法值",
+        "score": 1,
+        "task": "删除运输时长与传感器缺失率不合法的记录",
+        "ref": [
+          "df[(df['planned_hours'] > 0) & (df['planned_hours'] <= 72) & (df['sensor_missing_rate'] >= 0) & (df['sensor_missing_rate'] <= 1)]",
+          "df[(df['planned_hours']>0)&(df['planned_hours']<=72)&(df['sensor_missing_rate'].between(0,1))]"
+        ],
+        "keys": [
+          "planned_hours",
+          "sensor_missing_rate"
+        ],
+        "hint": "计划时长须为正且合理（如 ≤72），缺失率须在 0~1"
+      },
+      {
+        "i": 4,
+        "label": "分组填补",
+        "score": 1,
+        "task": "按货物类型的中位数填补 avg_temp 缺失值",
+        "ref": [
+          "df.groupby('cargo_type')['avg_temp'].transform(lambda s: s.fillna(s.median()))",
+          "df.groupby(\"cargo_type\")[\"avg_temp\"].transform(lambda s: s.fillna(s.median()))"
+        ],
+        "keys": [
+          "groupby",
+          "cargo_type",
+          "transform",
+          "median"
+        ],
+        "hint": "groupby + transform，不能用全列中位数"
+      },
+      {
+        "i": 5,
+        "label": "分布统计",
+        "score": 1,
+        "task": "按货物类型+线路区域统计样本数、报警率、平均缺失率",
+        "ref": [
+          "df.groupby(['cargo_type','route_region']).agg(样本数=('shipment_id','count'), 报警率=('temp_alarm','mean'), 平均传感器缺失率=('sensor_missing_rate','mean')).reset_index()"
+        ],
+        "keys": [
+          "groupby",
+          "cargo_type",
+          "route_region",
+          "agg"
+        ],
+        "hint": "两级 groupby + 命名聚合 agg"
+      },
+      {
+        "i": 6,
+        "label": "特征矩阵",
+        "score": 1,
+        "task": "构造特征矩阵并对分类字段独热编码",
+        "ref": [
+          "pd.get_dummies(df[feature_cols], columns=category_cols)",
+          "pd.get_dummies(df[feature_cols], columns=category_cols).astype(float)"
+        ],
+        "keys": [
+          "get_dummies",
+          "category_cols"
+        ],
+        "hint": "pd.get_dummies(..., columns=...)"
+      },
+      {
+        "i": 7,
+        "label": "目标变量",
+        "score": 1,
+        "task": "指定预测目标",
+        "ref": [
+          "df['temp_alarm']",
+          "df[\"temp_alarm\"]"
+        ],
+        "keys": [
+          "temp_alarm"
+        ],
+        "hint": "温控报警标签列"
+      },
+      {
+        "i": 8,
+        "label": "数据集划分",
+        "score": 1,
+        "task": "75%/25% 分层划分，random_state=42",
+        "ref": [
+          "train_test_split(X, y, test_size=0.25, stratify=y, random_state=42)"
+        ],
+        "keys": [
+          "train_test_split",
+          "test_size",
+          "stratify",
+          "random_state"
+        ],
+        "hint": "test_size=0.25、stratify=y、random_state=42 缺一不可"
+      },
+      {
+        "i": 9,
+        "label": "模型定义",
+        "score": 1,
+        "task": "随机森林：100棵树、深度6、平衡权重、random_state=42",
+        "ref": [
+          "RandomForestClassifier(n_estimators=100, max_depth=6, class_weight='balanced', random_state=42)"
+        ],
+        "keys": [
+          "RandomForestClassifier",
+          "n_estimators",
+          "max_depth",
+          "class_weight"
+        ],
+        "hint": "四个参数都要写全"
+      },
+      {
+        "i": 10,
+        "label": "模型训练",
+        "score": 1,
+        "task": "在训练集上训练模型",
+        "ref": [
+          "model.fit(X_train, y_train)"
+        ],
+        "keys": [
+          "model.fit",
+          "X_train",
+          "y_train"
+        ],
+        "hint": "model.fit(...)"
+      },
+      {
+        "i": 11,
+        "label": "模型预测",
+        "score": 1,
+        "task": "在测试集上预测",
+        "ref": [
+          "model.predict(X_test)"
+        ],
+        "keys": [
+          "model.predict",
+          "X_test"
+        ],
+        "hint": "model.predict(...)"
+      },
+      {
+        "i": 12,
+        "label": "精确率",
+        "score": 1,
+        "task": "计算精确率",
+        "ref": [
+          "precision_score(y_test, y_pred)"
+        ],
+        "keys": [
+          "precision_score",
+          "y_test",
+          "y_pred"
+        ],
+        "hint": "precision_score(真实值, 预测值)"
+      },
+      {
+        "i": 13,
+        "label": "召回率",
+        "score": 1,
+        "task": "计算召回率",
+        "ref": [
+          "recall_score(y_test, y_pred)"
+        ],
+        "keys": [
+          "recall_score",
+          "y_test",
+          "y_pred"
+        ],
+        "hint": "recall_score(...)"
+      },
+      {
+        "i": 14,
+        "label": "F1值",
+        "score": 1,
+        "task": "计算 F1 值",
+        "ref": [
+          "f1_score(y_test, y_pred)"
+        ],
+        "keys": [
+          "f1_score",
+          "y_test",
+          "y_pred"
+        ],
+        "hint": "f1_score(...)"
+      },
+      {
+        "i": 15,
+        "label": "混淆矩阵",
+        "score": 1,
+        "task": "计算混淆矩阵",
+        "ref": [
+          "confusion_matrix(y_test, y_pred)"
+        ],
+        "keys": [
+          "confusion_matrix",
+          "y_test",
+          "y_pred"
+        ],
+        "hint": "confusion_matrix(...)"
+      },
+      {
+        "i": 16,
+        "label": "分群召回",
+        "score": 1,
+        "task": "计算测试集中各货物类型的召回率",
+        "ref": [
+          "test_result.groupby('cargo_type').apply(lambda g: recall_score(g['actual'], g['predicted']))",
+          "test_result.groupby('cargo_type').apply(lambda g: recall_score(g['actual'], g['predicted']), include_groups=False)"
+        ],
+        "keys": [
+          "groupby",
+          "cargo_type",
+          "recall_score"
+        ],
+        "hint": "按 cargo_type 分组后对每组算 recall_score"
+      }
+    ],
+    "blankCount": 17,
+    "totalScore": 17
+  }
+]

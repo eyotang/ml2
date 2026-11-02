@@ -1,0 +1,7 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+preview-*.png
+verified-python-run.png
+/知练-静态网站.zip
