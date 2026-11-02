@@ -1,5 +1,7 @@
 # 知练 · 人工智能训练师备赛
 
+在线演示：[知练刷题工具](https://zhilian-quiz.apps.workbuddy.host/?sharecode=JQCS2SL54V)
+
 本地初版，无需安装依赖。启动：
 
 ```sh
