@@ -119,3 +119,5 @@ const entryView=new URLSearchParams(location.search).get('view');
 if(['all','wrong','favorites'].includes(entryView))setView(entryView);
 const entryMode=new URLSearchParams(location.search).get('mode');
 if(['answer','study'].includes(entryMode)){state.mode=entryMode;save();render();}
+
+$('#theory-study-tips').onclick=()=>{const q=QUESTIONS[state.current];window.StudyTips?.open(q.type===3?'a'+q.num:'theory');};

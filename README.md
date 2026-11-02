@@ -33,6 +33,8 @@ B1-2、B2 的「原题补全」可运行全部或选中代码，自动载入 `di
 
 技能操作包含业务分析 B1-1、B1-2，智能训练 B2，智能系统设计 B3，培训与指导 B4。综合评审当前保留导航入口，课程内容尚未接入。
 
+理论题和技能练习顶部提供「答题技巧」，按当前模块或简答题展示答题框架、展开方法和自检要点，参考[老师解析课件](https://ai-trainer-exam-courseware.app.workbuddy.host/?sharecode=U7DGZ5NTK5)整理。老师参考代码保持原样，计算结论以实际运行输出为准。
+
 ## 重新生成内容
 
 在项目根目录运行（Python 3，仅标准库）：
@@ -56,6 +58,7 @@ node check-editor.cjs
 node check-runner.cjs
 node check-reset.cjs
 node check-matching.cjs
+node check-study-tips.cjs
 ```
 
 部署目录选择 `dist`。全部练习记录保存在访问者当前浏览器中，更新代码不会主动清空记录；更换设备、域名或清除浏览器存储不会自动同步。

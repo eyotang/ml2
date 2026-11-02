@@ -159,3 +159,5 @@ function renderCaseCoverage(taskIndex,text){
   const unique=points.filter((p,i)=>points.findIndex(x=>x.label===p.label)===i),covered=unique.filter(p=>p.status==='covered').length;
   return `<section class="case-coverage"><h3>要点辅助核对 · 已识别 ${covered} / ${unique.length}</h3><p>按近义词与关键含义进行本地检查，未识别不代表答错，也不等同正式评分。数值命中仍需核对单位、前提和边界。</p><ul>${unique.map(p=>`<li class="${p.status==='covered'?'slot-correct':p.status==='conflict'?'slot-incorrect':'slot-review'}"><strong>${p.status==='covered'?'✓ 已识别':p.status==='conflict'?'× 请修正':'? 待自检'}</strong> ${esc(p.label)}<small>${esc(p.message)}</small></li>`).join('')}</ul></section>`;
 }
+
+$('#study-tips-button').onclick=()=>window.StudyTips?.open(courseId);
