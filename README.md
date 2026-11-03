@@ -60,6 +60,7 @@ node check-reset.cjs
 node check-matching.cjs
 node check-study-tips.cjs
 node check-flowcharts.cjs
+node check-page-boot.cjs
 ```
 
 部署目录选择 `dist`。全部练习记录保存在访问者当前浏览器中，更新代码不会主动清空记录；更换设备、域名或清除浏览器存储不会自动同步。

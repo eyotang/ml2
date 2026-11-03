@@ -3,6 +3,9 @@ const course=SKILL_COURSES[courseId];
 if(!course){location.replace('./#skills');throw new Error('Unknown course')}
 const isCase=course.kind==='case';
 document.title=isCase?'知练 · 技能方案练习':'知练 · 代码补全';
+// An older cached HTML page can load the latest script after a deployment.
+// Add the new control before render() touches it, without clearing saved answers.
+if(!document.querySelector('#reset-all-practice'))document.querySelector('#mastered-count').insertAdjacentHTML('afterend','<button id="reset-all-practice">全部重置</button>');
 const STORE='zhilian-skills-v1';let all={};try{all=JSON.parse(localStorage.getItem(STORE))||{}}catch{}
 const progress={index:0,mode:'pick',records:{},drafts:{},...all[courseId]};
 // Preserve existing work when reference-aligned blanks change their order.
