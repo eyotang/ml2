@@ -1425,14 +1425,191 @@ const SKILL_COURSES = {
           "test_result.groupby('cargo_type').apply(lambda g: recall_score(g['actual'], g['predicted']), include_groups=False)"
         ],
         "websiteHint": "按 cargo_type 分组后对每组算 recall_score"
+      },
+      {
+        "id": "b2-18",
+        "kind": "case",
+        "taskIndex": 0,
+        "title": "任务三：选择优先指标并解释理由",
+        "goal": "把冷链漏报风险与指标含义对应起来。",
+        "code": "优先关注异常类的 {{}}。\n理由：{{}}。\n同时关注 {{}}，避免只追求单一指标。",
+        "solution": "优先关注异常类的 召回率。\n理由：漏报可能导致货损与质量安全风险。\n同时关注 精确率、F1及误报处置成本，避免只追求单一指标。",
+        "slots": [
+          {
+            "answer": "召回率",
+            "choices": [
+              "召回率",
+              "总体准确率",
+              "仅看正常类预测数量"
+            ],
+            "why": "异常召回率=TP/(TP+FN)，衡量真实异常被识别的比例。",
+            "accepted": [],
+            "matchRule": {
+              "groups": [
+                [
+                  "召回率",
+                  "recall"
+                ]
+              ]
+            }
+          },
+          {
+            "answer": "漏报可能导致货损与质量安全风险",
+            "choices": [
+              "漏报可能导致货损与质量安全风险",
+              "误报完全没有成本",
+              "总体准确率高就一定没有风险"
+            ],
+            "why": "冷链异常漏报会延迟干预，导致异常运输未及时处置。",
+            "accepted": [],
+            "matchRule": {
+              "groups": [
+                [
+                  "漏报",
+                  "漏检",
+                  "未识别"
+                ],
+                [
+                  "货损",
+                  "安全",
+                  "质量",
+                  "损失"
+                ]
+              ]
+            }
+          },
+          {
+            "answer": "精确率、F1及误报处置成本",
+            "choices": [
+              "精确率、F1及误报处置成本",
+              "只看训练集准确率",
+              "忽略误报与人工负担"
+            ],
+            "why": "需要兼顾误报、人工复核和运营负担，不能只看召回率。",
+            "accepted": [],
+            "matchRule": {
+              "groups": [
+                [
+                  "精确率",
+                  "precision"
+                ],
+                [
+                  "误报",
+                  "成本",
+                  "负担",
+                  "f1"
+                ]
+              ]
+            }
+          }
+        ],
+        "hint": "结合业务说明指标和理由；改进措施要具体，效果需在独立数据上验证。",
+        "context": ""
+      },
+      {
+        "id": "b2-19",
+        "kind": "case",
+        "taskIndex": 0,
+        "title": "任务三：改进薄弱货类并验证",
+        "goal": "提出一项针对性的改进措施，再说明怎样证明有效。",
+        "code": "先比较各货类召回率、异常样本数和漏报数。\n措施：针对薄弱货类 {{}}。\n重新训练后用 {{}} 对比。\n核对薄弱组召回率和漏报数，同时检查 {{}}。",
+        "solution": "先比较各货类召回率、异常样本数和漏报数。\n措施：针对薄弱货类 补充代表性异常正样本并核验标签。\n重新训练后用 保留的独立测试集 对比。\n核对薄弱组召回率和漏报数，同时检查 总体表现、各组精确率和误报负担。",
+        "slots": [
+          {
+            "answer": "补充代表性异常正样本并核验标签",
+            "choices": [
+              "补充代表性异常正样本并核验标签",
+              "删除该组测试难例",
+              "修改测试标签让分数变高"
+            ],
+            "why": "补充薄弱类别真实异常数据用于训练，覆盖多样条件，先核验标签。",
+            "accepted": [],
+            "matchRule": {
+              "groups": [
+                [
+                  "补充",
+                  "增加",
+                  "采集"
+                ],
+                [
+                  "异常",
+                  "正样本"
+                ],
+                [
+                  "标签",
+                  "核验",
+                  "审核"
+                ]
+              ]
+            }
+          },
+          {
+            "answer": "保留的独立测试集",
+            "choices": [
+              "保留的独立测试集",
+              "并入训练的原测试集",
+              "只在训练数据上"
+            ],
+            "why": "测试数据不能参与训练或反复选型；必要时另设验证集和最终独立测试批次。",
+            "accepted": [],
+            "matchRule": {
+              "groups": [
+                [
+                  "独立",
+                  "保留",
+                  "未参与"
+                ],
+                [
+                  "测试",
+                  "验证"
+                ]
+              ]
+            }
+          },
+          {
+            "answer": "总体表现、各组精确率和误报负担",
+            "choices": [
+              "总体表现、各组精确率和误报负担",
+              "只看训练分数",
+              "忽略其他货物类型"
+            ],
+            "why": "改善弱组的同时评估总体与其他分组，防止以大量误报换取召回。",
+            "accepted": [],
+            "matchRule": {
+              "groups": [
+                [
+                  "总体",
+                  "其他组",
+                  "分组"
+                ],
+                [
+                  "精确率",
+                  "误报",
+                  "成本"
+                ]
+              ]
+            }
+          }
+        ],
+        "hint": "结合业务说明指标和理由；改进措施要具体，效果需在独立数据上验证。",
+        "context": ""
       }
     ],
-    "count": 17,
+    "count": 19,
     "originalCode": "import pandas as pd\nimport numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix\n\n\n# 读取与清洗数据\ndf = pd.read_csv('cold_chain_shipments.csv')\n\n# 转换发车时间并提取发车小时\ndf['depart_time'] = ______________________________\ndf['depart_hour'] = ______________________________\n\n# 按运输单号去重，并删除运输时长或传感器缺失率不合法的记录\ndf = _____________________________________________\ndf = _____________________________________________\n\n# 按货物类型的中位数填补 avg_temp 缺失值\ndf['avg_temp'] = __________________________________\n\nprint('清洗后记录数：', len(df))\n\n\n# 统计不同货物类型、不同线路区域的样本数、报警率和平均传感器缺失率\ncargo_region_summary = ______________________________________________\nprint(cargo_region_summary)\n\n\nfeature_cols = [\n    'route_region', 'vehicle_type', 'cargo_type', 'planned_hours',\n    'outside_temp', 'avg_temp', 'max_temp', 'door_open_count',\n    'sensor_missing_rate', 'driver_experience_years', 'depart_hour'\n]\ncategory_cols = ['route_region', 'vehicle_type', 'cargo_type']\n\n# 构造特征矩阵与目标变量，并对分类字段进行独热编码\nX = _______________________________________________\ny = _______________________________________________\n\n# 按 75%/25% 划分训练集和测试集，按 y 分层，random_state=42\nX_train, X_test, y_train, y_test = _________________________________\n\n# 构建随机森林分类器并完成训练和预测\n# 参数：决策树的数量为100，最大深度是6，采用平衡类别权重，random_state=42\nmodel = _____________________________________________________________\n_____________________________________________________________\ny_pred = ____________________________________________________________\n\n# 计算精确率、召回率、F1值和混淆矩阵\nprecision = __________________________\nrecall = _____________________________\nf1 = _________________________________\ncm = _________________________________\nprint('precision=', round(precision, 3))\nprint('recall=', round(recall, 3))\nprint('f1=', round(f1, 3))\nprint('confusion matrix=\\n', cm)\n\n# 计算测试集中不同货物类型的召回率\ntest_result = df.loc[X_test.index, ['shipment_id', 'cargo_type']].copy()\ntest_result['actual'] = y_test.to_numpy()\ntest_result['predicted'] = y_pred\ncargo_recall = ______________________________________________________\nprint(cargo_recall)\n",
     "referenceCode": "import pandas as pd\nimport numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix\n\n# 读取与清洗数据\ndf = pd.read_csv('cold_chain_shipments.csv')\n\n# 转换发车时间并提取发车小时\ndf['depart_time'] = pd.to_datetime(df['depart_time'])\ndf['depart_hour'] = df['depart_time'].dt.hour\n\n# 按运输单号去重，并删除运输时长或传感器缺失率不合法的记录\ndf = df.drop_duplicates(subset='shipment_id')\ndf = df[(df['planned_hours'] > 0) & (df['planned_hours'] <= 72) & (df['sensor_missing_rate'] >= 0) & (df['sensor_missing_rate'] <= 1)]\n\n# 按货物类型的中位数填补 avg_temp 缺失值\ndf['avg_temp'] = df.groupby('cargo_type')['avg_temp'].transform(lambda s: s.fillna(s.median()))\n\nprint('清洗后记录数：', len(df))\n\n# 统计不同货物类型、不同线路区域的样本数、报警率和平均传感器缺失率\ncargo_region_summary = df.groupby(['cargo_type','route_region']).agg(样本数=('shipment_id','count'), 报警率=('temp_alarm','mean'), 平均传感器缺失率=('sensor_missing_rate','mean')).reset_index()\nprint(cargo_region_summary)\n\nfeature_cols = [\n    'route_region', 'vehicle_type', 'cargo_type', 'planned_hours',\n    'outside_temp', 'avg_temp', 'max_temp', 'door_open_count',\n    'sensor_missing_rate', 'driver_experience_years', 'depart_hour'\n]\ncategory_cols = ['route_region', 'vehicle_type', 'cargo_type']\n\n# 构造特征矩阵与目标变量，并对分类字段进行独热编码\nX = pd.get_dummies(df[feature_cols], columns=category_cols)\ny = df['temp_alarm']\n\n# 按 75%/25% 划分训练集和测试集，按 y 分层，random_state=42\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, stratify=y, random_state=42)\n\n# 构建随机森林分类器并完成训练和预测\n# 参数：决策树的数量为100，最大深度是6，采用平衡类别权重，random_state=42\nmodel = RandomForestClassifier(n_estimators=100, max_depth=6, class_weight='balanced', random_state=42)\nmodel.fit(X_train, y_train)\ny_pred = model.predict(X_test)\n\n# 计算精确率、召回率、F1值和混淆矩阵\nprecision = precision_score(y_test, y_pred)\nrecall = recall_score(y_test, y_pred)\nf1 = f1_score(y_test, y_pred)\ncm = confusion_matrix(y_test, y_pred)\nprint('precision=', round(precision, 3))\nprint('recall=', round(recall, 3))\nprint('f1=', round(f1, 3))\nprint('confusion matrix=\\n', cm)\n\n# 计算测试集中不同货物类型的召回率\ntest_result = df.loc[X_test.index, ['shipment_id', 'cargo_type']].copy()\ntest_result['actual'] = y_test.to_numpy()\ntest_result['predicted'] = y_pred\ncargo_recall = test_result.groupby('cargo_type').apply(lambda g: recall_score(g['actual'], g['predicted']))\nprint(cargo_recall)",
     "websiteURL": "https://ai-trainer-exam-87484.app.workbuddy.host/?sharecode=P6SA3BBFCH",
     "websiteNote": "主答案采用老师提供的参考代码，分步练习仅在老师的原表达式上挖空；老师列出的等价写法保留供对照。planned_hours≤72 是老师参考代码中的运输计划时长筛选条件，不是答题时长限制；本页按老师写法保留。",
     "websiteCode": "import pandas as pd\nimport numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix\n\n# 读取与清洗数据\ndf = pd.read_csv('cold_chain_shipments.csv')\n\n# 转换发车时间并提取发车小时\ndf['depart_time'] = pd.to_datetime(df['depart_time'])\ndf['depart_hour'] = df['depart_time'].dt.hour\n\n# 按运输单号去重，并删除运输时长或传感器缺失率不合法的记录\ndf = df.drop_duplicates(subset='shipment_id')\ndf = df[(df['planned_hours'] > 0) & (df['planned_hours'] <= 72) & (df['sensor_missing_rate'] >= 0) & (df['sensor_missing_rate'] <= 1)]\n\n# 按货物类型的中位数填补 avg_temp 缺失值\ndf['avg_temp'] = df.groupby('cargo_type')['avg_temp'].transform(lambda s: s.fillna(s.median()))\n\nprint('清洗后记录数：', len(df))\n\n# 统计不同货物类型、不同线路区域的样本数、报警率和平均传感器缺失率\ncargo_region_summary = df.groupby(['cargo_type','route_region']).agg(样本数=('shipment_id','count'), 报警率=('temp_alarm','mean'), 平均传感器缺失率=('sensor_missing_rate','mean')).reset_index()\nprint(cargo_region_summary)\n\nfeature_cols = [\n    'route_region', 'vehicle_type', 'cargo_type', 'planned_hours',\n    'outside_temp', 'avg_temp', 'max_temp', 'door_open_count',\n    'sensor_missing_rate', 'driver_experience_years', 'depart_hour'\n]\ncategory_cols = ['route_region', 'vehicle_type', 'cargo_type']\n\n# 构造特征矩阵与目标变量，并对分类字段进行独热编码\nX = pd.get_dummies(df[feature_cols], columns=category_cols)\ny = df['temp_alarm']\n\n# 按 75%/25% 划分训练集和测试集，按 y 分层，random_state=42\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, stratify=y, random_state=42)\n\n# 构建随机森林分类器并完成训练和预测\n# 参数：决策树的数量为100，最大深度是6，采用平衡类别权重，random_state=42\nmodel = RandomForestClassifier(n_estimators=100, max_depth=6, class_weight='balanced', random_state=42)\nmodel.fit(X_train, y_train)\ny_pred = model.predict(X_test)\n\n# 计算精确率、召回率、F1值和混淆矩阵\nprecision = precision_score(y_test, y_pred)\nrecall = recall_score(y_test, y_pred)\nf1 = f1_score(y_test, y_pred)\ncm = confusion_matrix(y_test, y_pred)\nprint('precision=', round(precision, 3))\nprint('recall=', round(recall, 3))\nprint('f1=', round(f1, 3))\nprint('confusion matrix=\\n', cm)\n\n# 计算测试集中不同货物类型的召回率\ntest_result = df.loc[X_test.index, ['shipment_id', 'cargo_type']].copy()\ntest_result['actual'] = y_test.to_numpy()\ntest_result['predicted'] = y_pred\ncargo_recall = test_result.groupby('cargo_type').apply(lambda g: recall_score(g['actual'], g['predicted']))\nprint(cargo_recall)",
-    "answerSchema": 2
+    "answerSchema": 2,
+    "tasks": [
+      {
+        "id": "b2t3",
+        "title": "任务三 · 形成算法测试结论",
+        "promptHTML": "<p>结合冷链温控异常预警业务，说明应优先关注的分类指标及理由，并针对不同货物类型测试表现存在明显差异的情况提出一项改进措施。</p>",
+        "answerHTML": "<h4>优先指标及理由</h4><p>优先关注温控异常类（temp_alarm=1）的召回率，即 TP/(TP+FN)：实际异常运输中有多少被正确预警。漏报可能使温控异常未被及时处置，带来货损和质量安全风险，因此应重点减少 FN。不能只看总体准确率，正常样本较多时它可能掩盖异常漏报。也不能孤立追求召回率：同时报告精确率、F1和混淆矩阵，评估误报造成的人工复核和运营成本。具体目标需结合业务风险与处置能力确定，不虚构固定达标值。</p><h4>货物类型表现差异与一项改进</h4><p>依据本次测试输出，列出各货物类型的异常召回率、异常样本数及漏报数，识别薄弱类别；总体指标不能代表每个货类。样本很少时还应报告不确定性，不能凭一次划分认定业务差异一定稳定存在。</p><p><strong>改进措施：</strong>针对异常召回率偏低的货物类型，补充具有代表性的异常正样本，覆盖不同线路、季节和温度条件，并由业务人员核验标签，再加入训练集重新训练。这是一项“针对薄弱货类的数据补充与核验”措施；不能为了抬高指标而删除该组难例、修改测试标签或把测试集并入训练集。</p><p><strong>验证：</strong>保留独立测试集，原模型与新模型在同一测试口径上对比薄弱货类异常召回率、漏报数和异常样本数，同时核对总体召回率、各组精确率及误报负担。若反复据测试结果调参，应另设验证集，并保留最终未参与选型的测试数据；必要时补充独立时间批次复核。改善需由实际结果证实，不能仅凭训练集分数承诺上线效果。</p>"
+      }
+    ],
+    "writtenDownloadPath": "materials/b2-written-reference.html"
   }
 };

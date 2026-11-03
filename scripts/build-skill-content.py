@@ -144,6 +144,8 @@ for reference in json.loads((root/'scripts/web-code-reference.json').read_text()
  (root/'dist/materials'/f"{reference['id']}-website-reference.py").write_text('# 来源：'+website+'\n# '+c['websiteNote']+'\n'+code+'\n')
 from b12_written import enrich
 (root/'dist/materials/b12-written-reference.html').write_text(enrich(courses['b12']))
+from b2_written import enrich as enrich_b2
+(root/'dist/materials/b2-written-reference.html').write_text(enrich_b2(courses['b2']))
 (root/'dist/skill-content.js').write_text('const SKILL_COURSES = '+json.dumps(courses,ensure_ascii=False,indent=2)+';\n')
 # Fill the original notebooks with executable reference code and retain original instructions/imports.
 for key,source in [('b12','B1.2素材/B1.2.ipynb'),('b2','B2素材/B2.ipynb')]:
@@ -154,4 +156,4 @@ for key,source in [('b12','B1.2素材/B1.2.ipynb'),('b2','B2素材/B2.ipynb')]:
         {'cell_type':'code','metadata':{},'execution_count':None,'outputs':[],'source':text.splitlines(True)}]
  notebook['cells']=cells
  (root/'dist/materials'/f'{key}-reference.ipynb').write_text(json.dumps(notebook,ensure_ascii=False,indent=2))
-print('Generated 29 steps (24 code + 5 written) and 2 syntax-checked reference notebooks')
+print('Generated 31 steps (24 code + 7 written) and 2 syntax-checked reference notebooks')
