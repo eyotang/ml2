@@ -17,3 +17,25 @@ for(const id of ['b12','b11']){
  `,ctx);
  assert.equal(resets,1);console.log('PASS',id,'cancel, per-step keyword reset, original template reset, other modes and steps preserved, runtime reset');
 }
+// Bulk reset must cover every step and preserve the other mode, original work and other modules.
+for(const id of ['b12','b11','b2','b3','b4'])for(const mode of ['pick','type']){
+ const nodes=new Map(),node=s=>{if(!nodes.has(s))nodes.set(s,{innerHTML:'',textContent:'',style:{},getAnimations:()=>[],animate(){},addEventListener(){},showModal(){},close(){}});return nodes.get(s)};
+ let allowed=false,stored;const ctx={assert,mode,URLSearchParams,location:{search:'?course='+id},localStorage:{getItem:()=>null,setItem:(k,v)=>stored=JSON.parse(v)},document:{querySelector:node,querySelectorAll:()=>[]},window:{scrollTo(){}},confirm:()=>allowed,matchMedia:()=>({matches:true})};
+ vm.createContext(ctx);vm.runInContext(sources,ctx);
+ vm.runInContext(`
+ const other=mode==='pick'?'type':'pick';
+ all.untouched={draft:'另一个模块'};
+ for(let i=0;i<course.count;i++)for(const m of ['pick','type']){progress.mode=m;go(i);current().slots.forEach((s,j)=>values()[j]=s.answer);check();}
+ progress.originalDraft='原题代码';progress.caseDrafts={task:'文字'};progress.flowDrafts={task:['流程图']};progress.caseSelf={task:true};
+ progress.mode=mode;render();assert.equal(document.querySelector('#reset-all-practice').hidden,false);
+ const before=JSON.stringify(progress);resetAllPractice();assert.equal(JSON.stringify(progress),before);
+ `,ctx);
+ allowed=true;
+ vm.runInContext(`
+ resetAllPractice();assert.equal(progress.index,0);assert.equal(progress.mode,mode);assert.ok(values().every(v=>v===''));
+ for(const q of course.steps){assert.ok(!progress.draftsByMode[mode][q.id]?.some(Boolean));assert.ok(progress.draftsByMode[other][q.id].some(Boolean));assert.ok(!progress.records[q.id].modeAnswers[mode]);assert.ok(progress.records[q.id].modeAnswers[other]);}
+ assert.equal(progress.originalDraft,'原题代码');assert.equal(progress.caseDrafts.task,'文字');assert.equal(progress.flowDrafts.task[0],'流程图');assert.equal(progress.caseSelf.task,true);assert.equal(all.untouched.draft,'另一个模块');
+ assert.equal(feedback,null);assert.equal(showSolution,false);
+ progress.mode='original';render();assert.equal(document.querySelector('#reset-all-practice').hidden,true);
+ `,ctx);assert.ok(stored[id]);assert.ok(Object.values(stored[id].drafts).every(a=>a.every(v=>!v)));console.log('PASS',id,mode,'bulk cancel/reset, all steps, other mode/module and original work preserved');
+}
