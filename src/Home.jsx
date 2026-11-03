@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { readStore } from "./model";
+import ThemeControl from "./ThemeControl";
 const groups = [
   [
     "业务分析",
@@ -58,7 +59,10 @@ export default function Home() {
         <a href="./" className="logo">
           <span>知</span>知练
         </a>
-        <span className="top-meta">2026 上海专项赛</span>
+        <div className="home-settings">
+          <span className="top-meta">2026 上海专项赛</span>
+          <ThemeControl />
+        </div>
       </header>
       <main className="home">
         <div className="intro">

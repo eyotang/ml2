@@ -1,3 +1,4 @@
+import ThemeControl from "./ThemeControl";
 import React, { useEffect, useRef, useState } from "react";
 import {
   questions,
@@ -344,6 +345,7 @@ export default function Theory() {
                 >
                   答题技巧
                 </button>
+                <ThemeControl />
                 <label className="auto-label">
                   <input
                     id="auto"

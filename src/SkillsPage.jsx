@@ -1,3 +1,4 @@
+import ThemeControl from "./ThemeControl";
 import React, { useEffect, useRef, useState } from "react";
 import {
   courses,
@@ -288,6 +289,7 @@ export default function Skills({ courseId }) {
           </small>
           <strong id="course-name">{course.title.split(" · ")[1]}</strong>
         </div>
+        <ThemeControl />
         <button id="study-tips-button" onClick={() => setTip(courseId)}>
           答题技巧
         </button>
