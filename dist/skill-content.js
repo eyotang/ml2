@@ -595,7 +595,7 @@ const SKILL_COURSES = {
         "id": "b2-9",
         "title": "分层划分训练与测试集",
         "goal": "训练集占 75%，测试集占 25%，固定随机种子 42，并保持标签比例。",
-        "code": "# 按 75%/25% 划分训练集和测试集，按 y 分层，random_state=42\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size={{}}, stratif{{}}=y, random_state={{}})",
+        "code": "# 按 75%/25% 划分训练集和测试集，按 y 分层，random_state=42\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size={{}}, stratify={{}}, random_state={{}})",
         "slots": [
           {
             "answer": "0.25",

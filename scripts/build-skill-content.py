@@ -114,6 +114,8 @@ for reference in json.loads((root/'scripts/web-code-reference.json').read_text()
    template=expression;offset=0;ok=True
    for slot in step['slots']:
     pattern=re.escape(slot['answer']).replace(r'\ ',r'\s*')
+    # Do not cut an identifier, e.g. the y at the end of stratify.
+    if re.fullmatch(r'[A-Za-z_]\w*',slot['answer']):pattern=r'(?<!\w)'+pattern+r'(?!\w)'
     match=re.search(pattern,template[offset:])
     if not match:ok=False;break
     start=offset+match.start();end=offset+match.end()
