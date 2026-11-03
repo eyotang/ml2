@@ -72,20 +72,10 @@ add('b4',2,'训练不确定结果的处理','用正常、过期、冲突和信�
 ('先澄清或转主管',['凭经验作确定承诺','自动发送模型原文'],'不能在缺乏依据时给出确定结论，应按流程澄清或升级并留痕。')],'不会答时也要会处理：澄清、升级、保留证据。')
 add('b4',2,'设定考核与训后复查','考核应覆盖正常、错误、依据不足三类工单，并检查实际迁移效果。','合格要求：关键事实和政策核验正确、无无依据承诺、不确定问题升级、证据留痕完整。\n仍有关键风险漏检者 → {{}}。\n训后一周抽检实际工单，检查 {{}}。',[
 ('针对性补训并复测',['仍直接上岗','仅口头表扬'],'关键风险漏检不能被高完成速度抵消，需要补训复测。'),('同类错误是否减少',['是否背熟页面颜色','仅看登录次数'],'训后抽检验证实际任务表现，不仅看课堂小测或签到。')],'课堂能做对，还要在实际工单中保持正确。')
-# Add explicit branch diagrams to the written reference answers.
-courses['b11']['tasks'][1]['answerHTML'] += '<h4>业务流程图（参考）</h4><div class="case-flow" role="img" aria-label="视觉质检业务流程与异常分支"><div class="flow-node">1 现场采集：产品、批次、图像</div><div class="flow-arrow">↓</div><div class="flow-node">2 图像质量校验</div><div class="flow-note">不可用 → 原分数失效 → 补拍一次。补拍可用则重新检测；仍不可用则质检员检查实物，不得自动放行。</div><div class="flow-arrow">↓ 图像可用</div><div class="flow-node">3 视觉模型检测与阈值分流</div><div class="flow-arrow">↓</div><div class="flow-branches"><div>分数＜0.20<br>4 自动放行</div><div>0.20≤分数＜0.80<br>5 人工复核<br>合格放行／不合格隔离／不确定待检并交主管</div><div>分数≥0.80<br>6 自动隔离待质量人员处理<br>可放行／返工／报废</div></div><div class="flow-arrow">↓ 各路径均记录结果</div><div class="flow-node">7 同步当前有效状态，记录人员、理由、时间和版本</div><div class="flow-arrow">↓</div><div class="flow-node">8 包装前校验：仅已放行可进入包装，其他状态阻止进入</div><div class="flow-note">返工完成 → 回到采集与检测。模型缺陷分数不是已校准概率，试运行人工真值不是自动分流前已知输入。</div></div>'
-flow_nodes=['持续采集','数据质量判断','负荷预测与峰值判断','生成削峰建议','运行边界校验','必要审批：高风险由能源管理员确认','网关执行','结果留痕与实际负荷复核']
-flow='<h4>多产品协同流程图（8 个主要节点）</h4><div class="case-flow" role="img" aria-label="园区能源系统八节点协同流程">'
-for i,node in enumerate(flow_nodes):
- if i:flow+='<div class="flow-arrow">↓</div>'
- flow+=f'<div class="flow-node">{i+1} {node}</div>'
- if i==1:flow+='<div class="flow-note">连续缺失超过 5 分钟 → 重试并标记；仍失败 → 最近可靠值临时估计并通知运维，保留估计标志。</div>'
- if i==2:flow+='<div class="flow-note">未来 30 分钟预测负荷≥1500kW 才生成削峰建议；低于阈值回到持续采集。</div>'
- if i==4:flow+='<div class="flow-note">温度不在 24～27℃或拟自动削减关键负荷 → 拒绝方案，重新优化后校验。</div>'
- if i==5:flow+='<div class="flow-note">高风险未批准 → 不执行，修改后重新校验审批；低风险也需在已授权范围和安全约束内执行。</div>'
- if i==6:flow+='<div class="flow-note">60 秒内无成功反馈或明确失败 → 停止继续下发，恢复安全策略并通知值班，核对设备实际状态。</div>'
-flow+='<div class="flow-arrow">↺ 反馈回到持续采集，更新预测与规则</div></div>'
-courses['b3']['tasks'][0]['answerHTML']+=flow
+# All flowchart exercises use the same professional shape and connector model.
+from flowcharts import diagrams, CSS as FLOW_CSS
+diagrams(courses)
+(root/'dist/flowcharts.css').write_text(FLOW_CSS)
 matching=json.loads((root/'scripts/case-matching.json').read_text())
 for c in courses.values():
  for step in c['steps']:
@@ -95,6 +85,6 @@ for c in courses.values():
  c['referenceCode']=''
  c['downloadPath']=f"materials/{c['id']}-reference.html"
  c['referenceHTML']='<h1>'+html.escape(c['title'])+'</h1><p>参考解法（整理版），不代表唯一表述或官方评分细则。</p>'+c['materialHTML']+''.join('<h2>'+html.escape(t['title'])+'</h2>'+t['promptHTML']+t['answerHTML'] for t in c['tasks'])
- (root/'dist'/c['downloadPath']).write_text('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+html.escape(c['title'])+'</title><style>body{max-width:960px;margin:30px auto;padding:0 20px;font:15px/1.9 sans-serif;color:#263b4b}table{border-collapse:collapse;width:100%;font-size:13px}th,td{border:1px solid #ddd;padding:8px;text-align:left}pre{white-space:pre-wrap}h2{margin-top:35px}.case-flow{padding:18px;background:#f4f9fc;text-align:center}.flow-node{border:1px solid #a9cbdf;padding:10px;margin:8px;background:white}.flow-branches{display:flex;gap:10px}.flow-branches>div{flex:1;border:1px solid #a9cbdf;padding:10px;background:white}.flow-note{font-size:12px;text-align:left;padding:10px;color:#506b7d}.flow-arrow{color:#249ec7}</style>'+c['referenceHTML']+'</html>')
+ (root/'dist'/c['downloadPath']).write_text('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+html.escape(c['title'])+'</title><style>body{max-width:960px;margin:30px auto;padding:0 20px;font:15px/1.9 sans-serif;color:#263b4b}table{border-collapse:collapse;width:100%;font-size:13px}th,td{border:1px solid #ddd;padding:8px;text-align:left}pre{white-space:pre-wrap}h2{margin-top:35px}.case-flow{padding:18px;background:#f4f9fc;text-align:center}.flow-node{border:1px solid #a9cbdf;padding:10px;margin:8px;background:white}.flow-branches{display:flex;gap:10px}.flow-branches>div{flex:1;border:1px solid #a9cbdf;padding:10px;background:white}.flow-note{font-size:12px;text-align:left;padding:10px;color:#506b7d}.flow-arrow{color:#249ec7}'+(FLOW_CSS if any('flowchart' in t for t in c['tasks']) else '')+'</style>'+c['referenceHTML']+'</html>')
 (root/'dist/case-content.js').write_text('Object.assign(SKILL_COURSES, '+json.dumps(courses,ensure_ascii=False,indent=2)+');\n')
 print('Generated',[(c['id'],c['count']) for c in courses.values()])
