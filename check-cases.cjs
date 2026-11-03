@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const source=fs.readFileSync(__dirname+'/dist/skill-content.js','utf8')+fs.readFileSync(__dirname+'/dist/case-content.js','utf8');
-for(const id of ['b11','b3','b4']){
+for(const id of ['b11','b3','b4','c']){
  const nodes=new Map(),node=s=>{if(!nodes.has(s))nodes.set(s,{innerHTML:'',textContent:'',style:{},getAnimations:()=>[],animate(){},addEventListener(){},showModal(){},close(){}});return nodes.get(s)};
  let stored;
  const ctx={assert,URLSearchParams,location:{search:'?course='+id},localStorage:{getItem:()=>null,setItem:(k,v)=>stored=JSON.parse(v)},document:{querySelector:node,querySelectorAll:()=>[]},window:{scrollTo(){}},matchMedia:()=>({matches:true}),confirm:()=>true};
@@ -20,6 +20,7 @@ for(const id of ['b11','b3','b4']){
  openPracticeHistory();assert.ok(document.querySelector('#practice-history-items').innerHTML.includes('参考解法'));
  for(const task of course.tasks){assert.ok(task.promptHTML);assert.ok(task.answerHTML.length>100);assert.ok(!/<script|onerror|javascript:/i.test(task.answerHTML))}
  assert.ok(!/<script|onerror|javascript:/i.test(course.materialHTML));
+ if(courseId==='c'){assert.equal(course.count,12);const config=JSON.parse(course.tasks[1].answerHTML.split('<pre>')[1].split('</pre>')[0].replace(/&quot;/g,'\"'));assert.equal(config.forecast_window_minutes,15);assert.equal(config.manual_confirm_required,true);assert.ok(course.steps[3].flowchartHTML.includes('flow-decision'));assert.ok(course.tasks[1].flowchart);assert.ok(course.tasks[2].answerHTML.includes('待确认'));}
  if(courseId==='b11')assert.ok(course.tasks[1].answerHTML.includes('业务流程图'));
  if(courseId==='b3'){assert.ok(course.tasks[0].answerHTML.includes('8 个主要节点'));assert.ok(course.tasks[1].answerHTML.includes('1478.4'))}
  `,ctx);

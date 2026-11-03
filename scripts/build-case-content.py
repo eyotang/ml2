@@ -76,10 +76,12 @@ add('b4',2,'设定考核与训后复查','考核应覆盖正常、错误、依�
 from flowcharts import diagrams, CSS as FLOW_CSS
 diagrams(courses)
 (root/'dist/flowcharts.css').write_text(FLOW_CSS)
+from c_review import build as build_review
+courses['c']=build_review()
 matching=json.loads((root/'scripts/case-matching.json').read_text())
 for c in courses.values():
  for step in c['steps']:
-  for slot in step['slots']:slot['matchRule']=matching.get(slot['answer'],{})
+  for slot in step['slots']:slot['matchRule']=slot.get('matchRule',matching.get(slot['answer'],{}))
  c['count']=len(c['steps'])
  c['originalCode']='\n\n'.join(t['title'] for t in c['tasks'])
  c['referenceCode']=''
