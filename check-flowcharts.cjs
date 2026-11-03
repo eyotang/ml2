@@ -5,7 +5,7 @@ for(const id of ['b11','b3']){
  let stored;const ctx={assert,URLSearchParams,location:{search:'?course='+id},localStorage:{getItem:()=>null,setItem:(k,v)=>stored=JSON.parse(v)},document:{querySelector:node,querySelectorAll:()=>[]},window:{scrollTo(){}},matchMedia:()=>({matches:true}),confirm:()=>true};vm.createContext(ctx);
  vm.runInContext(source+fs.readFileSync('dist/case-matcher.js','utf8')+fs.readFileSync('dist/skills.js','utf8'),ctx);
  vm.runInContext(String.raw`
- const flowSteps=course.steps.filter(q=>q.flowchartHTML);assert.equal(flowSteps.length,courseId==='b11'?3:1);
+ const flowSteps=course.steps.filter(q=>q.flowchartHTML);assert.equal(flowSteps.length,courseId==='b11'?3:6);
  for(const q of flowSteps){
   const refs=[...q.flowchartHTML.matchAll(/\{\{(\d+)\}\}/g)].map(m=>Number(m[1])).sort();assert.equal(refs.join(','),q.slots.map((_,i)=>i).join(','));
   go(course.steps.indexOf(q));assert.ok(document.querySelector('#exercise').innerHTML.includes('flow-decision'));assert.ok(!document.querySelector('#exercise').innerHTML.includes('undefined'));
