@@ -4,7 +4,7 @@ from zipfile import ZipFile
 root=Path(__file__).resolve().parents[1]
 def read_template(source):
  key='b12' if source.startswith('B1.2') else 'b2'
- with ZipFile(root/'dist/materials'/f'{key}-original.zip') as archive:
+ with ZipFile(root/'public/materials'/f'{key}-original.zip') as archive:
   return json.loads(archive.read(Path(source).name).decode('utf-8'))
 courses={}
 def course(key,title):
@@ -141,12 +141,12 @@ for reference in json.loads((root/'scripts/web-code-reference.json').read_text()
  c['referenceCode']=primary
  c['answerSchema']=2
  compile(code,'website-reference','exec')
- (root/'dist/materials'/f"{reference['id']}-website-reference.py").write_text('# 来源：'+website+'\n# '+c['websiteNote']+'\n'+code+'\n')
+ (root/'public/materials'/f"{reference['id']}-website-reference.py").write_text('# 来源：'+website+'\n# '+c['websiteNote']+'\n'+code+'\n')
 from b12_written import enrich
-(root/'dist/materials/b12-written-reference.html').write_text(enrich(courses['b12']))
+(root/'public/materials/b12-written-reference.html').write_text(enrich(courses['b12']))
 from b2_written import enrich as enrich_b2
-(root/'dist/materials/b2-written-reference.html').write_text(enrich_b2(courses['b2']))
-(root/'dist/skill-content.js').write_text('const SKILL_COURSES = '+json.dumps(courses,ensure_ascii=False,indent=2)+';\n')
+(root/'public/materials/b2-written-reference.html').write_text(enrich_b2(courses['b2']))
+(root/'content/skill-content.js').write_text('const SKILL_COURSES = '+json.dumps(courses,ensure_ascii=False,indent=2)+';\n')
 # Fill the original notebooks with executable reference code and retain original instructions/imports.
 for key,source in [('b12','B1.2素材/B1.2.ipynb'),('b2','B2素材/B2.ipynb')]:
  notebook=read_template(source)
@@ -155,5 +155,5 @@ for key,source in [('b12','B1.2素材/B1.2.ipynb'),('b2','B2素材/B2.ipynb')]:
  cells=[{'cell_type':'markdown','metadata':{},'source':['老师提供的参考答案。代码顺序、变量名、列名和表达式保留原写法。请与原题 CSV 放在同一目录运行。']},
         {'cell_type':'code','metadata':{},'execution_count':None,'outputs':[],'source':text.splitlines(True)}]
  notebook['cells']=cells
- (root/'dist/materials'/f'{key}-reference.ipynb').write_text(json.dumps(notebook,ensure_ascii=False,indent=2))
+ (root/'public/materials'/f'{key}-reference.ipynb').write_text(json.dumps(notebook,ensure_ascii=False,indent=2))
 print('Generated 31 steps (24 code + 7 written) and 2 syntax-checked reference notebooks')

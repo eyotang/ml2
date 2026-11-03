@@ -75,7 +75,7 @@ add('b4',2,'设定考核与训后复查','考核应覆盖正常、错误、依�
 # All flowchart exercises use the same professional shape and connector model.
 from flowcharts import diagrams, CSS as FLOW_CSS
 diagrams(courses)
-(root/'dist/flowcharts.css').write_text(FLOW_CSS)
+(root/'src/styles/flowcharts.css').write_text(FLOW_CSS)
 from c_review import build as build_review
 courses['c']=build_review()
 matching=json.loads((root/'scripts/case-matching.json').read_text())
@@ -87,6 +87,6 @@ for c in courses.values():
  c['referenceCode']=''
  c['downloadPath']=f"materials/{c['id']}-reference.html"
  c['referenceHTML']='<h1>'+html.escape(c['title'])+'</h1><p>参考解法（整理版），不代表唯一表述或官方评分细则。</p>'+c['materialHTML']+''.join('<h2>'+html.escape(t['title'])+'</h2>'+t['promptHTML']+t['answerHTML'] for t in c['tasks'])
- (root/'dist'/c['downloadPath']).write_text('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+html.escape(c['title'])+'</title><style>body{max-width:960px;margin:30px auto;padding:0 20px;font:15px/1.9 sans-serif;color:#263b4b}table{border-collapse:collapse;width:100%;font-size:13px}th,td{border:1px solid #ddd;padding:8px;text-align:left}pre{white-space:pre-wrap}h2{margin-top:35px}.case-flow{padding:18px;background:#f4f9fc;text-align:center}.flow-node{border:1px solid #a9cbdf;padding:10px;margin:8px;background:white}.flow-branches{display:flex;gap:10px}.flow-branches>div{flex:1;border:1px solid #a9cbdf;padding:10px;background:white}.flow-note{font-size:12px;text-align:left;padding:10px;color:#506b7d}.flow-arrow{color:#249ec7}'+(FLOW_CSS if any('flowchart' in t for t in c['tasks']) else '')+'</style>'+c['referenceHTML']+'</html>')
-(root/'dist/case-content.js').write_text('Object.assign(SKILL_COURSES, '+json.dumps(courses,ensure_ascii=False,indent=2)+');\n')
+ (root/'public'/c['downloadPath']).write_text('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>'+html.escape(c['title'])+'</title><style>body{max-width:960px;margin:30px auto;padding:0 20px;font:15px/1.9 sans-serif;color:#263b4b}table{border-collapse:collapse;width:100%;font-size:13px}th,td{border:1px solid #ddd;padding:8px;text-align:left}pre{white-space:pre-wrap}h2{margin-top:35px}.case-flow{padding:18px;background:#f4f9fc;text-align:center}.flow-node{border:1px solid #a9cbdf;padding:10px;margin:8px;background:white}.flow-branches{display:flex;gap:10px}.flow-branches>div{flex:1;border:1px solid #a9cbdf;padding:10px;background:white}.flow-note{font-size:12px;text-align:left;padding:10px;color:#506b7d}.flow-arrow{color:#249ec7}'+(FLOW_CSS if any('flowchart' in t for t in c['tasks']) else '')+'</style>'+c['referenceHTML']+'</html>')
+(root/'content/case-content.js').write_text('Object.assign(SKILL_COURSES, '+json.dumps(courses,ensure_ascii=False,indent=2)+');\n')
 print('Generated',[(c['id'],c['count']) for c in courses.values()])

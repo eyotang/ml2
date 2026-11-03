@@ -5,3 +5,8 @@ __pycache__/
 preview-*.png
 verified-python-run.png
 /知练-静态网站.zip
+
+node_modules/
+/src/generated/
+/coverage/
+/test-results/

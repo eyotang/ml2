@@ -1,0 +1,11 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const ctx={window:{}};vm.runInNewContext(fs.readFileSync(__dirname+'/code-editor.js','utf8'),ctx);
+const h=ctx.window.PythonCodeEditor.highlight;
+assert.ok(h('# M1（1分）').includes('py-comment'));
+assert.ok(h('import pandas as pd').includes('py-keyword'));
+assert.ok(h("df['#literal'] # actual").includes('py-string'));
+assert.ok(h('print(0.25)').includes('py-number'));
+assert.ok(!h("'<img onerror=alert(1)>'").includes('<img'));
+const input="import pandas as pd\n# 保留注释\nx = '中文'\nprint(x)\n";
+const decoded=h(input).replace(/<[^>]*>/g,'').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');assert.equal(decoded,input);
+console.log('PASS: Python keyword/string/comment/number highlighting, escaped HTML, original text preserved');
