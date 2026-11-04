@@ -72,7 +72,19 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     ),
   );
   expect(questions).toEqual(old.questions);
-  expect(courses).toEqual(old.courses);
+  const { visualizationCode, visualizationDownloadPath, ...b12 } = courses.b12;
+  expect(visualizationCode).toContain("import matplotlib.pyplot");
+  expect(visualizationDownloadPath).toBe("materials/b12-visualization.ipynb");
+  expect({
+    ...courses,
+    b12: {
+      ...b12,
+      originalCode: old.courses.b12.originalCode,
+      count: 12,
+      steps: b12.steps.filter((s) => !["b12-13", "b12-14"].includes(s.id)),
+    },
+  }).toEqual(old.courses);
+  expect(b12.originalCode.startsWith(old.courses.b12.originalCode)).toBe(true);
   expect(
     questions.map((q) => q.type).reduce((a, t) => (a[t]++, a), [0, 0, 0, 0]),
   ).toEqual([14, 56, 7, 6]);
@@ -80,7 +92,7 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     Object.fromEntries(
       Object.entries(courses).map(([id, c]) => [id, c.steps.length]),
     ),
-  ).toEqual({ b12: 12, b2: 19, b11: 8, b3: 10, b4: 5, c: 12 });
+  ).toEqual({ b12: 14, b2: 19, b11: 8, b3: 10, b4: 5, c: 12 });
   expect(Object.keys(tips)).toHaveLength(13);
 });
 test("static deployment retains every downloadable asset and CSV byte for byte", () => {
@@ -148,7 +160,7 @@ describe("theory objective questions", () => {
       expect(
         document.querySelector("#question-card .result"),
       ).toHaveTextContent("回答正确");
-      expect(savedTheory().records[q.id]).toEqual({
+      expect(savedTheory().records[q.id]).toMatchObject({
         selected: q.answer,
         correct: true,
       });

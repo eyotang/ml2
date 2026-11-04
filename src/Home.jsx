@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { readStore } from "./model";
+import { theoryState } from "./model";
 import ThemeControl from "./ThemeControl";
 const groups = [
   [
@@ -30,10 +30,10 @@ export default function Home() {
   const [module, setModule] = useState(
       () => location.hash.slice(1) || "theory",
     ),
-    [s, setS] = useState(() => readStore("zhilian-v1"));
+    [s, setS] = useState(() => theoryState());
   useEffect(() => {
     const hash = () => setModule(location.hash.slice(1) || "theory"),
-      refresh = () => setS(readStore("zhilian-v1"));
+      refresh = () => setS(theoryState());
     window.addEventListener("hashchange", hash);
     window.addEventListener("storage", refresh);
     window.addEventListener("pageshow", refresh);
@@ -46,7 +46,7 @@ export default function Home() {
   const selected = ["theory", "skills", "review"].includes(module)
       ? module
       : "theory",
-    records = Object.values(s.records || {}),
+    records = Object.values(s.records || {}).filter((r) => !r.stale),
     graded = records.filter((r) => typeof r.correct === "boolean"),
     correct = graded.filter((r) => r.correct).length,
     wrong = graded.length - correct,

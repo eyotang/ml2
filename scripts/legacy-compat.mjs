@@ -36,7 +36,7 @@ export function legacyCompatibility() {
               /<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g,
             ),
           ].map((m) => m[1]);
-        const code = `/* Compatibility entry for cached pre-React HTML. */\n(()=>{for(const href of ${JSON.stringify(styles)}){const link=document.createElement('link');link.rel='stylesheet';link.href=href;document.head.append(link)}const root=document.createElement('div');root.id='root';document.body.replaceChildren(root);const entry=document.createElement('script');entry.type='module';entry.src=${JSON.stringify(script)};document.body.append(entry)})();\n`;
+        const code = `/* Compatibility entry for cached pre-React HTML. */\n(()=>{document.documentElement.dataset.appVersion=${JSON.stringify(source.match(/data-app-version="([^"]+)"/)[1])};const updates=document.createElement('script');updates.src='./update-check.js';document.head.append(updates);for(const href of ${JSON.stringify(styles)}){const link=document.createElement('link');link.rel='stylesheet';link.href=href;document.head.append(link)}const root=document.createElement('div');root.id='root';document.body.replaceChildren(root);const entry=document.createElement('script');entry.type='module';entry.src=${JSON.stringify(script)};document.body.append(entry)})();\n`;
         fs.writeFileSync(path.join(dist, bridge), code);
       }
     },

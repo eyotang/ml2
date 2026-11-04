@@ -1,4 +1,5 @@
-import ThemeControl from "./ThemeControl";
+import { download, reportHTML, theoryReport } from "./export";
+import { ThemeSync } from "./ThemeControl";
 import React, { useEffect, useRef, useState } from "react";
 import {
   questions,
@@ -6,19 +7,22 @@ import {
   theoryState,
   questionList,
   sameAnswers,
+  questionRevision,
 } from "./model";
 import { useSavedState, useSwipe, StudyTips } from "./shared";
 export default function Theory() {
-  const [s, update] = useSavedState(
+  const [s, update, externalVersion] = useSavedState(
     "zhilian-v1",
     () => theoryState(location.search),
     null,
     () => toast("浏览器无法保存记录，请检查存储设置"),
   );
-  const [selection, setSelection] = useState(
-      () => s.records[s.current]?.selected || [],
+  const [selection, setSelection] = useState(() =>
+      s.records[s.current]?.stale ? [] : s.records[s.current]?.selected || [],
     ),
-    [revealed, setRevealed] = useState(() => !!s.records[s.current]),
+    [revealed, setRevealed] = useState(
+      () => !!s.records[s.current] && !s.records[s.current].stale,
+    ),
     [map, setMap] = useState(false),
     [menu, setMenu] = useState(false),
     [tip, setTip] = useState(null),
@@ -57,10 +61,16 @@ export default function Theory() {
     pos = qs.findIndex((x) => x.id === q.id),
     record = s.records[q.id],
     show = s.mode === "study" || revealed;
+  useEffect(() => {
+    const record = s.records[s.current];
+    setSelection(record?.stale ? [] : record?.selected || []);
+    setRevealed(!!record && !record.stale);
+    clear();
+  }, [externalVersion]);
   function jump(id) {
     clear();
-    setSelection(s.records[id]?.selected || []);
-    setRevealed(!!s.records[id]);
+    setSelection(s.records[id]?.stale ? [] : s.records[id]?.selected || []);
+    setRevealed(!!s.records[id] && !s.records[id].stale);
     update((n) => {
       n.current = id;
     });
@@ -86,9 +96,14 @@ export default function Theory() {
     const id = list.some((x) => x.id === s.current)
       ? s.current
       : (list[0]?.id ?? s.current);
-    update((n) => Object.assign(n, next, { current: id }));
-    setSelection(s.records[id]?.selected || []);
-    setRevealed(!!s.records[id]);
+    update((n) => {
+      n.view = next.view;
+      n.filter = next.filter;
+      n.filterIds = next.filterIds;
+      n.current = id;
+    });
+    setSelection(s.records[id]?.stale ? [] : s.records[id]?.selected || []);
+    setRevealed(!!s.records[id] && !s.records[id].stale);
   }
   function filter(f) {
     clear();
@@ -98,7 +113,7 @@ export default function Theory() {
         : questions
             .filter((x) =>
               f === "unanswered"
-                ? !s.records[x.id]
+                ? !s.records[x.id] || s.records[x.id].stale
                 : s.records[x.id]?.correct === false,
             )
             .map((x) => x.id);
@@ -107,9 +122,14 @@ export default function Theory() {
       id = list.some((x) => x.id === s.current)
         ? s.current
         : (list[0]?.id ?? 0);
-    update((n) => Object.assign(n, next, { current: id }));
-    setSelection(s.records[id]?.selected || []);
-    setRevealed(!!s.records[id]);
+    update((n) => {
+      n.view = next.view;
+      n.filter = next.filter;
+      n.filterIds = next.filterIds;
+      n.current = id;
+    });
+    setSelection(s.records[id]?.stale ? [] : s.records[id]?.selected || []);
+    setRevealed(!!s.records[id] && !s.records[id].stale);
     document.getElementById("answer-map")?.scrollTo?.(0, 0);
   }
   function mode(m) {
@@ -118,8 +138,8 @@ export default function Theory() {
       n.mode = m;
     });
     if (m === "answer") {
-      setSelection(record?.selected || []);
-      setRevealed(!!record);
+      setSelection(record?.stale ? [] : record?.selected || []);
+      setRevealed(!!record && !record.stale);
     }
   }
   function submit(values = selection) {
@@ -137,7 +157,11 @@ export default function Theory() {
     setSelection(values);
     setRevealed(true);
     update((n) => {
-      n.records[q.id] = { selected: values, correct };
+      n.records[q.id] = {
+        selected: values,
+        correct,
+        questionRevision: questionRevision(q),
+      };
       if (correct && n.view === "wrong") {
         const list = questionList(n);
         n.current = list[0]?.id ?? q.id;
@@ -180,13 +204,15 @@ export default function Theory() {
     if (s.view === "favorites" && !favorites.includes(id))
       id = qs.find((x) => x.id !== q.id)?.id ?? id;
     update((n) => {
-      n.favorites = favorites;
+      n.favorites = n.favorites.includes(q.id)
+        ? n.favorites.filter((x) => x !== q.id)
+        : [...n.favorites, q.id];
       n.current = id;
     });
     if (id !== q.id) {
       clear();
-      setSelection(s.records[id]?.selected || []);
-      setRevealed(!!s.records[id]);
+      setSelection(s.records[id]?.stale ? [] : s.records[id]?.selected || []);
+      setRevealed(!!s.records[id] && !s.records[id].stale);
     }
   }
   function reset() {
@@ -213,7 +239,7 @@ export default function Theory() {
     setMenu(false);
     toast("答题记录已清空，可以重新开始");
   }
-  const records = Object.values(s.records),
+  const records = Object.values(s.records).filter((r) => !r.stale),
     graded = records.filter((r) => typeof r.correct === "boolean"),
     correct = graded.filter((r) => r.correct).length,
     wrong = graded.length - correct,
@@ -244,6 +270,7 @@ export default function Theory() {
       .join("、");
   return (
     <>
+      <ThemeSync />
       <header className="header">
         <a className="brand" href="./">
           <span className="brand-icon">知</span>
@@ -345,7 +372,6 @@ export default function Theory() {
                 >
                   答题技巧
                 </button>
-                <ThemeControl />
                 <label className="auto-label">
                   <input
                     id="auto"
@@ -401,6 +427,11 @@ export default function Theory() {
                   </div>
                 ) : (
                   <>
+                    {record?.stale && (
+                      <p className="record-updated" role="status">
+                        本题已更新，请重新作答。上次作答已保留在导出记录中。
+                      </p>
+                    )}
                     <div className="q-meta">
                       <span className="type-badge">
                         {TYPES[q.type]}
@@ -469,7 +500,11 @@ export default function Theory() {
                                         }
                                         onClick={() =>
                                           update((n) => {
-                                            n.records[q.id] = { self: level };
+                                            n.records[q.id] = {
+                                              self: level,
+                                              questionRevision:
+                                                questionRevision(q),
+                                            };
                                           })
                                         }
                                       >
@@ -677,6 +712,16 @@ export default function Theory() {
                 <div className="map-header">
                   <div className="panel-heading">
                     <h2>答题卡</h2>
+                    <button
+                      onClick={() =>
+                        download(
+                          "理论知识-我的答案.html",
+                          reportHTML(theoryReport(s)),
+                        )
+                      }
+                    >
+                      导出答案
+                    </button>
                     <button
                       id="reset-all"
                       className="reset-all"

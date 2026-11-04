@@ -1,4 +1,5 @@
 import data from "./generated/data.json";
+import { check as matchWritten } from "./matcher";
 export const { questions, courses, tips } = data;
 export const TYPES = ["判断题", "单选题", "多选题", "简答题"];
 export function readStore(key, fallback = {}) {
@@ -16,7 +17,7 @@ export function writeStore(key, value) {
     return false;
   }
 }
-export function theoryState(search = "") {
+export function theoryState(search = "", saved = readStore("zhilian-v1")) {
   const s = {
     current: 0,
     mode: "answer",
@@ -27,8 +28,9 @@ export function theoryState(search = "") {
     records: {},
     favorites: [],
     drafts: {},
-    ...readStore("zhilian-v1"),
+    ...saved,
   };
+  reconcileTheory(s);
   if (s.autoJumpVersion !== 1) {
     s.auto = true;
     s.autoJumpVersion = 1;
@@ -59,14 +61,14 @@ export function questionList(s) {
         s.filterIds.includes(q.id)),
   );
 }
-export function courseState(id) {
+export function courseState(id, saved = readStore("zhilian-skills-v1")[id]) {
   const c = courses[id],
     p = {
       index: 0,
       mode: "pick",
       records: {},
       drafts: {},
-      ...readStore("zhilian-skills-v1")[id],
+      ...saved,
     };
   if (c.kind !== "case" && p.answerSchema !== 2) {
     if (id === "b2")
@@ -95,7 +97,24 @@ export function courseState(id) {
     pick: structuredClone(p.drafts),
     type: structuredClone(p.drafts),
   };
+  if (
+    id === "b12" &&
+    p.courseSchema !== 3 &&
+    !p.stepId &&
+    p.index >= 7 &&
+    p.index < 12 &&
+    c.steps.length === 14
+  )
+    p.index += 2;
+  if (p.stepId) {
+    const index = c.steps.findIndex((q) => q.id === p.stepId);
+    if (index >= 0) p.index = index;
+  }
   if (!c.steps[p.index]) p.index = 0;
+  p.courseSchema = 3;
+  p.stepId = c.steps[p.index].id;
+  p.drafts = p.draftsByMode[p.mode === "type" ? "type" : "pick"] || {};
+  reconcileCourse(p, c);
   return p;
 }
 export function courseValues(p, q) {
@@ -154,4 +173,91 @@ export function filledCode(q, values) {
       (part, i) => part + (i < q.slots.length ? values?.[i] || "________" : ""),
     )
     .join("");
+}
+
+export function revision(value) {
+  let hash = 2166136261;
+  for (const char of JSON.stringify(value)) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16);
+}
+export function questionRevision(q) {
+  return revision([q.type, q.text, q.options]);
+}
+export function reconcileTheory(state) {
+  state.records ??= {};
+  state.favorites ??= [];
+  state.drafts ??= {};
+  for (const [id, r] of Object.entries(state.records)) {
+    const q = questions[id];
+    if (!q) continue;
+    const current = questionRevision(q),
+      answer = revision(q.type === 3 ? q.points : q.answer);
+    if (
+      (r.questionRevision && r.questionRevision !== current) ||
+      (q.type === 3 && r.answerRevision && r.answerRevision !== answer)
+    ) {
+      r.stale = true;
+      r.previousResult ??= {
+        selected: r.selected,
+        self: r.self,
+        correct: r.correct,
+      };
+      delete r.correct;
+      delete r.self;
+    }
+    r.questionRevision = current;
+    r.answerRevision = answer;
+    if (!r.stale && q.type < 3 && Array.isArray(r.selected))
+      r.correct = sameAnswers(r.selected, q.answer);
+  }
+  return state;
+}
+export function checkStep(course, q, mode, values) {
+  return q.slots.map((slot, i) => {
+    const value = values[i] ?? "";
+    if (!String(value).trim()) return { status: "review", message: "尚未填写" };
+    return (course.kind === "case" || q.kind === "case") && mode === "type"
+      ? matchWritten(slot, value)
+      : {
+          status: [slot.answer, ...(slot.accepted || [])].some(
+            (answer) => normalizeCode(answer) === normalizeCode(value),
+          )
+            ? "covered"
+            : "conflict",
+        };
+  });
+}
+export function reconcileCourse(state, course) {
+  for (const [id, r] of Object.entries(state.records)) {
+    const q = course.steps.find((q) => q.id === id);
+    if (!q) continue;
+    const current = revision([
+      q.code,
+      q.slots.map((slot) => [slot.answer, slot.accepted, slot.matchRule]),
+    ]);
+    for (const [mode, answer] of Object.entries(r.modeAnswers || {})) {
+      if (!Array.isArray(answer.values)) continue;
+      answer.details = checkStep(course, q, mode, answer.values);
+      answer.matches = answer.details.map((d) => d.status === "covered");
+      answer.revision = current;
+    }
+    const modes = Object.keys(r.modeAnswers || {}),
+      last =
+        (modes.includes(r.lastCheckedMode) ? r.lastCheckedMode : null) ||
+        (modes.includes(state.mode) ? state.mode : modes.at(-1));
+    if (last) {
+      const a = r.modeAnswers[last];
+      r.correct = a.matches?.every(Boolean) ?? false;
+      r.needsReview = a.details?.some((d) => d.status === "review") ?? false;
+    }
+  }
+  return state;
+}
+export function reconcileSaved(key, state, courseId) {
+  return key === "zhilian-v1"
+    ? theoryState("", state)
+    : courseState(courseId, state);
 }

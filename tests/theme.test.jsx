@@ -121,20 +121,31 @@ test.each([
     id,
     <Skills courseId={id} />,
   ]),
-])(
-  "%s exposes the shared theme selector and switches without leaving the page",
-  (_, page) => {
-    systemTheme(false);
-    render(page);
-    choose("dark");
-    expect(document.documentElement.dataset.theme).toBe("dark");
-    expect(screen.getByRole("combobox", { name: "颜色主题" })).toHaveValue(
-      "dark",
-    );
+])("%s inherits the home theme; only home exposes the selector", (id, page) => {
+  const media = systemTheme(false);
+  localStorage.setItem(THEME_KEY, "dark");
+  render(page);
+  expect(document.documentElement.dataset.theme).toBe("dark");
+  const selector = screen.queryByRole("combobox", { name: "颜色主题" });
+  if (id === "home") {
+    expect(selector).toHaveValue("dark");
     choose("light");
-    expect(document.documentElement.dataset.theme).toBe("light");
-  },
-);
+  } else {
+    expect(selector).toBeNull();
+    localStorage.setItem(THEME_KEY, "light");
+    act(() =>
+      window.dispatchEvent(new StorageEvent("storage", { key: THEME_KEY })),
+    );
+  }
+  expect(document.documentElement.dataset.theme).toBe("light");
+  localStorage.setItem(THEME_KEY, "system");
+  act(() =>
+    window.dispatchEvent(new StorageEvent("storage", { key: THEME_KEY })),
+  );
+  media.matches = true;
+  act(() => media.listener());
+  expect(document.documentElement.dataset.theme).toBe("dark");
+});
 test("pre-paint bootstrap agrees with the React theme settings on every HTML entry", () => {
   const source = fs.readFileSync("public/theme-init.js", "utf8");
   for (const page of ["index.html", "theory.html", "skills.html"]) {

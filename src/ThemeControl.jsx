@@ -19,7 +19,7 @@ function applyTheme(mode, systemDark) {
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute("content", background);
 }
-export default function ThemeControl() {
+export function useThemeAppearance() {
   const [mode, setMode] = useState(readTheme);
   const preference = useRef(mode),
     media = useRef(null);
@@ -56,6 +56,14 @@ export default function ThemeControl() {
     }
     applyTheme(next, media.current.matches);
   }
+  return { mode, change };
+}
+export function ThemeSync() {
+  useThemeAppearance();
+  return null;
+}
+export default function ThemeControl() {
+  const { mode, change } = useThemeAppearance();
   return (
     <label className="theme-control">
       <select

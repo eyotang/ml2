@@ -6,20 +6,83 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { tips, readStore, writeStore } from "./model";
+import { tips, reconcileSaved } from "./model";
+import {
+  collectEdits,
+  applyEdits,
+  latestSaved,
+  persistEdits,
+  localNavigation,
+} from "./persistence";
 export function useSavedState(key, init, courseId, onFailure) {
-  const [value, set] = useState(init);
+  const [value, set] = useState(init),
+    [externalVersion, setExternal] = useState(0);
+  const current = useRef(value),
+    pending = useRef([]),
+    mounted = useRef(false),
+    failure = useRef(onFailure);
+  failure.current = onFailure;
+  function display(saved) {
+    const navigation = localNavigation(current.current, courseId);
+    const merged = applyEdits(
+      { ...saved, ...navigation },
+      pending.current.flatMap((batch) => batch.edits),
+    );
+    const normalized = reconcileSaved(key, merged, courseId);
+    current.current = normalized;
+    if (mounted.current) set(normalized);
+  }
+  function commit(batch) {
+    if (!pending.current.includes(batch)) return;
+    const flushed = [...pending.current];
+    const result = persistEdits(
+      key,
+      current.current,
+      flushed.flatMap((item) => item.edits),
+      courseId,
+    );
+    if (result.saved)
+      pending.current = pending.current.filter(
+        (item) => !flushed.includes(item),
+      );
+    else failure.current?.();
+    display(result.value);
+  }
+  function enqueue(batch) {
+    pending.current.push(batch);
+    if (globalThis.navigator?.locks?.request) {
+      navigator.locks
+        .request("zhilian-save:" + key, () => commit(batch))
+        .catch(() => {
+          pending.current = pending.current.filter((item) => item !== batch);
+          failure.current?.();
+        });
+    } else commit(batch);
+  }
   useEffect(() => {
-    const saved = courseId ? { ...readStore(key), [courseId]: value } : value;
-    if (!writeStore(key, saved)) onFailure?.();
-  }, [value, key, courseId]);
-  const update = (recipe) =>
-    set((previous) => {
-      const next = structuredClone(previous);
-      recipe(next);
-      return next;
-    });
-  return [value, update];
+    mounted.current = true;
+    enqueue({ edits: [] });
+    const synchronize = (event) => {
+      if (event.type === "storage" && event.key !== key && event.key !== null)
+        return;
+      display(latestSaved(key, current.current, courseId));
+      setExternal((version) => version + 1);
+    };
+    window.addEventListener("storage", synchronize);
+    window.addEventListener("pageshow", synchronize);
+    return () => {
+      mounted.current = false;
+      window.removeEventListener("storage", synchronize);
+      window.removeEventListener("pageshow", synchronize);
+    };
+  }, [key, courseId]);
+  const update = (recipe) => {
+    const batch = collectEdits(current.current, recipe);
+    current.current = batch.value;
+    set(batch.value);
+    enqueue(batch);
+  };
+  return [value, update, externalVersion];
 }
 export function Rich({ html = "", className = "", ...props }) {
   return (

@@ -560,3 +560,5 @@ html[data-theme="dark"]
   background: #167ca2;
   color: white;
 }
+
+.export-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 16px}.export-tools button{padding:6px 12px;border:1px solid var(--line,#b9d1c7);border-radius:8px;background:var(--theme-surface,#fff);color:inherit;cursor:pointer}.export-tools small{flex-basis:100%}.record-updated{padding:10px;background:var(--theme-soft,#f2f7f5);border-left:3px solid #e4a33c}

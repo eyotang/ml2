@@ -83,7 +83,13 @@ export function usePythonRuntime({ courseId, editorRef, code }) {
     try {
       if (!worker.current) {
         const w = new Worker(
-          new URL("python-worker.js?v=24", document.baseURI),
+          new URL(
+            "python-worker.js?v=" +
+              (typeof __APP_VERSION__ === "undefined"
+                ? "dev"
+                : __APP_VERSION__),
+            document.baseURI,
+          ),
           { type: "module" },
         );
         worker.current = w;
@@ -132,7 +138,15 @@ export function usePythonRuntime({ courseId, editorRef, code }) {
         courseId,
         files: dataFiles[courseId].map((name) => ({
           name,
-          url: new URL("materials/data/" + name, document.baseURI).href,
+          url: new URL(
+            "materials/data/" +
+              name +
+              "?v=" +
+              (typeof __APP_VERSION__ === "undefined"
+                ? "dev"
+                : __APP_VERSION__),
+            document.baseURI,
+          ).href,
         })),
       });
     } catch (error) {

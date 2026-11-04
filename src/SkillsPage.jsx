@@ -1,10 +1,10 @@
-import ThemeControl from "./ThemeControl";
+import { ThemeSync } from "./ThemeControl";
+import ExportButtons from "./ExportButtons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   courses,
   courseState,
   courseValues,
-  setCourseValues,
   resetMode,
   resetOriginal,
   normalizeCode,
@@ -63,7 +63,7 @@ function WebsiteReference({ course, q }) {
 export default function Skills({ courseId }) {
   const course = courses[courseId],
     isCase = course.kind === "case";
-  const [p, update] = useSavedState(
+  const [p, update, externalVersion] = useSavedState(
     "zhilian-skills-v1",
     () => courseState(courseId),
     courseId,
@@ -96,6 +96,11 @@ export default function Skills({ courseId }) {
   useEffect(() => {
     document.title = isCase ? "知练 · 技能方案练习" : "知练 · 代码补全";
   }, [isCase]);
+  useEffect(() => {
+    setFeedback(null);
+    setSolution(false);
+    setChecked(false);
+  }, [externalVersion]);
   function clear() {
     setActive(0);
     setFeedback(null);
@@ -109,6 +114,7 @@ export default function Skills({ courseId }) {
     if (!course.steps[index]) return;
     update((n) => {
       n.index = index;
+      n.stepId = course.steps[index].id;
     });
     clear();
     window.scrollTo(0, 0);
@@ -128,7 +134,12 @@ export default function Skills({ courseId }) {
   function setValue(value, index = active) {
     const next = [...values];
     next[index] = value;
-    update((n) => setCourseValues(n, q, next));
+    update((n) => {
+      const m = p.mode === "type" ? "type" : "pick";
+      n.draftsByMode[m] ??= {};
+      n.draftsByMode[m][q.id] ??= q.slots.map(() => "");
+      n.draftsByMode[m][q.id][index] = value;
+    });
     setFeedback(null);
     setHint(false);
     setSolution(false);
@@ -162,24 +173,23 @@ export default function Skills({ courseId }) {
       correct = matches.every(Boolean);
     setFeedback({ correct, matches, details });
     update((n) => {
-      const old = n.records[q.id] || {};
-      n.records[q.id] = {
-        ...old,
-        modeAnswers: {
-          ...old.modeAnswers,
-          [p.mode]: { values: [...values], matches, details },
-        },
-        attempts: (old.attempts || 0) + 1,
-        correct,
-        needsReview: details.some((d) => d.status === "review"),
-        reviewed: correct || !!old.reviewed || (written && p.mode === "type"),
-      };
+      n.records[q.id] ??= {};
+      const record = n.records[q.id];
+      record.modeAnswers ??= {};
+      record.modeAnswers[p.mode] = { values: [...values], matches, details };
+      record.attempts = (record.attempts || 0) + 1;
+      record.lastCheckedMode = p.mode;
+      record.correct = correct;
+      record.needsReview = details.some((d) => d.status === "review");
+      record.reviewed =
+        correct || !!record.reviewed || (written && p.mode === "type");
     });
   }
   function reveal() {
     setSolution(true);
     update((n) => {
-      n.records[q.id] = { ...n.records[q.id], reviewed: true };
+      n.records[q.id] ??= {};
+      n.records[q.id].reviewed = true;
     });
   }
   function resetCurrent() {
@@ -212,6 +222,7 @@ export default function Skills({ courseId }) {
     update((n) => {
       resetMode(n, p.mode);
       n.index = 0;
+      n.stepId = course.steps[0].id;
     });
     clear();
     window.scrollTo(0, 0);
@@ -229,6 +240,7 @@ export default function Skills({ courseId }) {
       n.draftsByMode = { pick: {}, type: {} };
       resetOriginal(n);
       n.index = 0;
+      n.stepId = course.steps[0].id;
     });
     clear();
     runtime.reset();
@@ -275,6 +287,7 @@ export default function Skills({ courseId }) {
     mastered = Object.values(p.records).filter((r) => r.correct).length;
   return (
     <>
+      <ThemeSync />
       <header className="skill-top">
         <a
           href={courseId === "c" ? "./#review" : "./#skills"}
@@ -289,7 +302,6 @@ export default function Skills({ courseId }) {
           </small>
           <strong id="course-name">{course.title.split(" · ")[1]}</strong>
         </div>
-        <ThemeControl />
         <button id="study-tips-button" onClick={() => setTip(courseId)}>
           答题技巧
         </button>
@@ -404,6 +416,7 @@ export default function Skills({ courseId }) {
                   ))}
                 </nav>
               )}
+              <ExportButtons course={course} p={p} runtime={runtime.state} />
               <div className="original-tools">
                 <span>{isCase ? "逐任务作答" : "原题代码"}</span>
                 <button
@@ -415,6 +428,27 @@ export default function Skills({ courseId }) {
               </div>
               {!isCase && (
                 <>
+                  {course.visualizationCode &&
+                    p.originalDraft != null &&
+                    !p.originalDraft.includes("# 样卷任务一补充") && (
+                      <button
+                        className="chart-template"
+                        onClick={() =>
+                          update((n) => {
+                            n.originalDraft +=
+                              "\n\n" +
+                              course.visualizationCode
+                                .replace(
+                                  "['爽约率'] * 100",
+                                  "['爽约率'] * ________",
+                                )
+                                .replace("axhline(40", "axhline(________");
+                          })
+                        }
+                      >
+                        补入任务一图表模板
+                      </button>
+                    )}
                   <PythonEditor
                     editorRef={editorRef}
                     value={p.originalDraft ?? course.originalCode}
@@ -542,6 +576,12 @@ export default function Skills({ courseId }) {
                   <section className="solution">
                     <h3>完整参考解法</h3>
                     <pre>{course.referenceCode}</pre>
+                    {course.visualizationCode && (
+                      <>
+                        <h3>样卷要求补充：数据可视化</h3>
+                        <pre>{course.visualizationCode}</pre>
+                      </>
+                    )}
                   </section>
                   {course.websiteCode && (
                     <details className="solution website-reference">
@@ -867,6 +907,11 @@ export default function Skills({ courseId }) {
           >
             下载原题与 CSV
           </a>
+          {course.visualizationDownloadPath && (
+            <a href={course.visualizationDownloadPath} download>
+              下载含图表的完整 Notebook
+            </a>
+          )}
           <button id="restart-course" onClick={restart}>
             重新练习本模块
           </button>
