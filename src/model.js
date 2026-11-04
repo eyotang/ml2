@@ -154,6 +154,7 @@ export function resetOriginal(p) {
   p.caseSelf = {};
   p.flowDrafts = {};
   p.functionCardDrafts = {};
+  p.trainingDrafts = {};
   p.jsonDrafts = {};
   p.taskChecks = {};
 }

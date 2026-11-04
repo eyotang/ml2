@@ -9,6 +9,7 @@ const rerouted = new Set([
   "materials/b2-website-reference.py",
   "materials/b11-reference.html",
   "materials/b3-reference.html",
+  "materials/b4-reference.html",
 ]);
 for (const [file, expected] of Object.entries(manifest)) {
   if (rerouted.has(file)) {
@@ -48,5 +49,5 @@ for (const bridge of ["home.js", "app.js", "skills.js"])
 assert.ok(fs.existsSync("dist/python-worker.js"));
 assert.ok(!fs.existsSync("dist/_cached"));
 console.log(
-  "PASS: static entry points, relative assets, old cached HTML dependencies, compatibility entries, Worker and all 15 materials (11 original hashes + 4 updated reference files)",
+  "PASS: static entry points, relative assets, old cached HTML dependencies, compatibility entries, Worker and all 15 materials (10 original hashes + 5 updated reference files)",
 );

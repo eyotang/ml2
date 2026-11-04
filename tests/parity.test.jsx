@@ -107,6 +107,13 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
         "计划运输时长必须大于0且不超过24小时；传感器缺失率的 between(0,1) 包含两个边界。",
       ),
   );
+  // B4 task one now presents the approved structured training tables.
+  old.courses.b4.tasks[0] = {
+    ...old.courses.b4.tasks[0],
+    trainingPlan: courses.b4.tasks[0].trainingPlan,
+    answerHTML: courses.b4.tasks[0].answerHTML,
+  };
+  old.courses.b4.referenceHTML = courses.b4.referenceHTML;
   expect(questions).toEqual(old.questions);
   const { visualizationCode, visualizationDownloadPath, ...b12 } = courses.b12;
   expect(visualizationCode).toContain("import matplotlib.pyplot");
@@ -154,7 +161,7 @@ test("static deployment retains original assets and intentionally updated refere
       );
       continue;
     }
-    const updated = [courses.b11, courses.b3].find(
+    const updated = [courses.b11, courses.b3, courses.b4].find(
       (c) => c.downloadPath === file,
     );
     if (updated) {

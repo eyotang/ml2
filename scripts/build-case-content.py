@@ -4,7 +4,7 @@ from html.parser import HTMLParser
 root=Path(__file__).resolve().parents[1]
 # Only data fields are imported; scripts and executable attributes from the supplied HTML are never copied.
 class SafeHTML(HTMLParser):
- allowed=set('h3 h4 p table thead tbody tr th td ul ol li pre code strong b em br div span'.split())
+ allowed=set('h3 h4 p table caption thead tbody tr th td ul ol li pre code strong b em br div span'.split())
  def __init__(self):super().__init__();self.out=[];self.skip=0
  def handle_starttag(self,tag,attrs):
   if tag in ['script','style','iframe']:self.skip+=1
@@ -18,7 +18,7 @@ def safe(s):p=SafeHTML();p.feed(s);return ''.join(p.out)
 raw={c['id']:c for c in json.loads((root/'scripts/case-reference.json').read_text())}
 courses={}
 for key,group,code in [('b11','业务分析','B1-1'),('b3','智能系统设计','B3'),('b4','培训与指导','B4')]:
- c=raw[key];courses[key]={'id':key,'kind':'case','category':group+' · '+code,'title':code+' · '+c['title'],'materialHTML':safe(c['material']),'tasks':[dict(id=t['id'],title=t['title'],promptHTML=safe(t['prompt']),answerHTML=safe(t['answer'])) for t in c['tasks']],'steps':[]}
+ c=raw[key];courses[key]={'id':key,'kind':'case','category':group+' · '+code,'title':code+' · '+c['title'],'materialHTML':safe(c['material']),'tasks':[dict(id=t['id'],title=t['title'],promptHTML=safe(t['prompt']),answerHTML=safe(t['answer']),**({'trainingPlan':t['trainingPlan']} if 'trainingPlan' in t else {})) for t in c['tasks']],'steps':[]}
 def add(key,task,title,goal,template,answers,hint):
  rows=courses[key]['steps'];slots=[]
  for a,d,why,*aliases in answers:slots.append(dict(answer=a,choices=[a,*d],why=why,accepted=aliases[0] if aliases else []))

@@ -1,3 +1,4 @@
+import TrainingPlan, { trainingPlanText } from "./TrainingPlan";
 import JsonFeedback, { validateJSON } from "./JsonFeedback";
 import {
   FunctionCardsEditor,
@@ -42,6 +43,13 @@ const esc = (s) =>
       ],
   );
 function Solution({ q }) {
+  if (q.id === "b4-1")
+    return (
+      <TrainingPlan
+        task={courses.b4.tasks[0]}
+        field={(i) => q.slots[i].answer}
+      />
+    );
   if (hasFunctionCard(q)) return <FunctionCardStep q={q} />;
   return q.flowchartHTML ? (
     <Rich
@@ -674,7 +682,9 @@ export default function Skills({ courseId }) {
                   <pre>{q.context}</pre>
                 </details>
               )}
-              {hasFunctionCard(q) ? (
+              {q.id === "b4-1" ? (
+                <TrainingPlan task={course.tasks[0]} field={field} />
+              ) : hasFunctionCard(q) ? (
                 <FunctionCardStep q={q} field={field} />
               ) : q.flowchartHTML ? (
                 <div className="flow-practice">
@@ -1123,6 +1133,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
   return course.tasks.map((task, i) => {
     const taskChecked = checked || !!p.taskChecks?.[task.id];
     const functionTask = task.id === "ct1";
+    const trainingTask = !!task.trainingPlan;
     const jsonTask = task.id === "ct2";
     const jsonValue = p.jsonDrafts?.[task.id] || "";
     const flowValues = p.flowDrafts?.[task.id] || [],
@@ -1134,6 +1145,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
               "\n" +
               flowValues.join("\n") +
               (functionTask ? "\n" + functionCardsText(p) : "") +
+              (trainingTask ? "\n" + trainingPlanText(task, p) : "") +
               (jsonTask && validateJSON(jsonValue).status === "valid"
                 ? "\n" + jsonValue
                 : ""),
@@ -1216,9 +1228,13 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
             <JsonFeedback value={jsonValue} id={"json-feedback-" + task.id} />
           </section>
         )}
-        {functionTask ? (
+        {functionTask || trainingTask ? (
           <>
-            <FunctionCardsEditor p={p} update={update} />
+            {trainingTask ? (
+              <TrainingPlan task={task} p={p} update={update} />
+            ) : (
+              <FunctionCardsEditor p={p} update={update} />
+            )}
             <details
               className="function-card-supplement"
               open={!!p.caseDrafts?.[task.id]}
@@ -1317,7 +1333,15 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
                 </ul>
               </section>
             </div>
-            {functionTask ? (
+            {trainingTask ? (
+              <>
+                <TrainingPlan task={task} />
+                <details>
+                  <summary>教学安排补充说明</summary>
+                  <Rich className="case-rich" html={task.answerHTML} />
+                </details>
+              </>
+            ) : functionTask ? (
               <>
                 <ReferenceFunctionCards />
                 <details>

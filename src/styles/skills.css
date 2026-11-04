@@ -79,3 +79,13 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .json-valid { color: var(--theme-accent, #16845b); }
 .json-invalid { color: var(--theme-error, #d35252); }
 .json-editor[aria-invalid="true"] { border-color: var(--theme-error, #d35252); }
+
+.training-plan { display: grid; gap: 22px; margin: 18px 0; min-width: 0; }
+.training-plan table { width: 100%; border-collapse: collapse; table-layout: fixed; background: var(--theme-surface, #fff); }
+.training-plan caption { text-align: left; padding: 12px 0; font-size: 17px; font-weight: 700; color: var(--ink); }
+.training-plan th, .training-plan td { border: 1px solid var(--line); padding: 12px; vertical-align: top; text-align: left; overflow-wrap: anywhere; white-space: pre-wrap; line-height: 1.8; }
+.training-plan th { width: 112px; font-size: 16px; font-weight: 700; background: var(--theme-soft, #f4f9fc); }
+.training-plan td { font-size: 15px; min-width: 0; }
+.training-plan .answer-field { display: block; width: 100%; margin: 0; }
+.training-plan .training-input, .training-plan .answer-measure { font: inherit; font-size: 15px; line-height: 1.8; padding: 8px; min-height: 45px; }
+@media (max-width: 600px) { .training-plan th { width: 104px; } .training-plan th, .training-plan td { padding: 9px; } }
