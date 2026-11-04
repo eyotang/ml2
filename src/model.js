@@ -153,6 +153,7 @@ export function resetOriginal(p) {
   p.caseDrafts = {};
   p.caseSelf = {};
   p.flowDrafts = {};
+  p.functionCardDrafts = {};
 }
 export function normalizeCode(s) {
   return String(s)

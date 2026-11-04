@@ -476,6 +476,51 @@ describe.each(Object.entries(courses))("course %s", (id, course) => {
       });
     },
   );
+  test.each(["pick", "type"])(
+    "%s reset current step preserves other steps and modes",
+    (mode) => {
+      const q = course.steps[0],
+        next = course.steps[1],
+        other = mode === "pick" ? "type" : "pick";
+      seedCourse(id, {
+        mode,
+        index: 0,
+        draftsByMode: {
+          [mode]: { [q.id]: ["current"], [next.id]: ["next"] },
+          [other]: { [q.id]: ["other"] },
+        },
+        records: {
+          [q.id]: {
+            modeAnswers: {
+              [mode]: { values: ["current"], matches: [false] },
+              [other]: { values: ["other"], matches: [true] },
+            },
+          },
+        },
+        caseDrafts: { saved: "written" },
+        functionCardDrafts: { ct1: { monitor: { role: "keep" } } },
+      });
+      render(<Skills courseId={id} />);
+      expect(document.querySelector("#reset-practice")).toBeVisible();
+      vi.mocked(window.confirm).mockReturnValueOnce(false);
+      click("#reset-practice");
+      expect(savedCourse(id).draftsByMode[mode][q.id]).toEqual(["current"]);
+      click("#reset-practice");
+      const p = savedCourse(id);
+      expect(p.draftsByMode[mode][q.id]).toBeUndefined();
+      expect(p.records[q.id].modeAnswers[mode]).toBeUndefined();
+      expect(p.records[q.id].modeAnswers[other].values).toEqual(["other"]);
+      expect(p.draftsByMode[mode][next.id]).toEqual(["next"]);
+      expect(p.draftsByMode[other][q.id]).toEqual(["other"]);
+      expect(p.caseDrafts.saved).toBe("written");
+      expect(p.functionCardDrafts.ct1.monitor.role).toBe("keep");
+      if (mode === "pick")
+        expect(document.querySelector('[data-slot="0"]')).toHaveTextContent(
+          "空 1",
+        );
+      else expect(document.querySelector('[data-slot="0"]')).toHaveValue("");
+    },
+  );
   test("directory, previous/next navigation, hints, tips, per-step reset and restart", () => {
     render(<Skills courseId={id} />);
     click("#next-step");
@@ -681,3 +726,52 @@ test("swiping inside flowcharts and inputs never changes the step; cancelled res
     "我的方案",
   );
 });
+
+test("review task one uses persistent six-field function cards, preserves legacy text and resets originals", () => {
+  seedCourse("c", { mode: "original", caseDrafts: { ct1: "之前的答案" } });
+  let view = render(<Skills courseId="c" />);
+  expect(
+    document.querySelectorAll("#written-ct1 fieldset.function-card"),
+  ).toHaveLength(3);
+  expect(document.querySelectorAll("[data-function-field]")).toHaveLength(18);
+  expect(document.querySelector('[data-task="ct1"]')).toHaveValue("之前的答案");
+  fill(
+    '[data-function-card="monitor"][data-function-field="role"]',
+    "值班监控员；活动启用时持续监测。",
+  );
+  expect(savedCourse("c").functionCardDrafts.ct1.monitor.role).toContain(
+    "值班监控员",
+  );
+  view.unmount();
+  view = render(<Skills courseId="c" />);
+  expect(
+    document.querySelector(
+      '[data-function-card="monitor"][data-function-field="role"]',
+    ),
+  ).toHaveValue("值班监控员；活动启用时持续监测。");
+  click("#check-button");
+  expect(
+    document.querySelectorAll("#written-ct1 .function-card-reference article"),
+  ).toHaveLength(3);
+  expect(
+    document.querySelectorAll("#written-ct1 .function-card-reference dt"),
+  ).toHaveLength(18);
+  click("#reset-practice");
+  expect(savedCourse("c").functionCardDrafts).toEqual({});
+  expect(savedCourse("c").caseDrafts).toEqual({});
+});
+test.each([0, 1, 2])(
+  "review function card step %s retains six fields and both answer slots",
+  (index) => {
+    seedCourse("c", { mode: "pick", index });
+    render(<Skills courseId="c" />);
+    expect(
+      document.querySelectorAll("#exercise .function-card dt"),
+    ).toHaveLength(6);
+    expect(document.querySelectorAll("#exercise [data-slot]")).toHaveLength(2);
+    answer(courses.c.steps[index], "pick");
+    expect(savedCourse("c").records[courses.c.steps[index].id].correct).toBe(
+      true,
+    );
+  },
+);

@@ -1,3 +1,10 @@
+import {
+  FunctionCardsEditor,
+  ReferenceFunctionCards,
+  FunctionCardStep,
+  hasFunctionCard,
+  functionCardsText,
+} from "./FunctionCards";
 import { groupLessons } from "./lesson-groups";
 import AnswerNote, { taskNotes } from "./AnswerNote";
 import { ThemeSync } from "./ThemeControl";
@@ -34,6 +41,7 @@ const esc = (s) =>
       ],
   );
 function Solution({ q }) {
+  if (hasFunctionCard(q)) return <FunctionCardStep q={q} />;
   return q.flowchartHTML ? (
     <Rich
       html={q.flowchartHTML.replace(/\{\{(\d+)\}\}/g, (_, i) =>
@@ -269,18 +277,17 @@ export default function Skills({ courseId }) {
     });
   }
   function resetCurrent() {
-    if (!original && p.mode !== "type") return;
     if (
       !confirm(
         original
           ? "重置本课程的原题填写、自评和运行结果？原题模板会恢复，分步练习记录保留。"
-          : "重置当前这一步的关键填空及判定结果？点选补全、其他步骤和原题草稿保留。",
+          : `重置当前这一步的${p.mode === "pick" ? "点选练习" : "关键填空"}及判定结果？其他模式、其他步骤和原题草稿保留。`,
       )
     )
       return;
     update((n) => {
       if (original) resetOriginal(n);
-      else resetMode(n, "type", q.id);
+      else resetMode(n, p.mode, q.id);
     });
     if (original) {
       runtime.reset();
@@ -594,7 +601,9 @@ export default function Skills({ courseId }) {
                   <pre>{q.context}</pre>
                 </details>
               )}
-              {q.flowchartHTML ? (
+              {hasFunctionCard(q) ? (
+                <FunctionCardStep q={q} field={field} />
+              ) : q.flowchartHTML ? (
                 <div className="flow-practice">
                   <FlowChart html={q.flowchartHTML} field={field} />
                 </div>
@@ -885,11 +894,7 @@ export default function Skills({ courseId }) {
         >
           提示
         </button>
-        <button
-          id="reset-practice"
-          hidden={p.mode === "pick"}
-          onClick={resetCurrent}
-        >
+        <button id="reset-practice" hidden={finished} onClick={resetCurrent}>
           {original ? "重置原题" : "重置本步"}
         </button>
         <button
@@ -1099,12 +1104,16 @@ export default function Skills({ courseId }) {
 }
 function WrittenTasks({ course, p, update, checked, isCase = false }) {
   return course.tasks.map((task, i) => {
+    const functionTask = task.id === "ct1";
     const flowValues = p.flowDrafts?.[task.id] || [],
       points = checked
         ? coverage(
             course,
             i,
-            (p.caseDrafts?.[task.id] || "") + "\n" + flowValues.join("\n"),
+            (p.caseDrafts?.[task.id] || "") +
+              "\n" +
+              flowValues.join("\n") +
+              (functionTask ? "\n" + functionCardsText(p) : ""),
           )
         : [],
       unique = points.filter(
@@ -1155,24 +1164,55 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
             />
           </div>
         )}
-        <textarea
-          className="case-answer-editor"
-          data-task={task.id}
-          aria-label={task.title + "的答案"}
-          placeholder={
-            task.flowchart
-              ? "流程图在上方填写；这里填写规则表、路径说明等其余内容…"
-              : "按题目要求逐项回答，内容自动保存…"
-          }
-          value={p.caseDrafts?.[task.id] || ""}
-          onChange={(e) =>
-            update((n) => {
-              n.caseDrafts ??= {};
-              n.caseDrafts[task.id] = e.target.value;
-              delete n.caseSelf?.[task.id];
-            })
-          }
-        />
+        {functionTask ? (
+          <>
+            <FunctionCardsEditor p={p} update={update} />
+            <details
+              className="function-card-supplement"
+              open={!!p.caseDrafts?.[task.id]}
+            >
+              <summary>补充说明 / 之前的整段答案</summary>
+              <textarea
+                className="case-answer-editor"
+                data-task={task.id}
+                aria-label={task.title + "的答案"}
+                placeholder={
+                  task.flowchart
+                    ? "流程图在上方填写；这里填写规则表、路径说明等其余内容…"
+                    : "按题目要求逐项回答，内容自动保存…"
+                }
+                value={p.caseDrafts?.[task.id] || ""}
+                onChange={(e) =>
+                  update((n) => {
+                    n.caseDrafts ??= {};
+                    n.caseDrafts[task.id] = e.target.value;
+                    delete n.caseSelf?.[task.id];
+                  })
+                }
+              />
+            </details>
+          </>
+        ) : (
+          <textarea
+            className="case-answer-editor"
+            data-task={task.id}
+            aria-label={task.title + "的答案"}
+            placeholder={
+              task.flowchart
+                ? "流程图在上方填写；这里填写规则表、路径说明等其余内容…"
+                : "按题目要求逐项回答，内容自动保存…"
+            }
+            value={p.caseDrafts?.[task.id] || ""}
+            onChange={(e) =>
+              update((n) => {
+                n.caseDrafts ??= {};
+                n.caseDrafts[task.id] = e.target.value;
+                delete n.caseSelf?.[task.id];
+              })
+            }
+          />
+        )}
+
         {checked && (
           <details className="case-solution" open>
             <summary>本任务参考答案与核对要点</summary>
@@ -1213,7 +1253,17 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
                 </ul>
               </section>
             </div>
-            <Rich className="case-rich" html={task.answerHTML} />
+            {functionTask ? (
+              <>
+                <ReferenceFunctionCards />
+                <details>
+                  <summary>查看完整参考说明</summary>
+                  <Rich className="case-rich" html={task.answerHTML} />
+                </details>
+              </>
+            ) : (
+              <Rich className="case-rich" html={task.answerHTML} />
+            )}
             <label className="case-self">
               <input
                 type="checkbox"
