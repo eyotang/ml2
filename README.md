@@ -97,3 +97,5 @@ npm run build
 `npm run dev`、`npm test` 和 `npm run build` 会自动将 `content/` 转为构建数据。题目内容应修改内容源或生成脚本，保持题目 ID 稳定。
 
 老师参考答案及[解析课件](https://ai-trainer-exam-courseware.app.workbuddy.host/?sharecode=U7DGZ5NTK5)为学习参考，非官方评分细则。主观方案以业务约束、任务覆盖和合理性为重点。
+
+模式切换栏保持在页面顶部；点选补全、关键填空与原题作答分别记住本次页面中的阅读位置，切回来会恢复代码及流程图滚动位置，不必重复寻找原来的段落。

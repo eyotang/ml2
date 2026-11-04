@@ -24,3 +24,6 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .mode-progress{display:flex;flex-direction:column;align-items:flex-end;gap:7px;white-space:nowrap;font-size:11px;color:var(--muted)}#reset-all-practice{font-size:11px;border:1px solid #e8d9cf;border-radius:5px;color:#aa7e66;background:#fffaf7;padding:5px 9px}.mode-row{flex-wrap:wrap;row-gap:12px}
 
 .written-tasks{margin-top:36px;border-top:1px solid var(--line);padding-top:18px}.written-tasks>h2{font-size:20px}.original-task-nav{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.original-task-nav a{font-size:12px;padding:9px 12px;border:1px solid #cce5f0;border-radius:6px;color:#248ab0;background:#f4fbfe}.case-answer-task{scroll-margin-top:20px}
+
+/* Keep mode switching reachable without leaving the current reading position. */
+.mode-row{position:sticky;top:0;z-index:4;background:var(--theme-canvas,#f7f9fb);padding:10px 0}.case-answer-task{scroll-margin-top:100px}

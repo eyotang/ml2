@@ -1,6 +1,6 @@
 import { ThemeSync } from "./ThemeControl";
 import ExportButtons from "./ExportButtons";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   courses,
   courseState,
@@ -79,7 +79,10 @@ export default function Skills({ courseId }) {
     [tip, setTip] = useState(null),
     [checked, setChecked] = useState(false),
     [selfSaved, setSelfSaved] = useState(false);
-  const editorRef = useRef();
+  const editorRef = useRef(),
+    mainRef = useRef(),
+    modePositions = useRef(new Map()),
+    restorePosition = useRef(null);
   const runtime = usePythonRuntime({
     courseId,
     editorRef,
@@ -119,11 +122,72 @@ export default function Skills({ courseId }) {
     clear();
     window.scrollTo(0, 0);
   }
+  useLayoutEffect(() => {
+    const saved = restorePosition.current;
+    if (!saved) return;
+    restorePosition.current = null;
+    const main = mainRef.current;
+    main.querySelectorAll("details").forEach((el, i) => {
+      el.open = saved.details[i] || false;
+    });
+    main
+      .querySelectorAll(
+        ".original-editor, .flow-scroll, .runner-table, .case-answer-editor",
+      )
+      .forEach((el, i) => {
+        const position = saved.containers[i];
+        if (!position) return;
+        el.scrollTop = position.top;
+        el.scrollLeft = position.left;
+        // The code highlight overlay and gutter follow the textarea scroll event.
+        el.dispatchEvent(new Event("scroll", { bubbles: true }));
+        if (position.selection) el.setSelectionRange(...position.selection);
+      });
+    window.scrollTo({ left: saved.left, top: saved.top, behavior: "instant" });
+  }, [p.mode]);
   function mode(m) {
+    if (m === p.mode) return;
+    const key = (m) => (m === "original" ? m : m + ":" + q.id);
+    const main = mainRef.current;
+    modePositions.current.set(key(p.mode), {
+      left: window.scrollX,
+      top: window.scrollY,
+      details: [...main.querySelectorAll("details")].map((el) => el.open),
+      containers: [
+        ...main.querySelectorAll(
+          ".original-editor, .flow-scroll, .runner-table, .case-answer-editor",
+        ),
+      ].map((el) => ({
+        left: el.scrollLeft,
+        top: el.scrollTop,
+        selection: el.matches(".original-editor")
+          ? [el.selectionStart, el.selectionEnd]
+          : null,
+      })),
+      checked,
+      showSolution,
+      hint,
+      feedback,
+      active,
+    });
+    const saved = modePositions.current.get(key(m));
+    restorePosition.current = saved || {
+      left: 0,
+      top: 0,
+      details: [],
+      containers: [],
+    };
     update((n) => {
       n.mode = m;
     });
     clear();
+    if (saved) {
+      setChecked(saved.checked);
+      setSolution(saved.showSolution);
+      setHint(saved.hint);
+      setFeedback(saved.feedback);
+      setActive(saved.active);
+    }
   }
   const swipe = useSwipe({
     identity: p.index + ":" + p.mode,
@@ -313,7 +377,7 @@ export default function Skills({ courseId }) {
           ▦
         </button>
       </header>
-      <main className="skill-main">
+      <main className="skill-main" ref={mainRef}>
         <div className="progress-row">
           <div className="track">
             <i
