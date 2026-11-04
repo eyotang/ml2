@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { legacyCompatibility } from "./scripts/legacy-compat.mjs";
+import { release } from "./scripts/release.mjs";
 export default defineConfig({
   base: "./",
-  plugins: [react(), legacyCompatibility()],
+  plugins: [react(), release(), legacyCompatibility()],
   build: {
     rollupOptions: {
       input: {
