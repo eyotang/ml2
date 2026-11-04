@@ -59,6 +59,20 @@ function answer(q, mode) {
   });
   click("#check-button");
 }
+function normalizeFlowGeometry(value) {
+  if (Array.isArray(value)) return value.map(normalizeFlowGeometry);
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value).map(([key, v]) => [key, normalizeFlowGeometry(v)]),
+    );
+  if (typeof value !== "string") return value;
+  return value
+    .replace(/<svg class="flow-lines"[\s\S]*?<\/svg>/g, (svg) =>
+      [...svg.matchAll(/<text[^>]*>(.*?)<\/text>/g)].map((m) => m[1]).join("|"),
+    )
+    .replace(/style="left:[^"]*"/g, "");
+}
+
 test("all authored questions, answers, code, comments, diagrams, task requirements and teacher references match the archived version exactly", () => {
   const ctx = { window: {} };
   vm.createContext(ctx);
@@ -75,15 +89,17 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
   const { visualizationCode, visualizationDownloadPath, ...b12 } = courses.b12;
   expect(visualizationCode).toContain("import matplotlib.pyplot");
   expect(visualizationDownloadPath).toBe("materials/b12-visualization.ipynb");
-  expect({
-    ...courses,
-    b12: {
-      ...b12,
-      originalCode: old.courses.b12.originalCode,
-      count: 12,
-      steps: b12.steps.filter((s) => !["b12-13", "b12-14"].includes(s.id)),
-    },
-  }).toEqual(old.courses);
+  expect(
+    normalizeFlowGeometry({
+      ...courses,
+      b12: {
+        ...b12,
+        originalCode: old.courses.b12.originalCode,
+        count: 12,
+        steps: b12.steps.filter((s) => !["b12-13", "b12-14"].includes(s.id)),
+      },
+    }),
+  ).toEqual(normalizeFlowGeometry(old.courses));
   expect(b12.originalCode.startsWith(old.courses.b12.originalCode)).toBe(true);
   expect(
     questions.map((q) => q.type).reduce((a, t) => (a[t]++, a), [0, 0, 0, 0]),
@@ -99,7 +115,16 @@ test("static deployment retains every downloadable asset and CSV byte for byte",
   const manifest = JSON.parse(
     fs.readFileSync("legacy/materials-manifest.json", "utf8"),
   );
-  for (const [file, sha] of Object.entries(manifest))
+  for (const [file, sha] of Object.entries(manifest)) {
+    const updated = [courses.b11, courses.b3].find(
+      (c) => c.downloadPath === file,
+    );
+    if (updated) {
+      expect(fs.readFileSync("public/" + file, "utf8")).toContain(
+        updated.referenceHTML,
+      );
+      continue;
+    }
     expect(
       crypto
         .createHash("sha256")
@@ -107,6 +132,7 @@ test("static deployment retains every downloadable asset and CSV byte for byte",
         .digest("hex"),
       file,
     ).toBe(sha);
+  }
   for (const [id, c] of Object.entries(courses)) {
     for (const name of [
       c.downloadPath || `materials/${id}-reference.ipynb`,

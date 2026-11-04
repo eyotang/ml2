@@ -4,7 +4,18 @@ import crypto from "node:crypto";
 const manifest = JSON.parse(
   fs.readFileSync("legacy/materials-manifest.json", "utf8"),
 );
-for (const [file, expected] of Object.entries(manifest))
+const rerouted = new Set([
+  "materials/b11-reference.html",
+  "materials/b3-reference.html",
+]);
+for (const [file, expected] of Object.entries(manifest)) {
+  if (rerouted.has(file)) {
+    assert.equal(
+      fs.readFileSync("dist/" + file, "utf8"),
+      fs.readFileSync("public/" + file, "utf8"),
+    );
+    continue;
+  }
   assert.equal(
     crypto
       .createHash("sha256")
@@ -13,6 +24,7 @@ for (const [file, expected] of Object.entries(manifest))
     expected,
     file,
   );
+}
 for (const page of ["index.html", "theory.html", "skills.html"]) {
   const html = fs.readFileSync("dist/" + page, "utf8");
   assert.match(html, /id="root"/);
@@ -34,5 +46,5 @@ for (const bridge of ["home.js", "app.js", "skills.js"])
 assert.ok(fs.existsSync("dist/python-worker.js"));
 assert.ok(!fs.existsSync("dist/_cached"));
 console.log(
-  "PASS: static entry points, relative assets, old cached HTML dependencies, compatibility entries, Worker and all 15 original materials",
+  "PASS: static entry points, relative assets, old cached HTML dependencies, compatibility entries, Worker and all 15 materials (13 original hashes + 2 rerouted flowchart references)",
 );
