@@ -66,7 +66,7 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .function-card-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 16px; margin: 0; }
 .function-card-field { min-width: 0; display: block; grid-column: 1 / -1; }
 .function-card-field:nth-child(1), .function-card-field:nth-child(2) { grid-column: auto; }
-.function-card-field > span, .function-card-field dt { font-size: 13px; font-weight: 600; color: var(--ink); }
+.function-card-field > span, .function-card-field dt { font-size: 16px; font-weight: 700; color: var(--ink); }
 .function-card-field dd { margin: 6px 0 0; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
 .function-card-field .answer-field { display: block; width: 100%; margin: 6px 0 0; }
 .function-card-field .function-card-input, .function-card-field .answer-measure { font: inherit; font-size: 14px; line-height: 1.7; padding: 10px 12px; min-height: 46px; border-style: solid; }
