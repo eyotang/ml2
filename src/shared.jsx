@@ -163,6 +163,22 @@ export function StudyTips({ tip, onClose }) {
     </Dialog>
   );
 }
+export function AutoBlank({ value = "", placeholder = "", ...props }) {
+  return (
+    <span className="answer-field">
+      <span className="blank answer-measure" aria-hidden="true">
+        {value ? value + (value.endsWith("\n") ? " " : "") : placeholder}
+      </span>
+      <textarea
+        {...props}
+        value={value}
+        placeholder={placeholder}
+        rows={1}
+        wrap="soft"
+      />
+    </span>
+  );
+}
 export function Template({ code, field }) {
   return code.split("{{}}").map((part, i, array) => (
     <React.Fragment key={i}>

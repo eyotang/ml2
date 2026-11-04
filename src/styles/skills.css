@@ -40,3 +40,11 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 /* Leave room between wrapped blanks; keep focus inside its own box. */
 .code-template .blank{margin-block:4px}
 .skill-main .blank:focus{position:relative;z-index:1;border-style:solid;outline:2px solid var(--accent);outline-offset:-2px}
+
+/* Size answer borders from the full value; wrap and grow instead of clipping. */
+.answer-field{position:relative;display:inline-block;vertical-align:middle;max-width:100%;margin-block:4px}
+.answer-field .blank{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+.answer-field .answer-measure{display:block;visibility:hidden;pointer-events:none}
+.answer-field textarea.blank,.skill-main .answer-field textarea.blank:focus{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:none;resize:none;overflow:hidden}
+.answer-field:focus-within{z-index:1}
+.flow-box .answer-field{display:block;width:100%;max-width:220px;margin:2px auto}

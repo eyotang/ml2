@@ -18,6 +18,7 @@ import {
   Dialog,
   StudyTips,
   Template,
+  AutoBlank,
   FlowChart,
 } from "./shared";
 import PythonEditor from "./PythonEditor";
@@ -332,7 +333,7 @@ export default function Skills({ courseId }) {
         {values[i] || `空 ${i + 1}`}
       </button>
     ) : (
-      <input
+      <AutoBlank
         className={`blank code-input ${status}`}
         data-slot={i}
         value={values[i] || ""}
@@ -1082,7 +1083,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
                       ? match(task.flowchart.slots[index], value).status
                       : null;
                 return (
-                  <input
+                  <AutoBlank
                     className={`blank ${status === "covered" ? "correct" : status === "conflict" ? "incorrect" : status === "review" ? "review" : ""}`}
                     data-flow-task={task.id}
                     data-flow-slot={index}
