@@ -71,3 +71,11 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .function-card-field .answer-field { display: block; width: 100%; margin: 6px 0 0; }
 .function-card-field .function-card-input, .function-card-field .answer-measure { font: inherit; font-size: 14px; line-height: 1.7; padding: 10px 12px; min-height: 46px; border-style: solid; }
 .function-card-supplement { margin: 18px 0; }
+
+.task-check-button { margin: 16px 0; padding: 10px 18px; color: var(--accent, #168daf); border: 1px solid currentColor; border-radius: 8px; background: var(--theme-surface, #fff); cursor: pointer; font: inherit; }
+.json-editor-section { margin: 20px 0; }
+.json-editor { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; tab-size: 2; }
+.json-feedback { font-size: 13px; line-height: 1.7; overflow-wrap: anywhere; }
+.json-valid { color: var(--theme-accent, #16845b); }
+.json-invalid { color: var(--theme-error, #d35252); }
+.json-editor[aria-invalid="true"] { border-color: var(--theme-error, #d35252); }

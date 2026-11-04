@@ -154,6 +154,8 @@ export function resetOriginal(p) {
   p.caseSelf = {};
   p.flowDrafts = {};
   p.functionCardDrafts = {};
+  p.jsonDrafts = {};
+  p.taskChecks = {};
 }
 export function normalizeCode(s) {
   return String(s)

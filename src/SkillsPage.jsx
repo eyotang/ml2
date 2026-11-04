@@ -1,3 +1,4 @@
+import JsonFeedback, { validateJSON } from "./JsonFeedback";
 import {
   FunctionCardsEditor,
   ReferenceFunctionCards,
@@ -543,6 +544,78 @@ export default function Skills({ courseId }) {
                     }
                   />
                   <PythonRunner runtime={runtime} />
+                  <button
+                    className="task-check-button"
+                    data-check-task="code"
+                    onClick={() =>
+                      update((n) => {
+                        n.taskChecks ??= {};
+                        n.taskChecks.code = true;
+                      })
+                    }
+                  >
+                    {course.tasks ? "核对代码任务" : "核对本任务"}
+                  </button>
+                  {(checked || p.taskChecks?.code) && (
+                    <>
+                      <section className="solution">
+                        <h3>完整参考解法</h3>
+                        <pre>{course.referenceCode}</pre>
+                        {course.visualizationCode && (
+                          <>
+                            <h3>样卷要求补充：数据可视化</h3>
+                            <pre>{course.visualizationCode}</pre>
+                          </>
+                        )}
+                      </section>
+                      {course.websiteCode && (
+                        <details className="solution website-reference">
+                          <summary>对照指定网站的完整写法</summary>
+                          <p>{course.websiteNote}</p>
+                          <pre>{course.websiteCode}</pre>
+                          <a
+                            href={course.websiteURL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            查看参考来源 ↗
+                          </a>
+                        </details>
+                      )}
+                      <div className="feedback hint">
+                        <h3>完成自检</h3>
+                        <p>
+                          核对数据范围、字段、聚合方式、边界条件与模型参数。可下载参考
+                          Notebook 在原题数据上运行。
+                        </p>
+                        <div className="self-check">
+                          <button
+                            data-self="review"
+                            onClick={() => {
+                              update((n) => {
+                                n.originalSelf = "review";
+                              });
+                              setSelfSaved(true);
+                            }}
+                          >
+                            需要复习
+                          </button>
+                          <button
+                            data-self="done"
+                            onClick={() => {
+                              update((n) => {
+                                n.originalSelf = "done";
+                              });
+                              setSelfSaved(true);
+                            }}
+                          >
+                            已独立完成
+                          </button>
+                        </div>
+                        <p id="self-saved">{selfSaved ? "自评已保存" : ""}</p>
+                      </div>
+                    </>
+                  )}
                 </>
               )}
               {course.tasks &&
@@ -620,6 +693,12 @@ export default function Skills({ courseId }) {
                   </pre>
                 </div>
               )}
+              {/JSON/i.test(q.title) && q.code.trim().startsWith("{") && (
+                <JsonFeedback
+                  value={filledCode(q, values)}
+                  incomplete={values.some((v) => !v.trim())}
+                />
+              )}
               {p.mode === "pick" ? (
                 <>
                   <div className="bank-caption">
@@ -655,69 +734,7 @@ export default function Skills({ courseId }) {
                 <h3>一点提示</h3>
                 <p>{q.hint}</p>
               </div>
-            ) : original ? (
-              checked &&
-              !isCase && (
-                <>
-                  <section className="solution">
-                    <h3>完整参考解法</h3>
-                    <pre>{course.referenceCode}</pre>
-                    {course.visualizationCode && (
-                      <>
-                        <h3>样卷要求补充：数据可视化</h3>
-                        <pre>{course.visualizationCode}</pre>
-                      </>
-                    )}
-                  </section>
-                  {course.websiteCode && (
-                    <details className="solution website-reference">
-                      <summary>对照指定网站的完整写法</summary>
-                      <p>{course.websiteNote}</p>
-                      <pre>{course.websiteCode}</pre>
-                      <a
-                        href={course.websiteURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        查看参考来源 ↗
-                      </a>
-                    </details>
-                  )}
-                  <div className="feedback hint">
-                    <h3>完成自检</h3>
-                    <p>
-                      核对数据范围、字段、聚合方式、边界条件与模型参数。可下载参考
-                      Notebook 在原题数据上运行。
-                    </p>
-                    <div className="self-check">
-                      <button
-                        data-self="review"
-                        onClick={() => {
-                          update((n) => {
-                            n.originalSelf = "review";
-                          });
-                          setSelfSaved(true);
-                        }}
-                      >
-                        需要复习
-                      </button>
-                      <button
-                        data-self="done"
-                        onClick={() => {
-                          update((n) => {
-                            n.originalSelf = "done";
-                          });
-                          setSelfSaved(true);
-                        }}
-                      >
-                        已独立完成
-                      </button>
-                    </div>
-                    <p id="self-saved">{selfSaved ? "自评已保存" : ""}</p>
-                  </div>
-                </>
-              )
-            ) : (
+            ) : original ? null : (
               <>
                 {feedback?.storage ? (
                   <p className="warning">
@@ -905,9 +922,9 @@ export default function Skills({ courseId }) {
         >
           {original
             ? isCase
-              ? "核对要点与参考答案"
+              ? "核对全部任务"
               : course.tasks
-                ? "核对代码与文字答案"
+                ? "核对代码与全部任务"
                 : "对照参考解法"
             : "检查答案"}
         </button>
@@ -1104,16 +1121,22 @@ export default function Skills({ courseId }) {
 }
 function WrittenTasks({ course, p, update, checked, isCase = false }) {
   return course.tasks.map((task, i) => {
+    const taskChecked = checked || !!p.taskChecks?.[task.id];
     const functionTask = task.id === "ct1";
+    const jsonTask = task.id === "ct2";
+    const jsonValue = p.jsonDrafts?.[task.id] || "";
     const flowValues = p.flowDrafts?.[task.id] || [],
-      points = checked
+      points = taskChecked
         ? coverage(
             course,
             i,
             (p.caseDrafts?.[task.id] || "") +
               "\n" +
               flowValues.join("\n") +
-              (functionTask ? "\n" + functionCardsText(p) : ""),
+              (functionTask ? "\n" + functionCardsText(p) : "") +
+              (jsonTask && validateJSON(jsonValue).status === "valid"
+                ? "\n" + jsonValue
+                : ""),
           )
         : [],
       unique = points.filter(
@@ -1138,7 +1161,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
               field={(index) => {
                 const value = flowValues[index] || "",
                   status =
-                    checked && value.trim()
+                    taskChecked && value.trim()
                       ? match(task.flowchart.slots[index], value).status
                       : null;
                 return (
@@ -1163,6 +1186,35 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
               }}
             />
           </div>
+        )}
+        {jsonTask && (
+          <section className="json-editor-section">
+            <h3>JSON 配置 · 自动格式校验</h3>
+            <p>
+              在这里单独填写 JSON
+              配置；流程图在上方填写，接口与统计说明写在下方。之前整段填写的答案仍然保留。
+            </p>
+            <textarea
+              className="case-answer-editor json-editor"
+              data-json-task={task.id}
+              aria-label={task.title + "的 JSON 配置"}
+              aria-describedby={"json-feedback-" + task.id}
+              aria-invalid={validateJSON(jsonValue).status === "invalid"}
+              spellCheck={false}
+              placeholder={
+                '{\n  "forecast_window_minutes": …,\n  "risk_threshold": …,\n  "queue_wait_threshold_minutes": …,\n  "manual_confirm_required": …\n}'
+              }
+              value={jsonValue}
+              onChange={(e) =>
+                update((n) => {
+                  n.jsonDrafts ??= {};
+                  n.jsonDrafts[task.id] = e.target.value;
+                  delete n.caseSelf?.[task.id];
+                })
+              }
+            />
+            <JsonFeedback value={jsonValue} id={"json-feedback-" + task.id} />
+          </section>
         )}
         {functionTask ? (
           <>
@@ -1213,7 +1265,19 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
           />
         )}
 
-        {checked && (
+        <button
+          className="task-check-button"
+          data-check-task={task.id}
+          onClick={() =>
+            update((n) => {
+              n.taskChecks ??= {};
+              n.taskChecks[task.id] = true;
+            })
+          }
+        >
+          核对本任务
+        </button>
+        {taskChecked && (
           <details className="case-solution" open>
             <summary>本任务参考答案与核对要点</summary>
             <AnswerNote note={taskNotes[task.id]} />
