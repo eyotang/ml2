@@ -1,3 +1,4 @@
+import AnswerNote, { theoryNotes } from "./AnswerNote";
 import { ThemeSync } from "./ThemeControl";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -470,6 +471,7 @@ export default function Theory() {
                         </button>
                         {show && (
                           <section className="result">
+                            <AnswerNote note={theoryNotes[q.id]} />
                             <h3>参考答题框架</h3>
                             <p className="answer-label">
                               {q.points

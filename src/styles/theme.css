@@ -562,3 +562,5 @@ html[data-theme="dark"]
 }
 
 .record-updated{padding:10px;background:var(--theme-soft,#f2f7f5);border-left:3px solid #e4a33c}
+
+.answer-note{margin:14px 0 18px;padding:12px 14px;border-left:3px solid var(--accent,#20afe4);border-radius:4px;background:var(--theme-soft,#f2f8fc);font-size:13px;line-height:1.8;color:inherit}.answer-note h4{margin:0 0 6px;font-size:13px}.answer-note p{margin:6px 0}.answer-note strong{font-weight:600}

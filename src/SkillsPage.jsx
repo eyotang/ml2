@@ -1,3 +1,4 @@
+import AnswerNote, { taskNotes } from "./AnswerNote";
 import { ThemeSync } from "./ThemeControl";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
@@ -768,6 +769,7 @@ export default function Skills({ courseId }) {
                     <div className="solution">
                       <h3>{written ? "本步参考答案" : "完整参考代码"}</h3>
                       <Solution q={q} />
+                      {written && <AnswerNote summary={q.hint} />}
                       <small>
                         {written
                           ? "可参考不同表述，重点核对业务约束与任务覆盖。"
@@ -1030,6 +1032,9 @@ export default function Skills({ courseId }) {
                 <details className="history-solution">
                   <summary>查看本步参考解法</summary>
                   <Solution q={step} />
+                  {(isCase || step.kind === "case") && (
+                    <AnswerNote summary={step.hint} />
+                  )}
                   <ul>
                     {step.slots.map((slot, j) => (
                       <li key={j}>
@@ -1126,6 +1131,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
         {checked && (
           <details className="case-solution" open>
             <summary>本任务参考答案与核对要点</summary>
+            <AnswerNote note={taskNotes[task.id]} />
             <div id={"coverage-" + task.id}>
               <section className="case-coverage">
                 <h3>
