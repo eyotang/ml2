@@ -93,7 +93,15 @@ export function Rich({ html = "", className = "", ...props }) {
     />
   );
 }
-export function Dialog({ open, onClose, title, children, id, className = "" }) {
+export function Dialog({
+  open,
+  onClose,
+  title,
+  children,
+  id,
+  className = "",
+  headerExtra,
+}) {
   const ref = useRef(null);
   useEffect(() => {
     if (open && !ref.current.open) ref.current.showModal();
@@ -119,6 +127,7 @@ export function Dialog({ open, onClose, title, children, id, className = "" }) {
         <button aria-label="关闭" onClick={onClose}>
           ×
         </button>
+        {headerExtra}
       </div>
       {children}
     </dialog>

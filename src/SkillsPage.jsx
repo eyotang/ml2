@@ -1,3 +1,4 @@
+import { groupLessons } from "./lesson-groups";
 import AnswerNote, { taskNotes } from "./AnswerNote";
 import { ThemeSync } from "./ThemeControl";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -89,6 +90,10 @@ export default function Skills({ courseId }) {
     editorRef,
     code: p.originalDraft ?? course.originalCode ?? "",
   });
+  const groups = groupLessons(course);
+  const currentTask = groups.find((group) =>
+    group.steps.some((item) => item.index === p.index),
+  );
   const q = course.steps[p.index],
     written = isCase || q.kind === "case",
     values = courseValues(p, q),
@@ -113,6 +118,12 @@ export default function Skills({ courseId }) {
     setHint(false);
     setChecked(false);
     setSelfSaved(false);
+  }
+  function openLesson(index) {
+    setLessons(false);
+    mode(p.mode === "type" ? "type" : "pick");
+    restorePosition.current = null;
+    go(index);
   }
   function go(index) {
     if (!course.steps[index]) return;
@@ -387,7 +398,9 @@ export default function Skills({ courseId }) {
             />
           </div>
           <span id="step-count">
-            {original ? "原题" : `${p.index + 1} / ${course.count}`}
+            {original
+              ? "原题"
+              : `${currentTask.label} · ${p.index + 1} / ${course.count}`}
           </span>
         </div>
         <div className="mode-row">
@@ -912,39 +925,71 @@ export default function Skills({ courseId }) {
       <Dialog
         id="lesson-dialog"
         title="练习目录"
+        headerExtra={
+          <nav className="lesson-task-nav" aria-label="任务快速切换">
+            {groups.map((group) => (
+              <button
+                key={group.index}
+                data-task-jump={group.index}
+                className={group === currentTask ? "active" : ""}
+                aria-current={group === currentTask ? "step" : undefined}
+                aria-label={`切换到${group.label}：${group.title}`}
+                onClick={() => openLesson(group.steps[0].index)}
+              >
+                {group.label}
+                <small>{group.steps.length} 步</small>
+              </button>
+            ))}
+          </nav>
+        }
         open={lessons}
         onClose={() => setLessons(false)}
       >
         <div id="lesson-items">
-          {course.steps.map((step, i) => {
-            const r = p.records[step.id];
-            return (
-              <button
-                key={step.id}
-                data-lesson={i}
-                className={i === p.index ? "current" : ""}
-                onClick={() => {
-                  setLessons(false);
-                  update((n) => {
-                    n.mode = "pick";
-                  });
-                  go(i);
-                }}
-              >
-                <span>{r?.correct ? "✓" : r?.reviewed ? "◌" : i + 1}</span>
-                {step.title}
+          {groups.map((group) => (
+            <section
+              className="lesson-group"
+              key={group.index}
+              aria-labelledby={`lesson-task-${group.index}`}
+            >
+              <div className="lesson-group-heading">
+                <h3 id={`lesson-task-${group.index}`}>
+                  {group.label} · {group.title}
+                </h3>
                 <small>
-                  {r?.correct
-                    ? "已掌握"
-                    : r?.needsReview
-                      ? "待自检"
-                      : r?.reviewed
-                        ? "已看答案"
-                        : "待练习"}
+                  {
+                    group.steps.filter(
+                      ({ step }) => p.records[step.id]?.correct,
+                    ).length
+                  }{" "}
+                  / {group.steps.length} 已掌握
                 </small>
-              </button>
-            );
-          })}
+              </div>
+              {group.steps.map(({ step, index: i }) => {
+                const r = p.records[step.id];
+                return (
+                  <button
+                    key={step.id}
+                    data-lesson={i}
+                    className={i === p.index ? "current" : ""}
+                    onClick={() => openLesson(i)}
+                  >
+                    <span>{r?.correct ? "✓" : r?.reviewed ? "◌" : i + 1}</span>
+                    {step.title}
+                    <small>
+                      {r?.correct
+                        ? "已掌握"
+                        : r?.needsReview
+                          ? "待自检"
+                          : r?.reviewed
+                            ? "已看答案"
+                            : "待练习"}
+                    </small>
+                  </button>
+                );
+              })}
+            </section>
+          ))}
         </div>
         <div className="dialog-links">
           <a
