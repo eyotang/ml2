@@ -88,3 +88,6 @@ body{overflow-x:hidden}.question-card{backface-visibility:hidden}
  .map-filters button.active{color:#168bb5}
 }
 .home-link{display:inline-flex;align-items:center;white-space:nowrap;color:#62889b;font-size:12px;padding:10px 12px;margin-bottom:12px}.mobile-nav .home-link{font-size:11px;padding:8px 4px;margin:0}@media(max-width:680px){.mobile-menu-open .mobile-nav{gap:7px}.mobile-menu-open .mobile-nav button{padding:8px 10px}}
+
+/* Blank space below a short question is part of the mobile swipe surface. */
+@media(max-width:680px){#theory-practice-surface{min-height:100dvh;touch-action:pan-y pinch-zoom}}

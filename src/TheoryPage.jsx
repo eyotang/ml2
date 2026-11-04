@@ -80,11 +80,13 @@ export default function Theory() {
     if (qs[pos + d]) jump(qs[pos + d].id);
     else if (d > 0) toast("已到最后一题，做得不错！");
   }
-  const swipe = useSwipe({
+  const { ref: questionCardRef, ...swipe } = useSwipe({
     identity: s.current,
     onNavigate: navigate,
     canNavigate: (d) => !!qs[pos + d],
-    enabled: !empty,
+    enabled: !empty && !map && !menu && !tip,
+    ignoreSelector:
+      ".toolbar,.type-tabs,.mobile-nav,.question-actions,.right-panel,a,button:not([data-option])",
     onDrag: clear,
     kind: "theory",
   });
@@ -305,7 +307,7 @@ export default function Theory() {
             初版体验 <span>V 0.1</span>
           </div>
         </aside>
-        <main>
+        <main id="theory-practice-surface" {...swipe}>
           <div className="breadcrumb">
             理论知识 <span>/</span> <span id="crumb">{viewName}</span>
           </div>
@@ -405,7 +407,11 @@ export default function Theory() {
                   </button>
                 ))}
               </div>
-              <article className="question-card" id="question-card" {...swipe}>
+              <article
+                className="question-card"
+                id="question-card"
+                ref={questionCardRef}
+              >
                 {empty ? (
                   <div className="empty">
                     <strong>

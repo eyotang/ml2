@@ -247,13 +247,21 @@ export function useSwipe({
   enabled = true,
   onDrag,
   kind = "skill",
+  ignoreSelector = "",
 }) {
   const ref = useRef(),
     drag = useRef(null),
     blocked = useRef(false),
     incoming = useRef(null),
     latest = useRef();
-  latest.current = { identity, onNavigate, canNavigate, enabled, onDrag };
+  latest.current = {
+    identity,
+    onNavigate,
+    canNavigate,
+    enabled,
+    onDrag,
+    ignoreSelector,
+  };
   function reset() {
     ref.current?.getAnimations?.().forEach((a) => a.cancel());
     if (ref.current) ref.current.style.transform = "";
@@ -294,7 +302,10 @@ export function useSwipe({
         latest.current.enabled &&
         e.touches.length === 1 &&
         !e.target.closest(
-          "input,textarea,select,[contenteditable],.flow-scroll",
+          "input,textarea,select,[contenteditable],.flow-scroll" +
+            (latest.current.ignoreSelector
+              ? "," + latest.current.ignoreSelector
+              : ""),
         )
           ? {
               x: e.touches[0].clientX,
@@ -380,6 +391,13 @@ export function useSwipe({
     },
     onClickCapture: (e) => {
       if (blocked.current) {
+        if (
+          latest.current.ignoreSelector &&
+          e.target.closest(latest.current.ignoreSelector)
+        ) {
+          blocked.current = false;
+          return;
+        }
         e.preventDefault();
         e.stopPropagation();
         blocked.current = false;
