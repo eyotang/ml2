@@ -27,3 +27,12 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 
 /* Keep mode switching reachable without leaving the current reading position. */
 .mode-row{position:sticky;top:0;z-index:4;background:var(--theme-canvas,#f7f9fb);padding:10px 0}.case-answer-task{scroll-margin-top:100px}
+
+/* Soft wrapping changes display only; Python source and logical line numbers stay intact. */
+.editor-syntax,.editor-measure,.python-editor .original-editor{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+.editor-syntax{min-width:0;width:100%}
+.python-editor .original-editor{overflow-x:hidden}
+.editor-measure{position:absolute;top:0;left:0;visibility:hidden;pointer-events:none;margin:0;border:0;padding:16px;font:inherit}
+.editor-measure,.editor-measure span{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:13px;font-weight:400;line-height:23px;letter-spacing:0;tab-size:4;font-variant-ligatures:none}
+.editor-measure span{display:block}
+@media(max-width:600px){.editor-measure{padding:13px 12px}.editor-measure,.editor-measure span{font-size:12px;line-height:22px}}

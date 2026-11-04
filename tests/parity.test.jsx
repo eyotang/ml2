@@ -613,7 +613,11 @@ test("React Python editor shows comments, line numbers, escaped text, Tab/ShiftT
   }
   render(<Editor />);
   expect(document.querySelector(".py-comment")).toHaveTextContent("M1");
-  expect(document.querySelector(".editor-gutter pre").textContent).toBe("1\n2");
+  expect(
+    [...document.querySelectorAll(".editor-gutter pre span")].map(
+      (n) => n.textContent,
+    ),
+  ).toEqual(["1", "2"]);
   expect(document.querySelector(".editor-syntax script")).toBeNull();
   ref.current.setSelectionRange(0, 0);
   fireEvent.keyDown(ref.current, { key: "Tab" });

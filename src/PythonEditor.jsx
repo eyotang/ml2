@@ -3,8 +3,30 @@ import { highlight } from "./highlight";
 export default function PythonEditor({ value, onChange, editorRef }) {
   const syntax = useRef(),
     numbers = useRef(),
+    mirror = useRef(),
     selection = useRef(),
-    [scroll, setScroll] = useState({ left: 0, top: 0 });
+    [scroll, setScroll] = useState({ left: 0, top: 0 }),
+    [layout, setLayout] = useState({ width: null, heights: [] });
+  function measureLines() {
+    const width = editorRef.current?.clientWidth;
+    if (!width || !mirror.current) return;
+    mirror.current.style.width = width + "px";
+    const heights = [...mirror.current.children].map(
+      (line) => line.getBoundingClientRect().height,
+    );
+    setLayout((old) =>
+      old.width === width && old.heights.join() === heights.join()
+        ? old
+        : { width, heights },
+    );
+  }
+  useLayoutEffect(measureLines, [value]);
+  useLayoutEffect(() => {
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measureLines);
+    observer.observe(editorRef.current);
+    return () => observer.disconnect();
+  }, []);
   useLayoutEffect(() => {
     if (selection.current) {
       editorRef.current.setSelectionRange(...selection.current);
@@ -48,10 +70,17 @@ export default function PythonEditor({ value, onChange, editorRef }) {
             ref={numbers}
             style={{ transform: `translateY(${-scroll.top}px)` }}
           >
-            {Array.from(
-              { length: value.split("\n").length },
-              (_, i) => i + 1,
-            ).join("\n")}
+            {value.split("\n").map((_, i) => (
+              <span
+                key={i}
+                style={{
+                  display: "block",
+                  height: layout.heights[i] || undefined,
+                }}
+              >
+                {i + 1}
+              </span>
+            ))}
           </pre>
         </div>
         <div className="editor-viewport">
@@ -61,17 +90,23 @@ export default function PythonEditor({ value, onChange, editorRef }) {
             ref={syntax}
             style={{
               transform: `translate(${-scroll.left}px, ${-scroll.top}px)`,
+              width: layout.width || "100%",
             }}
             dangerouslySetInnerHTML={{
               __html: highlight(value) + (value.endsWith("\n") ? " " : ""),
             }}
           />
+          <pre className="editor-measure" ref={mirror} aria-hidden="true">
+            {value.split("\n").map((line, i) => (
+              <span key={i}>{line || " "}</span>
+            ))}
+          </pre>
           <textarea
             className="original-editor"
             aria-label="原题代码"
             ref={editorRef}
             value={value}
-            wrap="off"
+            wrap="soft"
             spellCheck={false}
             autoCorrect="off"
             autoCapitalize="off"

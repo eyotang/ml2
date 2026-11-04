@@ -1,5 +1,4 @@
 import { ThemeSync } from "./ThemeControl";
-import ExportButtons from "./ExportButtons";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   courses,
@@ -480,7 +479,6 @@ export default function Skills({ courseId }) {
                   ))}
                 </nav>
               )}
-              <ExportButtons course={course} p={p} runtime={runtime.state} />
               <div className="original-tools">
                 <span>{isCase ? "逐任务作答" : "原题代码"}</span>
                 <button

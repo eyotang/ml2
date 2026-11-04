@@ -14,14 +14,6 @@ import {
   readStore,
   resetMode,
 } from "../src/model";
-import {
-  flowSVG,
-  skillReport,
-  reportHTML,
-  notebook,
-  wordDocument,
-  theoryReport,
-} from "../src/export";
 import { useSavedState } from "../src/shared";
 import fs from "node:fs";
 import vm from "node:vm";
@@ -181,67 +173,6 @@ test("B1-2 charts use actual teacher aggregate columns and preserve existing IDs
   );
   expect(nb.cells[1].source.join("")).toBe(c.referenceCode);
   expect(nb.cells[2].source.join("")).toBe(c.visualizationCode);
-});
-test("exports contain own answers, escaped text, editable diagrams, code and actual outputs rather than teacher answers", async () => {
-  const c = courses.b11,
-    p = courseState("b11");
-  p.caseDrafts = { [c.tasks[0].id]: "我的答案 <script>alert(1)</script>" };
-  const t = c.tasks.find((t) => t.flowchart);
-  p.flowDrafts = { [t.id]: ["我填写的判断"] };
-  const blocks = skillReport(c, p, null),
-    html = reportHTML(blocks);
-  expect(html).toContain("&lt;script&gt;");
-  expect(html).not.toContain("<script>");
-  expect(html).toContain("<polygon");
-  expect(html).toContain("我填写的判断");
-  expect(html).not.toContain(c.tasks[0].answerHTML);
-  const parser = new DOMParser();
-  expect(
-    parser
-      .parseFromString(
-        flowSVG(t.flowchart.html, p.flowDrafts[t.id]),
-        "image/svg+xml",
-      )
-      .querySelector("parsererror"),
-  ).toBeNull();
-  const doc = await wordDocument([
-    { heading: "我的答案" },
-    { text: "A & B\n中文 <内容>" },
-    {
-      output: {
-        kind: "table",
-        columns: ["列"],
-        rows: [["值"]],
-        totalRows: 1,
-        totalColumns: 1,
-      },
-    },
-  ]);
-  const bytes = new Uint8Array(
-    await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.readAsArrayBuffer(doc);
-    }),
-  );
-  expect(new DataView(bytes.buffer).getUint32(0, true)).toBe(0x04034b50);
-  const xml = new TextDecoder().decode(bytes);
-  expect(xml).toContain("A &amp; B");
-  expect(xml).toContain("<w:tbl>");
-  expect(xml).toContain("word/document.xml");
-  const code = courseState("b2");
-  code.originalDraft = 'print("my code")';
-  const nb = JSON.parse(
-    notebook(courses.b2, code, {
-      outputs: [{ kind: "stdout", text: "my code" }],
-      lastSource: code.originalDraft,
-    }),
-  );
-  expect(nb.cells[1].source.join("")).toBe(code.originalDraft);
-  expect(nb.cells[1].outputs[0].text).toBe("my code");
-  expect(
-    reportHTML(theoryReport(theoryState("", { drafts: { 77: "我写的简答" } }))),
-  ).toContain("我写的简答");
 });
 test("static release discovery offers update without reloading or deleting learning data; offline is tolerated", async () => {
   document.documentElement.dataset.appVersion = "aaaaaaaaaaaaaaaa";

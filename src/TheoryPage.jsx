@@ -1,4 +1,3 @@
-import { download, reportHTML, theoryReport } from "./export";
 import { ThemeSync } from "./ThemeControl";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -429,7 +428,7 @@ export default function Theory() {
                   <>
                     {record?.stale && (
                       <p className="record-updated" role="status">
-                        本题已更新，请重新作答。上次作答已保留在导出记录中。
+                        本题已更新，请重新作答。
                       </p>
                     )}
                     <div className="q-meta">
@@ -712,16 +711,6 @@ export default function Theory() {
                 <div className="map-header">
                   <div className="panel-heading">
                     <h2>答题卡</h2>
-                    <button
-                      onClick={() =>
-                        download(
-                          "理论知识-我的答案.html",
-                          reportHTML(theoryReport(s)),
-                        )
-                      }
-                    >
-                      导出答案
-                    </button>
                     <button
                       id="reset-all"
                       className="reset-all"
