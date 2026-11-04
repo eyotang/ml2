@@ -1,5 +1,5 @@
 # 来源：https://ai-trainer-exam-87484.app.workbuddy.host/?sharecode=P6SA3BBFCH
-# 主答案采用老师提供的参考代码，分步练习仅在老师的原表达式上挖空；老师列出的等价写法保留供对照。planned_hours≤72 是老师参考代码中的运输计划时长筛选条件，不是答题时长限制；本页按老师写法保留。
+# 主答案采用老师提供的参考代码，分步练习仅在老师的原表达式上挖空；老师列出的等价写法保留供对照。本练习按已确认规则将计划运输时长上限调整为24小时，保留原有 >0、<= 的筛选写法；不是答题时长限制。
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -15,7 +15,7 @@ df['depart_hour'] = df['depart_time'].dt.hour
 
 # 按运输单号去重，并删除运输时长或传感器缺失率不合法的记录
 df = df.drop_duplicates(subset='shipment_id')
-df = df[(df['planned_hours'] > 0) & (df['planned_hours'] <= 72) & (df['sensor_missing_rate'] >= 0) & (df['sensor_missing_rate'] <= 1)]
+df = df[(df['planned_hours'] > 0) & (df['planned_hours'] <= 24) & (df['sensor_missing_rate'] >= 0) & (df['sensor_missing_rate'] <= 1)]
 
 # 按货物类型的中位数填补 avg_temp 缺失值
 df['avg_temp'] = df.groupby('cargo_type')['avg_temp'].transform(lambda s: s.fillna(s.median()))

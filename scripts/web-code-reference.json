@@ -178,14 +178,14 @@
         "score": 1,
         "task": "删除运输时长与传感器缺失率不合法的记录",
         "ref": [
-          "df[(df['planned_hours'] > 0) & (df['planned_hours'] <= 72) & (df['sensor_missing_rate'] >= 0) & (df['sensor_missing_rate'] <= 1)]",
-          "df[(df['planned_hours']>0)&(df['planned_hours']<=72)&(df['sensor_missing_rate'].between(0,1))]"
+          "df[(df['planned_hours'] > 0) & (df['planned_hours'] <= 24) & (df['sensor_missing_rate'] >= 0) & (df['sensor_missing_rate'] <= 1)]",
+          "df[(df['planned_hours']>0)&(df['planned_hours']<=24)&(df['sensor_missing_rate'].between(0,1))]"
         ],
         "keys": [
           "planned_hours",
           "sensor_missing_rate"
         ],
-        "hint": "计划时长须为正且合理（如 ≤72），缺失率须在 0~1"
+        "hint": "计划时长须为正且合理（≤24），缺失率须在 0~1"
       },
       {
         "i": 4,

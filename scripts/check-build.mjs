@@ -5,6 +5,8 @@ const manifest = JSON.parse(
   fs.readFileSync("legacy/materials-manifest.json", "utf8"),
 );
 const rerouted = new Set([
+  "materials/b2-reference.ipynb",
+  "materials/b2-website-reference.py",
   "materials/b11-reference.html",
   "materials/b3-reference.html",
 ]);
@@ -46,5 +48,5 @@ for (const bridge of ["home.js", "app.js", "skills.js"])
 assert.ok(fs.existsSync("dist/python-worker.js"));
 assert.ok(!fs.existsSync("dist/_cached"));
 console.log(
-  "PASS: static entry points, relative assets, old cached HTML dependencies, compatibility entries, Worker and all 15 materials (13 original hashes + 2 rerouted flowchart references)",
+  "PASS: static entry points, relative assets, old cached HTML dependencies, compatibility entries, Worker and all 15 materials (11 original hashes + 4 updated reference files)",
 );

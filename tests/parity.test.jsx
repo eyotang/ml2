@@ -85,6 +85,28 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
       ctx,
     ),
   );
+  // Apply only the explicitly approved B2 boundary/text changes to the archived expectation.
+  old.courses.b2 = JSON.parse(
+    JSON.stringify(old.courses.b2)
+      .replaceAll("planned_hours'] <= 72", "planned_hours'] <= 24")
+      .replaceAll("planned_hours']<=72", "planned_hours']<=24")
+      .replaceAll(
+        "计划时长须为正且合理（如 ≤72），缺失率须在 0~1",
+        "计划时长须为正且合理（≤24），缺失率须在 0~1",
+      )
+      .replaceAll(
+        "planned_hours≤72 是老师参考代码中的运输计划时长筛选条件，不是答题时长限制；本页按老师写法保留。",
+        "本练习按已确认规则将计划运输时长上限调整为24小时，保留原有 >0、<= 的筛选写法；不是答题时长限制。",
+      )
+      .replaceAll(
+        "按老师参考代码，保留 0<planned_hours≤72 且 sensor_missing_rate 在 [0,1] 的记录；72 小时是运输时长上界，不是答题时限。",
+        "保留 0<planned_hours≤24 且 sensor_missing_rate 在 [0,1] 的记录；排除0、包含24，24小时是运输时长上界，不是答题时限。",
+      )
+      .replaceAll(
+        "保留老师参考的运输时长上界 72；between(0,1) 包含两个边界。",
+        "计划运输时长必须大于0且不超过24小时；传感器缺失率的 between(0,1) 包含两个边界。",
+      ),
+  );
   expect(questions).toEqual(old.questions);
   const { visualizationCode, visualizationDownloadPath, ...b12 } = courses.b12;
   expect(visualizationCode).toContain("import matplotlib.pyplot");
@@ -111,11 +133,27 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
   ).toEqual({ b12: 14, b2: 19, b11: 8, b3: 10, b4: 5, c: 12 });
   expect(Object.keys(tips)).toHaveLength(13);
 });
-test("static deployment retains every downloadable asset and CSV byte for byte", () => {
+test("static deployment retains original assets and intentionally updated references", () => {
   const manifest = JSON.parse(
     fs.readFileSync("legacy/materials-manifest.json", "utf8"),
   );
   for (const [file, sha] of Object.entries(manifest)) {
+    if (file === "materials/b2-reference.ipynb") {
+      const notebook = JSON.parse(fs.readFileSync("public/" + file, "utf8"));
+      expect(
+        notebook.cells
+          .filter((c) => c.cell_type === "code")
+          .map((c) => c.source.join(""))
+          .join("\n"),
+      ).toBe(courses.b2.referenceCode);
+      continue;
+    }
+    if (file === "materials/b2-website-reference.py") {
+      expect(fs.readFileSync("public/" + file, "utf8")).toContain(
+        courses.b2.websiteCode,
+      );
+      continue;
+    }
     const updated = [courses.b11, courses.b3].find(
       (c) => c.downloadPath === file,
     );
@@ -775,3 +813,24 @@ test.each([0, 1, 2])(
     );
   },
 );
+
+test("B2 planned hours stays positive with the confirmed 24-hour upper bound everywhere", () => {
+  const course = courses.b2;
+  const step = course.steps.find((q) => q.title === "过滤非法记录");
+  expect(step.id).toBe("b2-4");
+  expect(step.slots.map((s) => s.answer)).toEqual([">", "between"]);
+  expect(step.solution).toContain(
+    "(df['planned_hours']>0)&(df['planned_hours']<=24)",
+  );
+  expect(step.goal).toContain("0<planned_hours≤24");
+  for (const code of [
+    ...step.websiteReferences,
+    step.teacherExpression,
+    course.referenceCode,
+    course.websiteCode,
+  ]) {
+    expect(code).toMatch(/planned_hours'\]\s*>\s*0/);
+    expect(code).toMatch(/planned_hours'\]\s*<=\s*24/);
+    expect(code).not.toMatch(/planned_hours'\]\s*<=\s*72/);
+  }
+});

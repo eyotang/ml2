@@ -105,7 +105,7 @@ for reference in json.loads((root/'scripts/web-code-reference.json').read_text()
  assert len(reference['blanks'])==len(c['steps'])
  c['websiteURL']=website
  c['websiteNote']='主答案采用老师提供的参考代码，分步练习仅在老师的原表达式上挖空；老师列出的等价写法保留供对照。'
- if reference['id']=='b2':c['websiteNote']+='planned_hours≤72 是老师参考代码中的运输计划时长筛选条件，不是答题时长限制；本页按老师写法保留。'
+ if reference['id']=='b2':c['websiteNote']+='本练习按已确认规则将计划运输时长上限调整为24小时，保留原有 >0、<= 的筛选写法；不是答题时长限制。'
  code=reference['snippet']
  for step,blank in zip(c['steps'],reference['blanks']):
   # Use an expression actually supplied by the teacher, not a rewritten equivalent.
@@ -130,8 +130,8 @@ for reference in json.loads((root/'scripts/web-code-reference.json').read_text()
   step['solution']=step['examComments']+'\n'+prelude+prefix+chosen[0]
   step['teacherExpression']=chosen[0]
   if reference['id']=='b2' and blank['i']==3:
-   step['goal']='按老师参考代码，保留 0<planned_hours≤72 且 sensor_missing_rate 在 [0,1] 的记录；72 小时是运输时长上界，不是答题时限。'
-   step['hint']='保留老师参考的运输时长上界 72；between(0,1) 包含两个边界。'
+   step['goal']='保留 0<planned_hours≤24 且 sensor_missing_rate 在 [0,1] 的记录；排除0、包含24，24小时是运输时长上界，不是答题时限。'
+   step['hint']='计划运输时长必须大于0且不超过24小时；传感器缺失率的 between(0,1) 包含两个边界。'
   step['websiteReferences']=blank['ref']
   step['websiteHint']=blank['hint']
   for expression in blank['ref']:compile(expression,'website-reference','exec')
@@ -156,6 +156,7 @@ for key,source in [('b12','B1.2素材/B1.2.ipynb'),('b2','B2素材/B2.ipynb')]:
  compile(text,'teacher-reference','exec')
  cells=[{'cell_type':'markdown','metadata':{},'source':['老师提供的参考答案。代码顺序、变量名、列名和表达式保留原写法。请与原题 CSV 放在同一目录运行。']},
         {'cell_type':'code','metadata':{},'execution_count':None,'outputs':[],'source':text.splitlines(True)}]
+ if key=='b2':cells[0]['source'].append('本练习已将 planned_hours 上限调整为24小时，筛选条件为 >0 且 <=24。')
  notebook['cells']=cells
  (root/'public/materials'/f'{key}-reference.ipynb').write_text(json.dumps(notebook,ensure_ascii=False,indent=2))
 print('Generated 33 steps (26 code + 7 written), including B1-2 chart practice, and 2 syntax-checked reference notebooks')
