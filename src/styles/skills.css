@@ -43,7 +43,7 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 
 /* Size answer borders from the full value; wrap and grow instead of clipping. */
 .answer-field{position:relative;display:inline-block;vertical-align:middle;max-width:100%;margin-block:4px}
-.answer-field .blank{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+.answer-field .blank{margin:0;padding-block:6px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
 .answer-field .answer-measure{display:block;visibility:hidden;pointer-events:none}
 .answer-field textarea.blank,.skill-main .answer-field textarea.blank:focus{position:absolute;inset:0;width:100%;height:100%;min-width:0;max-width:none;resize:none;overflow:hidden}
 .answer-field:focus-within{z-index:1}
