@@ -144,12 +144,13 @@ export default function BusinessTables({ task, p, update, step, field }) {
                       {update &&
                       (task.reviewTables
                         ? c > 0
-                        : !task.pathTables || c === 2) ? (
+                        : (!task.pathTables || c === 2) &&
+                          !(task.businessTables && g === 2 && c === 0)) ? (
                         <AutoBlank
                           className="blank training-input"
                           data-business-cell={key}
                           aria-label={`${groups[g].title}第${r + 1}行${groups[g].headers[c]}`}
-                          placeholder={`填写${groups[g].headers[c]}`}
+                          placeholder={groups[g].headers[c]}
                           value={p.businessDrafts?.[task.id]?.[key] || ""}
                           onChange={(e) =>
                             update((n) => {
