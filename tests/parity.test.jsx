@@ -126,6 +126,16 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     solution: courses.b11.steps[1].solution,
     slots: courses.b11.steps[1].slots,
   };
+  old.courses.b11.tasks[1] = {
+    ...old.courses.b11.tasks[1],
+    pathTables: courses.b11.tasks[1].pathTables,
+    answerHTML: courses.b11.tasks[1].answerHTML,
+  };
+  old.courses.b11.tasks[2] = {
+    ...old.courses.b11.tasks[2],
+    reviewTables: courses.b11.tasks[2].reviewTables,
+    answerHTML: courses.b11.tasks[2].answerHTML,
+  };
   expect(questions).toEqual(old.questions);
   const { visualizationCode, visualizationDownloadPath, ...b12 } = courses.b12;
   expect(visualizationCode).toContain("import matplotlib.pyplot");

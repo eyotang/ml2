@@ -208,3 +208,75 @@ test.each(["pick", "type"])(
     ).toEqual(q.slots.slice(0, 3).map((s) => s.answer));
   },
 );
+test("P004 and P005 paths use independent table drafts with teacher structure", () => {
+  const task = courses.b11.tasks[1];
+  expect(task.pathTables[0].headers).toEqual([
+    "产品",
+    "数据",
+    "按拟上线规则的路径",
+  ]);
+  expect(task.pathTables[0].rows.map((r) => r[0])).toEqual(["P004", "P005"]);
+  localStorage.setItem(
+    "zhilian-skills-v1",
+    JSON.stringify({
+      b11: {
+        answerSchema: 2,
+        mode: "original",
+        businessDrafts: { b11t1: { "0-0-0": "模块答案" } },
+        caseDrafts: { b11t2: "其他规则说明" },
+      },
+    }),
+  );
+  render(<Skills courseId="b11" />);
+  expect(
+    document.querySelectorAll("#written-b11t2 .business-tables tbody tr"),
+  ).toHaveLength(2);
+  fill(
+    '#written-b11t2 [data-business-cell="0-0-2"]',
+    "图像模糊，旧分数作废，补拍一次",
+  );
+  expect(
+    readStore("zhilian-skills-v1").b11.businessDrafts.b11t2["0-0-2"],
+  ).toContain("补拍一次");
+  expect(readStore("zhilian-skills-v1").b11.businessDrafts.b11t1["0-0-0"]).toBe(
+    "模块答案",
+  );
+  cleanup();
+  render(<Skills courseId="b11" />);
+  expect(
+    document.querySelector('#written-b11t2 [data-business-cell="0-0-2"]'),
+  ).toHaveValue("图像模糊，旧分数作废，补拍一次");
+  expect(document.querySelector('[data-task="b11t2"]')).toHaveValue(
+    "其他规则说明",
+  );
+  click("#reset-practice");
+  expect(readStore("zhilian-skills-v1").b11.businessDrafts).toEqual({});
+});
+test("B1-1 task three tables separate measures, validation and metric definitions", () => {
+  const task = courses.b11.tasks[2];
+  expect(task.reviewTables.map((g) => g.headers)).toEqual([
+    ["问题", "具体改进措施", "有效性验证方法"],
+    ["指标", "统计口径", "意义与统计要求"],
+  ]);
+  localStorage.setItem(
+    "zhilian-skills-v1",
+    JSON.stringify({ b11: { answerSchema: 2, mode: "original" } }),
+  );
+  render(<Skills courseId="b11" />);
+  expect(
+    document.querySelectorAll("#written-b11t3 .review-tables table"),
+  ).toHaveLength(2);
+  fill('#written-b11t3 [data-business-cell="0-0-1"]', "补充细小凹陷正样本");
+  expect(readStore("zhilian-skills-v1").b11.businessDrafts.b11t3["0-0-1"]).toBe(
+    "补充细小凹陷正样本",
+  );
+  cleanup();
+  render(<Skills courseId="b11" />);
+  expect(
+    document.querySelector('#written-b11t3 [data-business-cell="0-0-1"]'),
+  ).toHaveValue("补充细小凹陷正样本");
+  click('[data-check-task="b11t3"]');
+  expect(document.querySelectorAll(".case-solution")).toHaveLength(1);
+  click("#reset-practice");
+  expect(readStore("zhilian-skills-v1").b11.businessDrafts).toEqual({});
+});

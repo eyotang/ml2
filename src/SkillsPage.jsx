@@ -44,6 +44,10 @@ const esc = (s) =>
       ],
   );
 function Solution({ q }) {
+  if (["b11-7", "b11-8"].includes(q.id))
+    return <BusinessTables task={courses.b11.tasks[2]} step={q.id} />;
+  if (q.id === "b11-6")
+    return <BusinessTables task={courses.b11.tasks[1]} step={q.id} />;
   if (["b11-1", "b11-2"].includes(q.id))
     return (
       <BusinessTables
@@ -691,7 +695,19 @@ export default function Skills({ courseId }) {
                   <pre>{q.context}</pre>
                 </details>
               )}
-              {["b11-1", "b11-2"].includes(q.id) ? (
+              {["b11-7", "b11-8"].includes(q.id) ? (
+                <BusinessTables
+                  task={course.tasks[2]}
+                  step={q.id}
+                  field={field}
+                />
+              ) : q.id === "b11-6" ? (
+                <BusinessTables
+                  task={course.tasks[1]}
+                  step={q.id}
+                  field={field}
+                />
+              ) : ["b11-1", "b11-2"].includes(q.id) ? (
                 <BusinessTables
                   task={course.tasks[0]}
                   step={q.id}
@@ -1162,7 +1178,9 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
               flowValues.join("\n") +
               (functionTask ? "\n" + functionCardsText(p) : "") +
               (trainingTask ? "\n" + trainingPlanText(task, p) : "") +
-              (businessTask ? "\n" + businessText(p) : "") +
+              (businessTask || task.pathTables || task.reviewTables
+                ? "\n" + businessText(p, task.id)
+                : "") +
               (jsonTask && validateJSON(jsonValue).status === "valid"
                 ? "\n" + jsonValue
                 : ""),
@@ -1244,6 +1262,9 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
             />
             <JsonFeedback value={jsonValue} id={"json-feedback-" + task.id} />
           </section>
+        )}
+        {(task.pathTables || task.reviewTables) && (
+          <BusinessTables task={task} p={p} update={update} />
         )}
         {functionTask || trainingTask || businessTask ? (
           <>
