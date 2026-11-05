@@ -49,7 +49,7 @@ function Solution({ q }) {
       <BusinessTables
         task={courses.b11.tasks[0]}
         step={q.id}
-        field={(i) => q.slots[i].answer}
+        field={q.id === "b11-2" ? undefined : (i) => q.slots[i].answer}
       />
     );
   if (q.id === "b4-1")

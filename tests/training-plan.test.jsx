@@ -133,3 +133,39 @@ test("B1-1 original framework uses three editable tables and preserves drafts th
   click("#reset-practice");
   expect(readStore("zhilian-skills-v1").b11.businessDrafts).toEqual({});
 });
+
+test("B1-1 teacher IO table preserves six records and keeps old cell drafts separate", () => {
+  const task = courses.b11.tasks[0],
+    io = task.businessTables[2];
+  expect(io.headers).toEqual(["方向", "记录", "来源/去向", "关键字段"]);
+  expect(io.rows.map((row) => row[1])).toEqual([
+    "检测任务记录",
+    "模型推理结果",
+    "人工复核结论",
+    "产品状态记录",
+    "质量处置记录",
+    "模型改进样本记录",
+  ]);
+  localStorage.setItem(
+    "zhilian-skills-v1",
+    JSON.stringify({
+      b11: {
+        answerSchema: 2,
+        mode: "original",
+        businessDrafts: { b11t1: { "2-0-1": "旧来源" } },
+      },
+    }),
+  );
+  render(<Skills courseId="b11" />);
+  expect(document.querySelector("#written-b11t1")).toHaveTextContent("旧来源");
+  expect(document.querySelector('[data-business-cell="io-0-1"]')).toHaveValue(
+    "",
+  );
+  fill('[data-business-cell="io-0-1"]', "检测任务记录");
+  expect(readStore("zhilian-skills-v1").b11.businessDrafts.b11t1["2-0-1"]).toBe(
+    "旧来源",
+  );
+  expect(
+    readStore("zhilian-skills-v1").b11.businessDrafts.b11t1["io-0-1"],
+  ).toBe("检测任务记录");
+});

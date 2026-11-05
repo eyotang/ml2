@@ -93,3 +93,7 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .business-tables td { font-size: 14px; }
 .business-tables .training-input, .business-tables .answer-measure { font-size: 14px; padding: 6px; }
 @media (max-width:600px) { .business-tables th, .business-tables td { padding: 6px; } }
+.business-tables table:has(thead th:nth-child(4)) th:nth-child(1) { width: 14%; }
+.business-tables table:has(thead th:nth-child(4)) th:nth-child(2) { width: 20%; }
+.business-tables table:has(thead th:nth-child(4)) th:nth-child(3) { width: 23%; }
+.business-tables table:has(thead th:nth-child(4)) th:nth-child(4) { width: 43%; }

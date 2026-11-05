@@ -9,9 +9,30 @@ export default function BusinessTables({ task, p, update, step, field }) {
   const slots =
     step === "b11-1"
       ? { "0-0-0": 0, "0-2-0": 1, "0-3-0": 2 }
-      : { "1-1-0": 0, "2-2-2": 1, "2-1-2": 2 };
+      : { "1-1-0": 0, "io-3-3": 1, "io-2-3": 2 };
   return (
     <div className="training-plan business-tables">
+      {update &&
+        Object.keys(p.businessDrafts?.[task.id] || {}).some((k) =>
+          k.startsWith("2-"),
+        ) && (
+          <details>
+            <summary>查看旧版输入输出表的填写</summary>
+            {Object.entries(p.businessDrafts[task.id])
+              .filter(([k, v]) => k.startsWith("2-") && v)
+              .map(([k, v]) => (
+                <p key={k}>
+                  第{Number(k.split("-")[1]) + 1}行 ·{" "}
+                  {
+                    ["记录方向", "来源或去向", "关键字段"][
+                      Number(k.split("-")[2])
+                    ]
+                  }
+                  ：{v}
+                </p>
+              ))}
+          </details>
+        )}
       {shown.map((g) => (
         <table key={g}>
           <caption>{groups[g].title}</caption>
@@ -28,19 +49,19 @@ export default function BusinessTables({ task, p, update, step, field }) {
             {groups[g].rows.map((row, r) => (
               <tr key={r}>
                 {row.map((value, c) => {
-                  const key = `${g}-${r}-${c}`;
+                  const key = `${g === 2 ? "io" : g}-${r}-${c}`;
                   let content = value;
                   if (field && slots[key] !== undefined) {
                     const i = slots[key];
                     content =
                       step === "b11-2" && i === 1 ? (
                         <>
-                          产品ID、{field(i)}
-                          、状态版本、处置指令、有效时间；包装校验记录。
+                          产品编号、{field(i)}
+                          （已放行/已隔离/待检）、状态更新时间
                         </>
                       ) : step === "b11-2" && i === 2 ? (
                         <>
-                          检测记录ID、模型版本、分数、规则版本、分流路径；人工结论及
+                          产品编号、复核结论（合格/不合格/待定）、
                           {field(i)}。
                         </>
                       ) : (
