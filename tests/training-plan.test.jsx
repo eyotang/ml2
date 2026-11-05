@@ -169,3 +169,42 @@ test("B1-1 teacher IO table preserves six records and keeps old cell drafts sepa
     readStore("zhilian-skills-v1").b11.businessDrafts.b11t1["io-0-1"],
   ).toBe("检测任务记录");
 });
+test.each(["pick", "type"])(
+  "expanded IO practice %s preserves old blanks and requires new answers",
+  (mode) => {
+    const q = courses.b11.steps[1];
+    expect(q.slots.slice(0, 3).map((s) => s.answer)).toEqual([
+      "质检员",
+      "当前有效状态",
+      "人员、理由及时间",
+    ]);
+    expect(q.slots).toHaveLength(9);
+    localStorage.setItem(
+      "zhilian-skills-v1",
+      JSON.stringify({
+        b11: {
+          answerSchema: 2,
+          mode,
+          index: 1,
+          draftsByMode: {
+            [mode]: { [q.id]: q.slots.slice(0, 3).map((s) => s.answer) },
+          },
+        },
+      }),
+    );
+    render(<Skills courseId="b11" />);
+    expect(
+      document.querySelectorAll(
+        "#exercise .business-tables table:last-child [data-slot]",
+      ),
+    ).toHaveLength(8);
+    expect(document.querySelectorAll("#exercise [data-slot]")).toHaveLength(9);
+    click("#check-button");
+    expect(document.querySelector("#feedback")).toHaveTextContent(
+      "还有空位未填写",
+    );
+    expect(
+      readStore("zhilian-skills-v1").b11.draftsByMode[mode][q.id].slice(0, 3),
+    ).toEqual(q.slots.slice(0, 3).map((s) => s.answer));
+  },
+);

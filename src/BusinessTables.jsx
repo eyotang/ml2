@@ -9,7 +9,17 @@ export default function BusinessTables({ task, p, update, step, field }) {
   const slots =
     step === "b11-1"
       ? { "0-0-0": 0, "0-2-0": 1, "0-3-0": 2 }
-      : { "1-1-0": 0, "io-3-3": 1, "io-2-3": 2 };
+      : {
+          "1-1-0": 0,
+          "io-3-3": 1,
+          "io-2-3": 2,
+          "io-0-1": 3,
+          "io-1-2": 4,
+          "io-1-3": 5,
+          "io-4-1": 6,
+          "io-4-3": 7,
+          "io-5-3": 8,
+        };
   return (
     <div className="training-plan business-tables">
       {update &&
@@ -63,6 +73,18 @@ export default function BusinessTables({ task, p, update, step, field }) {
                         <>
                           产品编号、复核结论（合格/不合格/待定）、
                           {field(i)}。
+                        </>
+                      ) : step === "b11-2" && i === 5 ? (
+                        <>{field(i)}、缺陷分数、推理时间、模型版本号</>
+                      ) : step === "b11-2" && i === 7 ? (
+                        <>
+                          产品编号、处置决定（放行/返工/报废）、处置人、时间；
+                          {field(i)}
+                        </>
+                      ) : step === "b11-2" && i === 8 ? (
+                        <>
+                          图像ID、模型原分数、人工最终结论、{field(i)}
+                          、关联模型版本
                         </>
                       ) : (
                         field(i)

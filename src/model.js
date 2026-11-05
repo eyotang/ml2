@@ -118,10 +118,9 @@ export function courseState(id, saved = readStore("zhilian-skills-v1")[id]) {
   return p;
 }
 export function courseValues(p, q) {
-  return (
-    p.draftsByMode[p.mode === "type" ? "type" : "pick"]?.[q.id] ||
-    q.slots.map(() => "")
-  );
+  const saved =
+    p.draftsByMode[p.mode === "type" ? "type" : "pick"]?.[q.id] || [];
+  return q.slots.map((_, i) => saved[i] || "");
 }
 export function setCourseValues(p, q, values) {
   const mode = p.mode === "type" ? "type" : "pick";
