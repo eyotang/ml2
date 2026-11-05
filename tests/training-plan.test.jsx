@@ -99,3 +99,37 @@ test.each(["pick", "type"])(
     expect(stored().caseDrafts.b4t1).toBe("之前的整段答案");
   },
 );
+test("B1-1 original framework uses three editable tables and preserves drafts through refresh", () => {
+  localStorage.setItem(
+    "zhilian-skills-v1",
+    JSON.stringify({
+      b11: {
+        answerSchema: 2,
+        mode: "original",
+        caseDrafts: { b11t1: "旧答案" },
+      },
+    }),
+  );
+  render(<Skills courseId="b11" />);
+  expect(
+    document.querySelectorAll("#written-b11t1 .business-tables table"),
+  ).toHaveLength(3);
+  fill('[data-business-cell="0-0-0"]', "现场采集与图像质量校验");
+  expect(readStore("zhilian-skills-v1").b11.businessDrafts.b11t1["0-0-0"]).toBe(
+    "现场采集与图像质量校验",
+  );
+  cleanup();
+  render(<Skills courseId="b11" />);
+  expect(document.querySelector('[data-business-cell="0-0-0"]')).toHaveValue(
+    "现场采集与图像质量校验",
+  );
+  expect(document.querySelector('[data-task="b11t1"]')).toHaveValue("旧答案");
+  click('[data-check-task="b11t1"]');
+  expect(
+    document.querySelectorAll(
+      "#written-b11t1 .case-solution .business-tables table",
+    ),
+  ).toHaveLength(3);
+  click("#reset-practice");
+  expect(readStore("zhilian-skills-v1").b11.businessDrafts).toEqual({});
+});

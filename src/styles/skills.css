@@ -89,3 +89,7 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .training-plan .answer-field { display: block; width: 100%; margin: 0; }
 .training-plan .training-input, .training-plan .answer-measure { font: inherit; font-size: 15px; line-height: 1.8; padding: 8px; min-height: 45px; }
 @media (max-width: 600px) { .training-plan th { width: 104px; } .training-plan th, .training-plan td { padding: 9px; } }
+.business-tables thead th { width: auto; }
+.business-tables td { font-size: 14px; }
+.business-tables .training-input, .business-tables .answer-measure { font-size: 14px; padding: 6px; }
+@media (max-width:600px) { .business-tables th, .business-tables td { padding: 6px; } }

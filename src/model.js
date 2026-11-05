@@ -155,6 +155,7 @@ export function resetOriginal(p) {
   p.flowDrafts = {};
   p.functionCardDrafts = {};
   p.trainingDrafts = {};
+  p.businessDrafts = {};
   p.jsonDrafts = {};
   p.taskChecks = {};
 }

@@ -114,6 +114,12 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     answerHTML: courses.b4.tasks[0].answerHTML,
   };
   old.courses.b4.referenceHTML = courses.b4.referenceHTML;
+  old.courses.b11.tasks[0] = {
+    ...old.courses.b11.tasks[0],
+    businessTables: courses.b11.tasks[0].businessTables,
+    answerHTML: courses.b11.tasks[0].answerHTML,
+  };
+  old.courses.b11.referenceHTML = courses.b11.referenceHTML;
   expect(questions).toEqual(old.questions);
   const { visualizationCode, visualizationDownloadPath, ...b12 } = courses.b12;
   expect(visualizationCode).toContain("import matplotlib.pyplot");

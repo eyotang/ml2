@@ -1,3 +1,4 @@
+import BusinessTables, { businessText } from "./BusinessTables";
 import TrainingPlan, { trainingPlanText } from "./TrainingPlan";
 import JsonFeedback, { validateJSON } from "./JsonFeedback";
 import {
@@ -43,6 +44,14 @@ const esc = (s) =>
       ],
   );
 function Solution({ q }) {
+  if (["b11-1", "b11-2"].includes(q.id))
+    return (
+      <BusinessTables
+        task={courses.b11.tasks[0]}
+        step={q.id}
+        field={(i) => q.slots[i].answer}
+      />
+    );
   if (q.id === "b4-1")
     return (
       <TrainingPlan
@@ -682,7 +691,13 @@ export default function Skills({ courseId }) {
                   <pre>{q.context}</pre>
                 </details>
               )}
-              {q.id === "b4-1" ? (
+              {["b11-1", "b11-2"].includes(q.id) ? (
+                <BusinessTables
+                  task={course.tasks[0]}
+                  step={q.id}
+                  field={field}
+                />
+              ) : q.id === "b4-1" ? (
                 <TrainingPlan task={course.tasks[0]} field={field} />
               ) : hasFunctionCard(q) ? (
                 <FunctionCardStep q={q} field={field} />
@@ -1134,6 +1149,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
     const taskChecked = checked || !!p.taskChecks?.[task.id];
     const functionTask = task.id === "ct1";
     const trainingTask = !!task.trainingPlan;
+    const businessTask = !!task.businessTables;
     const jsonTask = task.id === "ct2";
     const jsonValue = p.jsonDrafts?.[task.id] || "";
     const flowValues = p.flowDrafts?.[task.id] || [],
@@ -1146,6 +1162,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
               flowValues.join("\n") +
               (functionTask ? "\n" + functionCardsText(p) : "") +
               (trainingTask ? "\n" + trainingPlanText(task, p) : "") +
+              (businessTask ? "\n" + businessText(p) : "") +
               (jsonTask && validateJSON(jsonValue).status === "valid"
                 ? "\n" + jsonValue
                 : ""),
@@ -1228,9 +1245,11 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
             <JsonFeedback value={jsonValue} id={"json-feedback-" + task.id} />
           </section>
         )}
-        {functionTask || trainingTask ? (
+        {functionTask || trainingTask || businessTask ? (
           <>
-            {trainingTask ? (
+            {businessTask ? (
+              <BusinessTables task={task} p={p} update={update} />
+            ) : trainingTask ? (
               <TrainingPlan task={task} p={p} update={update} />
             ) : (
               <FunctionCardsEditor p={p} update={update} />
@@ -1333,7 +1352,9 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
                 </ul>
               </section>
             </div>
-            {trainingTask ? (
+            {businessTask ? (
+              <BusinessTables task={task} />
+            ) : trainingTask ? (
               <>
                 <TrainingPlan task={task} />
                 <details>
