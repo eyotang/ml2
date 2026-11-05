@@ -160,19 +160,27 @@ test("answer-only releases regrade theory and skill records; stem changes requir
   resetMode(p, "type");
   expect(() => reconcileCourse(p, c)).not.toThrow();
 });
-test("B1-2 charts use actual teacher aggregate columns and preserve existing IDs and notebook teacher code", () => {
+test("B1-2 restores teacher code and preserves old drafts without added chart exercises", () => {
   const c = courses.b12;
-  expect(c.count).toBe(14);
-  expect(c.steps.slice(7, 9).map((s) => s.id)).toEqual(["b12-13", "b12-14"]);
-  expect(courseState("b12", { index: 7 }).stepId).toBe("b12-8");
-  expect(c.visualizationCode).toContain("slot_summary['爽约率']");
-  expect(c.visualizationCode).toContain("room_summary['平均座位利用率']");
-  expect(c.visualizationCode).toContain("room_summary['room_id']");
-  const nb = JSON.parse(
-    fs.readFileSync("public/materials/b12-visualization.ipynb"),
-  );
-  expect(nb.cells[1].source.join("")).toBe(c.referenceCode);
-  expect(nb.cells[2].source.join("")).toBe(c.visualizationCode);
+  expect(c.count).toBe(12);
+  expect(c.steps.map((s) => s.id)).not.toContain("b12-13");
+  expect(c.steps.map((s) => s.id)).not.toContain("b12-14");
+  expect(c.visualizationCode).toBeUndefined();
+  expect(c.visualizationDownloadPath).toBeUndefined();
+  expect(c.originalCode).not.toContain("matplotlib");
+  const saved = courseState("b12", {
+    mode: "type",
+    index: 9,
+    stepId: "b12-8",
+    courseSchema: 3,
+    caseDrafts: { saved: "keep" },
+    records: { "b12-13": { correct: true } },
+    draftsByMode: { pick: {}, type: { "b12-8": ["saved"] } },
+  });
+  expect(saved.index).toBe(7);
+  expect(saved.caseDrafts.saved).toBe("keep");
+  expect(saved.records["b12-13"].correct).toBe(true);
+  expect(saved.draftsByMode.type["b12-8"]).toEqual(["saved"]);
 });
 test("static release discovery offers update without reloading or deleting learning data; offline is tolerated", async () => {
   document.documentElement.dataset.appVersion = "aaaaaaaaaaaaaaaa";

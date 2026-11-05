@@ -6,7 +6,7 @@ import { groupLessons } from "../src/lesson-groups";
 import Skills from "../src/SkillsPage";
 test.each([
   ["b2", [6, 11, 2]],
-  ["b12", [9, 2, 3]],
+  ["b12", [7, 2, 3]],
   ["b11", [2, 4, 2]],
   ["b3", [6, 4]],
   ["b4", [1, 2, 2]],

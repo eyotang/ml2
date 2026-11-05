@@ -301,68 +301,6 @@ const SKILL_COURSES = {
         "websiteHint": "三个条件用 & 连接，注意每个条件各自加括号"
       },
       {
-        "id": "b12-13",
-        "title": "任务一：时段爽约率图",
-        "goal": "对比各时段爽约率，纵轴使用百分比",
-        "code": "# 对比各时段爽约率，纵轴使用百分比\naxes[0].{{}}(slot_summary.index.astype(str), slot_summary['爽约率'] * {{}})",
-        "solution": "# 对比各时段爽约率，纵轴使用百分比\naxes[0].bar(slot_summary.index.astype(str), slot_summary['爽约率'] * 100)",
-        "slots": [
-          {
-            "answer": "bar",
-            "choices": [
-              "bar",
-              "plotting",
-              "scatterplot"
-            ],
-            "why": "柱状图用于类别对比；比例乘100转为百分数，横向阈值线便于识别低利用率。",
-            "accepted": []
-          },
-          {
-            "answer": "100",
-            "choices": [
-              "100",
-              "0.01",
-              "10"
-            ],
-            "why": "柱状图用于类别对比；比例乘100转为百分数，横向阈值线便于识别低利用率。",
-            "accepted": []
-          }
-        ],
-        "hint": "先运行老师参考代码得到汇总表，再在同一环境绘图。",
-        "context": "补充样卷明确要求的数据可视化。"
-      },
-      {
-        "id": "b12-14",
-        "title": "任务一：会议室利用率图",
-        "goal": "平均座位利用率低于40%时，列入优化候选",
-        "code": "# 平均座位利用率低于40%时，列入优化候选\naxes[1].bar(room_summary['room_id'].astype(str), room_summary['平均座位利用率'] * 100)\naxes[1].{{}}({{}}, color='red', linestyle='--')",
-        "solution": "# 平均座位利用率低于40%时，列入优化候选\naxes[1].bar(room_summary['room_id'].astype(str), room_summary['平均座位利用率'] * 100)\naxes[1].axhline(40, color='red', linestyle='--')",
-        "slots": [
-          {
-            "answer": "axhline",
-            "choices": [
-              "axhline",
-              "axvline",
-              "hist"
-            ],
-            "why": "柱状图用于类别对比；比例乘100转为百分数，横向阈值线便于识别低利用率。",
-            "accepted": []
-          },
-          {
-            "answer": "40",
-            "choices": [
-              "40",
-              "0.4",
-              "4"
-            ],
-            "why": "柱状图用于类别对比；比例乘100转为百分数，横向阈值线便于识别低利用率。",
-            "accepted": []
-          }
-        ],
-        "hint": "先运行老师参考代码得到汇总表，再在同一环境绘图。",
-        "context": "补充样卷明确要求的数据可视化。"
-      },
-      {
         "id": "b12-8",
         "kind": "case",
         "taskIndex": 0,
@@ -782,8 +720,8 @@ const SKILL_COURSES = {
         "context": ""
       }
     ],
-    "count": 14,
-    "originalCode": "import pandas as pd\n\n\n# 读取数据\nbookings = pd.read_csv('meeting_bookings.csv', encoding='utf-8-sig')\nrooms = pd.read_csv('meeting_rooms.csv', encoding='utf-8-sig')\n\n# M1（1分）：数据准备\n# 按booking_id去重，再排除已取消预约\nclean = ______________________________\nvalid = ______________________________\n\nprint('数据准备结果')\nprint('去重后预约数：', len(clean))\nprint('有效预约数：', len(valid))\n\n# M2（2分）：识别爽约高发时段\n# 统计各时段的有效预约数、爽约数和爽约率，并按爽约率降序排列\nvalid['is_no_show'] = ______________________________\nslot_summary = ______________________________\n\n\nprint('\\n各时段爽约情况')\nprint(slot_summary)\n\n\n# M3（2分）：分析会议室容量匹配\n# 只分析已使用预约，关联会议室容量，统计使用场次和平均座位利用率\nused = ______________________________\nused['seat_util'] = used[\"attendees\"] / used[\"capacity\"]\nroom_summary = ______________________________\n\n\nprint('\\n各会议室空间利用情况')\nprint(room_summary)\n\n\n# M4（1分）：输出空间匹配优化候选清单\n# 筛选容量不少于12、实际使用不少于20场、平均座位利用率低于40%的会议室\ncandidates = ______________________________\n\n\nprint('\\n空间匹配优化候选清单')\nprint(candidates)\n\n\n# 样卷任务一补充：数据可视化（老师参考代码保持原样）\nimport matplotlib.pyplot as plt\n\n# 对比各时段爽约率，标出需要优先干预的时段\nslot_labels = {'上午': 'Morning', '午间': 'Midday', '下午': 'Afternoon', '傍晚': 'Evening'}\nfig, axes = plt.subplots(1, 2, figsize=(12, 4))\naxes[0].bar([slot_labels.get(str(x), str(x)) for x in slot_summary.index], slot_summary['爽约率'] * ________)\naxes[0].set(title='No-show rate by time slot', ylabel='No-show rate (%)')\n\n# 对比已使用场次的平均座位利用率；低于40%为优化候选\naxes[1].bar(room_summary['room_id'].astype(str), room_summary['平均座位利用率'] * 100)\naxes[1].axhline(________, color='red', linestyle='--', label='40% threshold')\naxes[1].set(title='Mean seat utilization by room', ylabel='Seat utilization (%)', xlabel='Room')\naxes[1].legend()\nplt.tight_layout()\n",
+    "count": 12,
+    "originalCode": "import pandas as pd\n\n\n# 读取数据\nbookings = pd.read_csv('meeting_bookings.csv', encoding='utf-8-sig')\nrooms = pd.read_csv('meeting_rooms.csv', encoding='utf-8-sig')\n\n# M1（1分）：数据准备\n# 按booking_id去重，再排除已取消预约\nclean = ______________________________\nvalid = ______________________________\n\nprint('数据准备结果')\nprint('去重后预约数：', len(clean))\nprint('有效预约数：', len(valid))\n\n# M2（2分）：识别爽约高发时段\n# 统计各时段的有效预约数、爽约数和爽约率，并按爽约率降序排列\nvalid['is_no_show'] = ______________________________\nslot_summary = ______________________________\n\n\nprint('\\n各时段爽约情况')\nprint(slot_summary)\n\n\n# M3（2分）：分析会议室容量匹配\n# 只分析已使用预约，关联会议室容量，统计使用场次和平均座位利用率\nused = ______________________________\nused['seat_util'] = used[\"attendees\"] / used[\"capacity\"]\nroom_summary = ______________________________\n\n\nprint('\\n各会议室空间利用情况')\nprint(room_summary)\n\n\n# M4（1分）：输出空间匹配优化候选清单\n# 筛选容量不少于12、实际使用不少于20场、平均座位利用率低于40%的会议室\ncandidates = ______________________________\n\n\nprint('\\n空间匹配优化候选清单')\nprint(candidates)\n",
     "referenceCode": "import pandas as pd\n\n# 读取数据\nbookings = pd.read_csv('meeting_bookings.csv', encoding='utf-8-sig')\nrooms = pd.read_csv('meeting_rooms.csv', encoding='utf-8-sig')\n\n# M1（1分）：数据准备\n# 按booking_id去重，再排除已取消预约\nclean = bookings.drop_duplicates(subset='booking_id')\nvalid = clean[clean['status'] != '已取消']\n\nprint('数据准备结果')\nprint('去重后预约数：', len(clean))\nprint('有效预约数：', len(valid))\n\n# M2（2分）：识别爽约高发时段\n# 统计各时段的有效预约数、爽约数和爽约率，并按爽约率降序排列\nvalid['is_no_show'] = (valid['status'] == '爽约').astype(int)\nslot_summary = valid.groupby('time_slot').agg(有效预约数=('is_no_show','count'), 爽约数=('is_no_show','sum'), 爽约率=('is_no_show','mean')).sort_values('爽约率', ascending=False)\n\nprint('\\n各时段爽约情况')\nprint(slot_summary)\n\n# M3（2分）：分析会议室容量匹配\n# 只分析已使用预约，关联会议室容量，统计使用场次和平均座位利用率\nused = valid[valid['status'] == '已使用'].merge(rooms, on='room_id')\nused['seat_util'] = used[\"attendees\"] / used[\"capacity\"]\nroom_summary = used.groupby(['room_id','room_name','capacity']).agg(使用场次=('booking_id','count'), 平均座位利用率=('seat_util','mean')).reset_index()\n\nprint('\\n各会议室空间利用情况')\nprint(room_summary)\n\n# M4（1分）：输出空间匹配优化候选清单\n# 筛选容量不少于12、实际使用不少于20场、平均座位利用率低于40%的会议室\ncandidates = room_summary[(room_summary['capacity'] >= 12) & (room_summary['使用场次'] >= 20) & (room_summary['平均座位利用率'] < 0.4)]\n\nprint('\\n空间匹配优化候选清单')\nprint(candidates)",
     "websiteURL": "https://ai-trainer-exam-87484.app.workbuddy.host/?sharecode=P6SA3BBFCH",
     "websiteNote": "主答案采用老师提供的参考代码，分步练习仅在老师的原表达式上挖空；老师列出的等价写法保留供对照。",
@@ -803,9 +741,7 @@ const SKILL_COURSES = {
         "answerHTML": "<h4>选择场景：预约效率优化——爽约风险辅助提醒</h4><p><strong>数据使用：</strong>历史数据按 booking_id 去重，按题设定义有效预约和爽约标签。用预约前已知的 time_slot、department、room_id、会议室容量、星期及 start_time−booked_at 的提前预约时长构造特征。status 的最终值只用于生成历史标签，不能作为预测特征；实际 attendees 在会后才可确认，也不作为会前预测特征。只使用必要字段，权限分级，设置留存周期。新增提醒、确认、取消、签到、释放及再预约事件日志，为后续验证服务。</p><p><strong>算法模型：</strong>先以“午间/傍晚优先提醒”的规则为基线；数据积累后试用逻辑回归或浅层决策树预测爽约风险，使用分类特征编码并处理类不均衡。历史样本仅覆盖10个工作日，初期可先用规则试点，不能据此承诺模型稳定泛化。训练和验证按时间先后划分，预处理仅在训练数据拟合，必要时开展滚动时间验证。</p><p><strong>业务应用：</strong>预约产生→提取会前特征→计算风险等级→高风险会前提醒和二次确认→预约人保留或取消→按核实的状态及已告知签到规则处理资源释放→通知候补→记录结果。风险分数仅辅助提醒，不替代用户确认和企业规则，不按模型分数直接取消预约。</p><p><strong>预期效果：</strong>目标是减少爽约和空占、提高被释放时段的再预约使用率、减少找房耗时，同时控制额外提醒负担和错误释放。此处为待验证目标，不虚构改善百分比或成本节省金额。</p><p><strong>验证方法：</strong>先做历史时间留出验证，报告爽约类精确率、召回率、F1及样本量、混淆矩阵，并与规则基线比较。再将可比会议室/日期的预约随机分配到原流程与提醒流程，尽量控制跨组干扰并覆盖相同时段；观察至少预先约定的完整周期，不只挑最好的一天。</p><p>线上业务指标：爽约率=爽约笔数/同周期有效预约笔数；释放后再利用率=被释放且又被预约并实际使用的时段数/同周期已释放时段数。同步报告各分母、提醒量、投诉及错误释放事件；比较组间改善和不确定性，结合用户反馈复核，未达到预设目标则调整规则或回退。</p>"
       }
     ],
-    "writtenDownloadPath": "materials/b12-written-reference.html",
-    "visualizationCode": "# 样卷任务一补充：数据可视化（老师参考代码保持原样）\nimport matplotlib.pyplot as plt\n\n# 对比各时段爽约率，标出需要优先干预的时段\nslot_labels = {'上午': 'Morning', '午间': 'Midday', '下午': 'Afternoon', '傍晚': 'Evening'}\nfig, axes = plt.subplots(1, 2, figsize=(12, 4))\naxes[0].bar([slot_labels.get(str(x), str(x)) for x in slot_summary.index], slot_summary['爽约率'] * 100)\naxes[0].set(title='No-show rate by time slot', ylabel='No-show rate (%)')\n\n# 对比已使用场次的平均座位利用率；低于40%为优化候选\naxes[1].bar(room_summary['room_id'].astype(str), room_summary['平均座位利用率'] * 100)\naxes[1].axhline(40, color='red', linestyle='--', label='40% threshold')\naxes[1].set(title='Mean seat utilization by room', ylabel='Seat utilization (%)', xlabel='Room')\naxes[1].legend()\nplt.tight_layout()\n",
-    "visualizationDownloadPath": "materials/b12-visualization.ipynb"
+    "writtenDownloadPath": "materials/b12-written-reference.html"
   },
   "b2": {
     "id": "b2",

@@ -388,8 +388,12 @@ export default function Skills({ courseId }) {
       />
     );
   }
-  const reviewed = Object.values(p.records).filter((r) => r.reviewed).length,
-    mastered = Object.values(p.records).filter((r) => r.correct).length;
+  const reviewed = course.steps
+      .map((q) => p.records[q.id])
+      .filter((r) => r?.reviewed).length,
+    mastered = course.steps
+      .map((q) => p.records[q.id])
+      .filter((r) => r?.correct).length;
   return (
     <>
       <ThemeSync />
@@ -534,27 +538,6 @@ export default function Skills({ courseId }) {
               </div>
               {!isCase && (
                 <>
-                  {course.visualizationCode &&
-                    p.originalDraft != null &&
-                    !p.originalDraft.includes("# 样卷任务一补充") && (
-                      <button
-                        className="chart-template"
-                        onClick={() =>
-                          update((n) => {
-                            n.originalDraft +=
-                              "\n\n" +
-                              course.visualizationCode
-                                .replace(
-                                  "['爽约率'] * 100",
-                                  "['爽约率'] * ________",
-                                )
-                                .replace("axhline(40", "axhline(________");
-                          })
-                        }
-                      >
-                        补入任务一图表模板
-                      </button>
-                    )}
                   <PythonEditor
                     editorRef={editorRef}
                     value={p.originalDraft ?? course.originalCode}
@@ -582,12 +565,6 @@ export default function Skills({ courseId }) {
                       <section className="solution">
                         <h3>完整参考解法</h3>
                         <pre>{course.referenceCode}</pre>
-                        {course.visualizationCode && (
-                          <>
-                            <h3>样卷要求补充：数据可视化</h3>
-                            <pre>{course.visualizationCode}</pre>
-                          </>
-                        )}
                       </section>
                       {course.websiteCode && (
                         <details className="solution website-reference">
@@ -1080,11 +1057,6 @@ export default function Skills({ courseId }) {
           >
             下载原题与 CSV
           </a>
-          {course.visualizationDownloadPath && (
-            <a href={course.visualizationDownloadPath} download>
-              下载含图表的完整 Notebook
-            </a>
-          )}
           <button id="restart-course" onClick={restart}>
             重新练习本模块
           </button>

@@ -97,15 +97,6 @@ export function courseState(id, saved = readStore("zhilian-skills-v1")[id]) {
     pick: structuredClone(p.drafts),
     type: structuredClone(p.drafts),
   };
-  if (
-    id === "b12" &&
-    p.courseSchema !== 3 &&
-    !p.stepId &&
-    p.index >= 7 &&
-    p.index < 12 &&
-    c.steps.length === 14
-  )
-    p.index += 2;
   if (p.stepId) {
     const index = c.steps.findIndex((q) => q.id === p.stepId);
     if (index >= 0) p.index = index;

@@ -146,8 +146,6 @@ from b12_written import enrich
 (root/'public/materials/b12-written-reference.html').write_text(enrich(courses['b12']))
 from b2_written import enrich as enrich_b2
 (root/'public/materials/b2-written-reference.html').write_text(enrich_b2(courses['b2']))
-from b12_visualization import enrich as enrich_visualization
-enrich_visualization(courses['b12'],root)
 (root/'content/skill-content.js').write_text('const SKILL_COURSES = '+json.dumps(courses,ensure_ascii=False,indent=2)+';\n')
 # Fill the original notebooks with executable reference code and retain original instructions/imports.
 for key,source in [('b12','B1.2素材/B1.2.ipynb'),('b2','B2素材/B2.ipynb')]:
@@ -159,4 +157,4 @@ for key,source in [('b12','B1.2素材/B1.2.ipynb'),('b2','B2素材/B2.ipynb')]:
  if key=='b2':cells[0]['source'].append('本练习已将 planned_hours 上限调整为24小时，筛选条件为 >0 且 <=24。')
  notebook['cells']=cells
  (root/'public/materials'/f'{key}-reference.ipynb').write_text(json.dumps(notebook,ensure_ascii=False,indent=2))
-print('Generated 33 steps (26 code + 7 written), including B1-2 chart practice, and 2 syntax-checked reference notebooks')
+print('Generated 31 steps (24 code + 7 written), preserving teacher code, and 2 syntax-checked reference notebooks')
