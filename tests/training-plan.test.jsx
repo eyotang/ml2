@@ -280,3 +280,36 @@ test("B1-1 task three tables separate measures, validation and metric definition
   click("#reset-practice");
   expect(readStore("zhilian-skills-v1").b11.businessDrafts).toEqual({});
 });
+test("B2 conclusions use structured tables without adding code or exercises", () => {
+  expect(courses.b2.steps).toHaveLength(19);
+  expect(
+    courses.b2.tasks[0].conclusionTables.map((t) => t.rows.length),
+  ).toEqual([3, 5]);
+  localStorage.setItem(
+    "zhilian-skills-v1",
+    JSON.stringify({
+      b2: { answerSchema: 2, mode: "original", caseDrafts: { b2t3: "旧结论" } },
+    }),
+  );
+  render(<Skills courseId="b2" />);
+  expect(
+    document.querySelectorAll("#written-b2t3 .business-tables table"),
+  ).toHaveLength(2);
+  fill(
+    '#written-b2t3 [data-business-cell="0-0-1"]',
+    "优先关注异常类的召回率。",
+  );
+  expect(readStore("zhilian-skills-v1").b2.businessDrafts.b2t3["0-0-1"]).toBe(
+    "优先关注异常类的召回率。",
+  );
+  cleanup();
+  render(<Skills courseId="b2" />);
+  expect(
+    document.querySelector('#written-b2t3 [data-business-cell="0-0-1"]'),
+  ).toHaveValue("优先关注异常类的召回率。");
+  expect(document.querySelector('[data-task="b2t3"]')).toHaveValue("旧结论");
+  click('[data-check-task="b2t3"]');
+  expect(document.querySelectorAll(".case-solution")).toHaveLength(1);
+  click("#reset-practice");
+  expect(readStore("zhilian-skills-v1").b2.businessDrafts).toEqual({});
+});

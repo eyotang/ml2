@@ -136,6 +136,11 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     reviewTables: courses.b11.tasks[2].reviewTables,
     answerHTML: courses.b11.tasks[2].answerHTML,
   };
+  old.courses.b2.tasks[0] = {
+    ...old.courses.b2.tasks[0],
+    conclusionTables: courses.b2.tasks[0].conclusionTables,
+    answerHTML: courses.b2.tasks[0].answerHTML,
+  };
   expect(questions).toEqual(old.questions);
   expect(normalizeFlowGeometry(courses)).toEqual(
     normalizeFlowGeometry(old.courses),
@@ -155,6 +160,12 @@ test("static deployment retains original assets and intentionally updated refere
     fs.readFileSync("legacy/materials-manifest.json", "utf8"),
   );
   for (const [file, sha] of Object.entries(manifest)) {
+    if (file === "materials/b2-written-reference.html") {
+      expect(fs.readFileSync("public/" + file, "utf8")).toContain(
+        courses.b2.tasks[0].answerHTML,
+      );
+      continue;
+    }
     if (file === "materials/b2-reference.ipynb") {
       const notebook = JSON.parse(fs.readFileSync("public/" + file, "utf8"));
       expect(

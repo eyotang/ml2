@@ -3,7 +3,13 @@ def enrich(c):
  title='任务三 · 形成算法测试结论'
  prompt='<p>结合冷链温控异常预警业务，说明应优先关注的分类指标及理由，并针对不同货物类型测试表现存在明显差异的情况提出一项改进措施。</p>'
  answer='''<h4>优先指标及理由</h4><p>优先关注温控异常类（temp_alarm=1）的召回率，即 TP/(TP+FN)：实际异常运输中有多少被正确预警。漏报可能使温控异常未被及时处置，带来货损和质量安全风险，因此应重点减少 FN。不能只看总体准确率，正常样本较多时它可能掩盖异常漏报。也不能孤立追求召回率：同时报告精确率、F1和混淆矩阵，评估误报造成的人工复核和运营成本。具体目标需结合业务风险与处置能力确定，不虚构固定达标值。</p><h4>货物类型表现差异与一项改进</h4><p>依据本次测试输出，列出各货物类型的异常召回率、异常样本数及漏报数，识别薄弱类别；总体指标不能代表每个货类。样本很少时还应报告不确定性，不能凭一次划分认定业务差异一定稳定存在。</p><p><strong>改进措施：</strong>针对异常召回率偏低的货物类型，补充具有代表性的异常正样本，覆盖不同线路、季节和温度条件，并由业务人员核验标签，再加入训练集重新训练。这是一项“针对薄弱货类的数据补充与核验”措施；不能为了抬高指标而删除该组难例、修改测试标签或把测试集并入训练集。</p><p><strong>验证：</strong>保留独立测试集，原模型与新模型在同一测试口径上对比薄弱货类异常召回率、漏报数和异常样本数，同时核对总体召回率、各组精确率及误报负担。若反复据测试结果调参，应另设验证集，并保留最终未参与选型的测试数据；必要时补充独立时间批次复核。改善需由实际结果证实，不能仅凭训练集分数承诺上线效果。</p>'''
- c['tasks']=[dict(id='b2t3',title=title,promptHTML=prompt,answerHTML=answer)]
+ import re,html
+ paragraphs=[re.sub('<[^>]+>','',p) for p in re.findall(r'<p>(.*?)</p>',answer)]
+ first=paragraphs[0];a=first.index('漏报可能');b=first.index('也不能孤立')
+ validation=paragraphs[3].removeprefix('验证：');v=validation.index('同时核对');end=validation.index('若反复')
+ tables=[dict(title='优先指标与业务理由',headers=['答题要点','回答内容'],rows=[['优先指标及含义',first[:a]],['业务理由',first[a:b]],['兼顾指标与目标',first[b:]]]),dict(title='薄弱货类改进与验证',headers=['答题要点','回答内容'],rows=[['差异诊断',paragraphs[1]],['一项改进措施',paragraphs[2].removeprefix('改进措施：')],['验证数据与比较',validation[:v]],['效果检查',validation[v:end]],['结果使用边界',validation[end:]]])]
+ answer=''.join('<table><caption>'+t['title']+'</caption><thead><tr>'+''.join('<th>'+h+'</th>' for h in t['headers'])+'</tr></thead><tbody>'+''.join('<tr>'+''.join('<td>'+html.escape(x)+'</td>' for x in row)+'</tr>' for row in t['rows'])+'</tbody></table>' for t in tables)
+ c['tasks']=[dict(id='b2t3',title=title,promptHTML=prompt,answerHTML=answer,conclusionTables=tables)]
  def slot(a,wrong,why,groups,aliases=()):return dict(answer=a,choices=[a,*wrong],why=why,accepted=list(aliases),matchRule=dict(groups=groups))
  specs=[('任务三：选择优先指标并解释理由','把冷链漏报风险与指标含义对应起来。','优先关注异常类的 {{}}。\n理由：{{}}。\n同时关注 {{}}，避免只追求单一指标。',[
  slot('召回率',['总体准确率','仅看正常类预测数量'],'异常召回率=TP/(TP+FN)，衡量真实异常被识别的比例。',[['召回率','recall']]),

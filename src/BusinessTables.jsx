@@ -4,39 +4,53 @@ export function businessText(p, taskId = "b11t1") {
   return Object.values(p.businessDrafts?.[taskId] || {}).join("\n");
 }
 export default function BusinessTables({ task, p, update, step, field }) {
-  const groups = task.businessTables || task.pathTables || task.reviewTables;
-  const shown = task.reviewTables
-    ? step === "b11-7"
+  const groups =
+    task.businessTables ||
+    task.pathTables ||
+    task.reviewTables ||
+    task.conclusionTables;
+  const shown = task.conclusionTables
+    ? step === "b2-18"
       ? [0]
-      : step === "b11-8"
+      : step === "b2-19"
         ? [1]
         : [0, 1]
-    : task.pathTables
-      ? [0]
-      : step === "b11-1"
+    : task.reviewTables
+      ? step === "b11-7"
         ? [0]
-        : step === "b11-2"
-          ? [1, 2]
-          : [0, 1, 2];
-  const slots = task.reviewTables
-    ? step === "b11-7"
-      ? { "0-0-2": 0, "0-1-1": 1 }
-      : { "1-0-1": 0, "1-1-1": 1 }
-    : task.pathTables
-      ? { "0-0-2": 0, "0-1-2": 1 }
-      : step === "b11-1"
-        ? { "0-0-0": 0, "0-2-0": 1, "0-3-0": 2 }
-        : {
-            "1-1-0": 0,
-            "io-3-3": 1,
-            "io-2-3": 2,
-            "io-0-1": 3,
-            "io-1-2": 4,
-            "io-1-3": 5,
-            "io-4-1": 6,
-            "io-4-3": 7,
-            "io-5-3": 8,
-          };
+        : step === "b11-8"
+          ? [1]
+          : [0, 1]
+      : task.pathTables
+        ? [0]
+        : step === "b11-1"
+          ? [0]
+          : step === "b11-2"
+            ? [1, 2]
+            : [0, 1, 2];
+  const slots = task.conclusionTables
+    ? step === "b2-18"
+      ? { "0-0-1": 0, "0-1-1": 1, "0-2-1": 2 }
+      : { "1-1-1": 0, "1-2-1": 1, "1-3-1": 2 }
+    : task.reviewTables
+      ? step === "b11-7"
+        ? { "0-0-2": 0, "0-1-1": 1 }
+        : { "1-0-1": 0, "1-1-1": 1 }
+      : task.pathTables
+        ? { "0-0-2": 0, "0-1-2": 1 }
+        : step === "b11-1"
+          ? { "0-0-0": 0, "0-2-0": 1, "0-3-0": 2 }
+          : {
+              "1-1-0": 0,
+              "io-3-3": 1,
+              "io-2-3": 2,
+              "io-0-1": 3,
+              "io-1-2": 4,
+              "io-1-3": 5,
+              "io-4-1": 6,
+              "io-4-3": 7,
+              "io-5-3": 8,
+            };
   return (
     <div
       className={`training-plan business-tables ${task.reviewTables ? "review-tables" : ""}`}
@@ -83,7 +97,9 @@ export default function BusinessTables({ task, p, update, step, field }) {
                   let content = value;
                   if (field && slots[key] !== undefined) {
                     const i = slots[key];
-                    content = task.reviewTables ? (
+                    content = task.conclusionTables ? (
+                      field(i)
+                    ) : task.reviewTables ? (
                       step === "b11-7" ? (
                         i === 0 ? (
                           <>
@@ -142,7 +158,7 @@ export default function BusinessTables({ task, p, update, step, field }) {
                   return (
                     <td key={c}>
                       {update &&
-                      (task.reviewTables
+                      (task.reviewTables || task.conclusionTables
                         ? c > 0
                         : (!task.pathTables || c === 2) &&
                           !(task.businessTables && g === 2 && c === 0)) ? (

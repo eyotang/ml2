@@ -44,6 +44,8 @@ const esc = (s) =>
       ],
   );
 function Solution({ q }) {
+  if (["b2-18", "b2-19"].includes(q.id))
+    return <BusinessTables task={courses.b2.tasks[0]} step={q.id} />;
   if (["b11-7", "b11-8"].includes(q.id))
     return <BusinessTables task={courses.b11.tasks[2]} step={q.id} />;
   if (q.id === "b11-6")
@@ -672,7 +674,13 @@ export default function Skills({ courseId }) {
                   <pre>{q.context}</pre>
                 </details>
               )}
-              {["b11-7", "b11-8"].includes(q.id) ? (
+              {["b2-18", "b2-19"].includes(q.id) ? (
+                <BusinessTables
+                  task={course.tasks[0]}
+                  step={q.id}
+                  field={field}
+                />
+              ) : ["b11-7", "b11-8"].includes(q.id) ? (
                 <BusinessTables
                   task={course.tasks[2]}
                   step={q.id}
@@ -1150,7 +1158,10 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
               flowValues.join("\n") +
               (functionTask ? "\n" + functionCardsText(p) : "") +
               (trainingTask ? "\n" + trainingPlanText(task, p) : "") +
-              (businessTask || task.pathTables || task.reviewTables
+              (businessTask ||
+              task.pathTables ||
+              task.reviewTables ||
+              task.conclusionTables
                 ? "\n" + businessText(p, task.id)
                 : "") +
               (jsonTask && validateJSON(jsonValue).status === "valid"
@@ -1235,7 +1246,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
             <JsonFeedback value={jsonValue} id={"json-feedback-" + task.id} />
           </section>
         )}
-        {(task.pathTables || task.reviewTables) && (
+        {(task.pathTables || task.reviewTables || task.conclusionTables) && (
           <BusinessTables task={task} p={p} update={update} />
         )}
         {functionTask || trainingTask || businessTask ? (
