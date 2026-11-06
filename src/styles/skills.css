@@ -102,3 +102,5 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .business-tables table:has(thead th:nth-child(3)):not(:has(thead th:nth-child(4))) th:nth-child(3) { width: 56%; }
 .review-tables table:has(thead th:nth-child(3)) th:nth-child(1) { width: 26%; }
 .review-tables table:has(thead th:nth-child(3)) th:nth-child(2), .review-tables table:has(thead th:nth-child(3)) th:nth-child(3) { width: 37%; }
+
+.flow-scroll:has(#arrow-b3) .flow-box .answer-field{display:inline-block;width:auto}.flow-scroll:has(#arrow-b3) .flow-box .blank{min-width:0}

@@ -67,3 +67,21 @@ test("B1-1 new-image failure connects straight down to manual inspection, with i
     expect(html).toContain("否：检查实物");
   }
 });
+
+test("B3 uses the original task diagram for every flow exercise", () => {
+  const task = courses.b3.tasks[0];
+  const fill = (html, slots) =>
+    html.replace(/\{\{(\d+)\}\}/g, (_, i) => slots[Number(i)].answer);
+  const full = fill(task.flowchart.html, task.flowchart.slots);
+  expect(task.answerHTML).toContain(full);
+  const steps = courses.b3.steps.filter((step) => step.flowchartHTML);
+  expect(steps).toHaveLength(6);
+  for (const step of steps) {
+    expect(
+      [...step.flowchartHTML.matchAll(/\{\{(\d+)\}\}/g)]
+        .map((m) => Number(m[1]))
+        .sort(),
+    ).toEqual(step.slots.map((_, i) => i));
+    expect(fill(step.flowchartHTML, step.slots), step.id).toBe(full);
+  }
+});

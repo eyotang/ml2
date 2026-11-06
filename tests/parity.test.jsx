@@ -141,6 +141,22 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     conclusionTables: courses.b2.tasks[0].conclusionTables,
     answerHTML: courses.b2.tasks[0].answerHTML,
   };
+  for (const [index, step] of courses.b3.steps.entries()) {
+    if (step.flowchartHTML)
+      old.courses.b3.steps[index].flowchartHTML = step.flowchartHTML;
+  }
+  const oldB3Task = old.courses.b3.tasks[0];
+  const b3Task = courses.b3.tasks[0];
+  const diagramHeading = "<h4>规范业务流程图（参考方案）</h4>";
+  oldB3Task.flowchart.html = b3Task.flowchart.html;
+  oldB3Task.answerHTML =
+    oldB3Task.answerHTML.split(diagramHeading)[0] +
+    diagramHeading +
+    b3Task.answerHTML.split(diagramHeading)[1];
+  old.courses.b3.referenceHTML = old.courses.b3.referenceHTML.replace(
+    /<h4>规范业务流程图（参考方案）<\/h4>[\s\S]*?(?=<h2>)/,
+    diagramHeading + b3Task.answerHTML.split(diagramHeading)[1],
+  );
   expect(questions).toEqual(old.questions);
   expect(normalizeFlowGeometry(courses)).toEqual(
     normalizeFlowGeometry(old.courses),
