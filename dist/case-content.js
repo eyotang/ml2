@@ -1057,7 +1057,7 @@ Object.assign(SKILL_COURSES, {
         "id": "b3t1",
         "title": "智能产品应用方案设计",
         "promptHTML": "<p>（1）完成智能产品应用设计表，写明每类产品解决的业务问题、主要数据输入、系统输出或下游动作。（2）根据题目给出的约束，完成运行规则表，填写判断条件和处理动作，覆盖能源数据连续缺失、预测出现峰值风险、调度方案触及运行边界、控制指令执行失败。（3）绘制多产品协同流程图：体现产品之间的信息传递、业务判断及分支处理、人机协作和结果闭环，主要节点控制在 6～8 个。</p>",
-        "answerHTML": "<div><table><caption>智能产品应用设计表</caption><thead><tr><th>智能产品</th><th>解决的业务问题</th><th>主要数据输入</th><th>系统输出或下游动作</th></tr></thead><tbody><tr><td>能源 IoT 采集终端</td><td>仪表离线发现慢，设备数据不统一。</td><td>电表、楼控、储能和充电平台的时间戳、功率、电量、温度、在线状态。</td><td>标准化数据、质量标记和离线事件；异常重试与运维通知。</td></tr><tr><td>AI 负荷预测与能源优化平台</td><td>高峰判断依赖人工，设备缺少协同调度。</td><td>历史和实时负荷、天气预报、工作日、活动、分时电价、设备能力和运行边界。</td><td>未来 30 分钟负荷预测、峰值风险、削峰方案、预期效果及审批任务。</td></tr><tr><td>智能控制网关</td><td>执行与反馈分散，异常缺少保护。</td><td>已通过约束校验及必要审批的策略、设备目标值、有效期和安全约束。</td><td>向非关键空调、储能及充电设施下发调节指令；返回状态，失败时停发、恢复安全策略并通知值班人员。</td></tr></tbody></table></div>\n<p>运行规则表如下。</p>\n<div><table><caption>运行规则表</caption><thead><tr><th>情况</th><th>判断条件</th><th>处理动作</th></tr></thead><tbody><tr><td>能源数据连续缺失</td><td>连续超过 5 分钟仍无数据。</td><td>重试采集并标记异常；重试仍失败则以最近可靠值临时估计，记录原值时间和估计标志，同时通知运维。估计不可伪装为真实采集值。</td></tr><tr><td>预测出现峰值风险</td><td>未来 30 分钟预测负荷达到或超过 1500kW。</td><td>生成削峰建议，进入边界校验及审批；低于 1500kW 则持续监测。</td></tr><tr><td>调度触及运行边界</td><td>预计使办公温度低于 24℃ 或高于 27℃，或涉及关键负荷自动削减。</td><td>拒绝越界方案并重新优化或交人工处理；消防、安防、数据机房等关键负荷不得自动削减。</td></tr><tr><td>控制指令执行失败</td><td>下发后 60 秒内未收到成功反馈，包括明确失败。</td><td>停止继续下发，恢复预先验证的安全策略，通知值班人员；核查设备实际状态，防止盲目重试。</td></tr></tbody></table></div>\n<p>高风险策略在发布前必须由能源管理员确认。所有策略均记录策略版本、审批人或审批依据、设备指令、执行结果及时间；审批尚未通过的高风险策略不得发给网关。流程图包含 8 个主要节点：持续采集 → 数据质量判断 → 负荷预测与峰值判断 → 生成削峰建议 → 运行边界校验 → 能源管理员审批（高风险）→ 网关执行 → 结果留痕与实际负荷复核，复核后回到持续采集。数据缺失处理保留估计标志；边界不满足时修改后重新校验；高风险审批未通过时不执行。</p><h4>规范业务流程图（参考方案）</h4><div class=\"flow-scroll\" tabindex=\"0\" aria-label=\"业务流程图，可横向滚动\"><div class=\"flow-canvas\" style=\"width:760px;height:1220px\"><svg class=\"flow-lines\" viewBox=\"0 0 760 1220\" aria-hidden=\"true\"><defs><marker id=\"arrow-b3\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10Z\" fill=\"#7296aa\"/></marker></defs><path d=\"M380 105V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M255 190H210\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"232\" y=\"178\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M120 134V110H380V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"175\" y=\"102\" text-anchor=\"middle\" class=\"flow-edge-label\">重试／降级校验</text><path d=\"M380 245V295\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"272\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 415V465\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"445\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M520 355H750V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"651\" y=\"343\" text-anchor=\"middle\" class=\"flow-edge-label\">否：记录后持续监测</text><path d=\"M380 555V600\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M520 510H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" stroke-dasharray=\"4 3\"/><text x=\"543\" y=\"495\" text-anchor=\"middle\" class=\"flow-edge-label\">约束</text><path d=\"M240 665H220V510H240\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"174\" y=\"545\" text-anchor=\"middle\" class=\"flow-edge-label\">否：修改后重审</text><path d=\"M380 730V780\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"758\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 850V900\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M380 1020V1062\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"1050\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M510 960H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"535\" y=\"948\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M650 1015V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"637\" y=\"1106\" text-anchor=\"middle\" class=\"flow-edge-label\">处置结果</text><path d=\"M380 1177V1190H15V60H250\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"145\" y=\"1180\" text-anchor=\"middle\" class=\"flow-edge-label\">持续监测与反馈闭环</text></svg><div class=\"flow-box flow-process\" style=\"left:250.0px;top:15.0px;width:260px;height:90px\"><div class=\"flow-text\">① IoT终端持续采集<br>电表／楼控／储能／充电数据<br>标准化数据、质量标记与离线事件</div></div><div class=\"flow-box flow-decision\" style=\"left:255.0px;top:135.0px;width:250px;height:110px\"><svg class=\"flow-shape\" viewBox=\"0 0 250 110\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"125.0,1 249,55.0 125.0,109 1,55.0\"/></svg><div class=\"flow-text\">② 数据是否可用？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:134.0px;width:180px;height:112px\"><div class=\"flow-text\">连续缺失 &gt;5分钟：重试<br>仍失败→最近可靠值估计<br>保留估计标志并通知运维<br>降级数据重新校验</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:295.0px;width:280px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,60.0 140.0,119 1,60.0\"/></svg><div class=\"flow-text\">③ AI预测未来30分钟<br>负荷 ≥1500kW？</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:465.0px;width:280px;height:90px\"><div class=\"flow-text\">④ AI平台生成削峰建议<br>未来30分钟预测、风险与削峰建议<br>运行边界校验</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:460.0px;width:180px;height:100px\"><div class=\"flow-text\">温度24～27℃<br>不得自动削减关键负荷<br>越界→修改／重新优化</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:600.0px;width:280px;height:130px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 130\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,65.0 140.0,129 1,65.0\"/></svg><div class=\"flow-text\">⑤ 边界合规且<br>必要审批已通过？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:613.0px;width:180px;height:104px\"><div class=\"flow-text\">高风险由能源管理员审批<br>未批准不得执行<br>低风险须在授权范围内</div></div><div class=\"flow-box flow-process\" style=\"left:250.0px;top:780.0px;width:260px;height:70px\"><div class=\"flow-text\">⑥ 控制网关执行<br>执行已校验策略并返回状态</div></div><div class=\"flow-box flow-decision\" style=\"left:250.0px;top:900.0px;width:260px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 260 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"130.0,1 259,60.0 130.0,119 1,60.0\"/></svg><div class=\"flow-text\">⑦ 60秒内收到<br>成功反馈？</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:905.0px;width:180px;height:110px\"><div class=\"flow-text\">明确失败或超时：<br>停止继续下发并恢复安全策略<br>通知值班<br>核对实际设备状态</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:1062.5px;width:280px;height:115px\"><div class=\"flow-text\">⑧ 结果留痕与实际负荷复核<br>记录策略、审批、指令与结果<br>反馈至持续采集与模型改进</div></div></div></div>",
+        "answerHTML": "<table><caption>智能产品应用设计表</caption><thead><tr><th>智能产品</th><th>解决的业务问题</th><th>主要数据输入</th><th>系统输出或下游动作</th></tr></thead><tbody><tr><td>能源 IoT 采集终端</td><td>能源数据完整率仅91%、仪表离线不能及时补偿告警；数据分散无法追溯</td><td>电表计量数据、楼宇自控系统数据、储能系统状态、充电平台数据（经接口汇聚）</td><td>标准化实时能源数据流（含时间戳、测点ID、数据质量标记）；离线/缺失告警；数据补采与临时估计值</td></tr><tr><td>AI 负荷预测与能源优化平台</td><td>高峰负荷靠人工观察、需量费用高；空调/储能/充电缺少统一调度</td><td>历史负荷曲线、天气预报、工作日类型、园区活动日历、分时电价</td><td>未来30分钟负荷预测、峰值风险判定（≥1500kW）、推荐调度方案（削峰策略）；策略推送至确认与执行环节</td></tr><tr><td>智能控制网关</td><td>从发现风险到执行调节平均25分钟，响应慢；执行结果无反馈闭环</td><td>经确认（高风险策略须能源管理员批准）的调度策略指令</td><td>对非关键空调负荷、储能充放电、充电设施功率的调节指令；60秒内执行状态反馈；失败时恢复安全策略并告警</td></tr></tbody></table><table><caption>运行规则表</caption><thead><tr><th>情况</th><th>判断条件</th><th>处理动作</th></tr></thead><tbody><tr><td>能源数据连续缺失</td><td>连续缺失超过 5 分钟</td><td>系统重试采集并标记异常；重试仍无数据→用最近可靠值形成临时估计，同时通知运维人员现场核查</td></tr><tr><td>预测出现峰值风险</td><td>未来30分钟园区负荷预测 ≥ 1500 kW</td><td>判定峰值风险，生成削峰建议（调非关键空调、储能放电、限制充电功率），推送能源管理员确认后下发执行</td></tr><tr><td>调度方案触及运行边界</td><td>方案将使办公区域温度超出 24~27℃，或涉及消防/安防/数据机房等关键负荷</td><td>拒绝执行该方案（关键负荷不得自动削减），退回平台重新生成替代策略，并记录越界拦截事件</td></tr><tr><td>控制指令执行失败</td><td>指令发出后 60 秒内未收到成功反馈</td><td>停止继续下发指令，恢复安全策略（回退到调节前状态），通知值班人员处理，全程留痕</td></tr></tbody></table><h4>规范业务流程图（参考方案）</h4><div class=\"flow-scroll\" tabindex=\"0\" aria-label=\"业务流程图，可横向滚动\"><div class=\"flow-canvas\" style=\"width:760px;height:1220px\"><svg class=\"flow-lines\" viewBox=\"0 0 760 1220\" aria-hidden=\"true\"><defs><marker id=\"arrow-b3\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10Z\" fill=\"#7296aa\"/></marker></defs><path d=\"M380 105V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M255 190H210\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"232\" y=\"178\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M120 134V110H380V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"175\" y=\"102\" text-anchor=\"middle\" class=\"flow-edge-label\">重试／降级校验</text><path d=\"M380 245V295\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"272\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 415V465\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"445\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M520 355H750V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"651\" y=\"343\" text-anchor=\"middle\" class=\"flow-edge-label\">否：记录后持续监测</text><path d=\"M380 555V600\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M520 510H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" stroke-dasharray=\"4 3\"/><text x=\"543\" y=\"495\" text-anchor=\"middle\" class=\"flow-edge-label\">约束</text><path d=\"M240 665H220V510H240\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"174\" y=\"545\" text-anchor=\"middle\" class=\"flow-edge-label\">否：修改后重审</text><path d=\"M380 730V780\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"758\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 850V900\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M380 1020V1062\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"1050\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M510 960H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"535\" y=\"948\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M650 1015V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"637\" y=\"1106\" text-anchor=\"middle\" class=\"flow-edge-label\">处置结果</text><path d=\"M380 1177V1190H15V60H250\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"145\" y=\"1180\" text-anchor=\"middle\" class=\"flow-edge-label\">持续监测与反馈闭环</text></svg><div class=\"flow-box flow-process\" style=\"left:250.0px;top:15.0px;width:260px;height:90px\"><div class=\"flow-text\">① IoT终端持续采集<br>电表／楼控／储能／充电数据<br>标准化数据、质量标记与离线事件</div></div><div class=\"flow-box flow-decision\" style=\"left:255.0px;top:135.0px;width:250px;height:110px\"><svg class=\"flow-shape\" viewBox=\"0 0 250 110\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"125.0,1 249,55.0 125.0,109 1,55.0\"/></svg><div class=\"flow-text\">② 数据是否可用？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:134.0px;width:180px;height:112px\"><div class=\"flow-text\">连续缺失 &gt;5分钟：重试<br>仍失败→最近可靠值估计<br>保留估计标志并通知运维<br>降级数据重新校验</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:295.0px;width:280px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,60.0 140.0,119 1,60.0\"/></svg><div class=\"flow-text\">③ AI预测未来30分钟<br>负荷 ≥1500kW？</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:465.0px;width:280px;height:90px\"><div class=\"flow-text\">④ AI平台生成削峰建议<br>未来30分钟预测、风险与削峰建议<br>运行边界校验</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:460.0px;width:180px;height:100px\"><div class=\"flow-text\">温度24～27℃<br>不得自动削减关键负荷<br>越界→修改／重新优化</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:600.0px;width:280px;height:130px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 130\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,65.0 140.0,129 1,65.0\"/></svg><div class=\"flow-text\">⑤ 边界合规且<br>必要审批已通过？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:613.0px;width:180px;height:104px\"><div class=\"flow-text\">高风险由能源管理员审批<br>未批准不得执行<br>低风险须在授权范围内</div></div><div class=\"flow-box flow-process\" style=\"left:250.0px;top:780.0px;width:260px;height:70px\"><div class=\"flow-text\">⑥ 控制网关执行<br>执行已校验策略并返回状态</div></div><div class=\"flow-box flow-decision\" style=\"left:250.0px;top:900.0px;width:260px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 260 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"130.0,1 259,60.0 130.0,119 1,60.0\"/></svg><div class=\"flow-text\">⑦ 60秒内收到<br>成功反馈？</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:905.0px;width:180px;height:110px\"><div class=\"flow-text\">明确失败或超时：<br>停止继续下发并恢复安全策略<br>通知值班<br>核对实际设备状态</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:1062.5px;width:280px;height:115px\"><div class=\"flow-text\">⑧ 结果留痕与实际负荷复核<br>记录策略、审批、指令与结果<br>反馈至持续采集与模型改进</div></div></div></div>",
         "flowchart": {
           "html": "<div class=\"flow-scroll\" tabindex=\"0\" aria-label=\"业务流程图，可横向滚动\"><div class=\"flow-canvas\" style=\"width:760px;height:1220px\"><svg class=\"flow-lines\" viewBox=\"0 0 760 1220\" aria-hidden=\"true\"><defs><marker id=\"arrow-b3\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10Z\" fill=\"#7296aa\"/></marker></defs><path d=\"M380 105V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M255 190H210\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"232\" y=\"178\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M120 134V110H380V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"175\" y=\"102\" text-anchor=\"middle\" class=\"flow-edge-label\">重试／降级校验</text><path d=\"M380 245V295\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"272\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 415V465\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"445\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M520 355H750V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"651\" y=\"343\" text-anchor=\"middle\" class=\"flow-edge-label\">否：记录后持续监测</text><path d=\"M380 555V600\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M520 510H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" stroke-dasharray=\"4 3\"/><text x=\"543\" y=\"495\" text-anchor=\"middle\" class=\"flow-edge-label\">约束</text><path d=\"M240 665H220V510H240\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"174\" y=\"545\" text-anchor=\"middle\" class=\"flow-edge-label\">否：修改后重审</text><path d=\"M380 730V780\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"758\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 850V900\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M380 1020V1062\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"1050\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M510 960H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"535\" y=\"948\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M650 1015V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"637\" y=\"1106\" text-anchor=\"middle\" class=\"flow-edge-label\">处置结果</text><path d=\"M380 1177V1190H15V60H250\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"145\" y=\"1180\" text-anchor=\"middle\" class=\"flow-edge-label\">持续监测与反馈闭环</text></svg><div class=\"flow-box flow-process\" style=\"left:250.0px;top:15.0px;width:260px;height:90px\"><div class=\"flow-text\">① IoT终端持续采集<br>电表／楼控／储能／充电数据<br>标准化数据、质量标记与离线事件</div></div><div class=\"flow-box flow-decision\" style=\"left:255.0px;top:135.0px;width:250px;height:110px\"><svg class=\"flow-shape\" viewBox=\"0 0 250 110\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"125.0,1 249,55.0 125.0,109 1,55.0\"/></svg><div class=\"flow-text\">② 数据是否可用？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:134.0px;width:180px;height:112px\"><div class=\"flow-text\">连续缺失 &gt;5分钟：重试<br>仍失败→最近可靠值估计<br>保留估计标志并通知运维<br>降级数据重新校验</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:295.0px;width:280px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,60.0 140.0,119 1,60.0\"/></svg><div class=\"flow-text\">③ AI预测未来30分钟<br>负荷 ≥1500kW？</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:465.0px;width:280px;height:90px\"><div class=\"flow-text\">④ AI平台生成削峰建议<br>未来30分钟预测、风险与削峰建议<br>{{0}}</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:460.0px;width:180px;height:100px\"><div class=\"flow-text\">温度24～27℃<br>不得自动削减关键负荷<br>越界→修改／重新优化</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:600.0px;width:280px;height:130px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 130\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,65.0 140.0,129 1,65.0\"/></svg><div class=\"flow-text\">⑤ 边界合规且<br>必要审批已通过？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:613.0px;width:180px;height:104px\"><div class=\"flow-text\">{{1}}<br>未批准不得执行<br>低风险须在授权范围内</div></div><div class=\"flow-box flow-process\" style=\"left:250.0px;top:780.0px;width:260px;height:70px\"><div class=\"flow-text\">⑥ 控制网关执行<br>执行已校验策略并返回状态</div></div><div class=\"flow-box flow-decision\" style=\"left:250.0px;top:900.0px;width:260px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 260 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"130.0,1 259,60.0 130.0,119 1,60.0\"/></svg><div class=\"flow-text\">⑦ 60秒内收到<br>成功反馈？</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:905.0px;width:180px;height:110px\"><div class=\"flow-text\">明确失败或超时：<br>停止继续下发并恢复安全策略<br>通知值班<br>核对实际设备状态</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:1062.5px;width:280px;height:115px\"><div class=\"flow-text\">⑧ {{2}}<br>记录策略、审批、指令与结果<br>反馈至持续采集与模型改进</div></div></div></div>",
           "slots": [
@@ -1156,21 +1156,21 @@ Object.assign(SKILL_COURSES, {
             "rows": [
               [
                 "能源 IoT 采集终端",
-                "仪表离线发现慢，设备数据不统一。",
-                "电表、楼控、储能和充电平台的时间戳、功率、电量、温度、在线状态。",
-                "标准化数据、质量标记和离线事件；异常重试与运维通知。"
+                "能源数据完整率仅91%、仪表离线不能及时补偿告警；数据分散无法追溯",
+                "电表计量数据、楼宇自控系统数据、储能系统状态、充电平台数据（经接口汇聚）",
+                "标准化实时能源数据流（含时间戳、测点ID、数据质量标记）；离线/缺失告警；数据补采与临时估计值"
               ],
               [
                 "AI 负荷预测与能源优化平台",
-                "高峰判断依赖人工，设备缺少协同调度。",
-                "历史和实时负荷、天气预报、工作日、活动、分时电价、设备能力和运行边界。",
-                "未来 30 分钟负荷预测、峰值风险、削峰方案、预期效果及审批任务。"
+                "高峰负荷靠人工观察、需量费用高；空调/储能/充电缺少统一调度",
+                "历史负荷曲线、天气预报、工作日类型、园区活动日历、分时电价",
+                "未来30分钟负荷预测、峰值风险判定（≥1500kW）、推荐调度方案（削峰策略）；策略推送至确认与执行环节"
               ],
               [
                 "智能控制网关",
-                "执行与反馈分散，异常缺少保护。",
-                "已通过约束校验及必要审批的策略、设备目标值、有效期和安全约束。",
-                "向非关键空调、储能及充电设施下发调节指令；返回状态，失败时停发、恢复安全策略并通知值班人员。"
+                "从发现风险到执行调节平均25分钟，响应慢；执行结果无反馈闭环",
+                "经确认（高风险策略须能源管理员批准）的调度策略指令",
+                "对非关键空调负荷、储能充放电、充电设施功率的调节指令；60秒内执行状态反馈；失败时恢复安全策略并告警"
               ]
             ],
             "title": "智能产品应用设计表"
@@ -1184,23 +1184,23 @@ Object.assign(SKILL_COURSES, {
             "rows": [
               [
                 "能源数据连续缺失",
-                "连续超过 5 分钟仍无数据。",
-                "重试采集并标记异常；重试仍失败则以最近可靠值临时估计，记录原值时间和估计标志，同时通知运维。估计不可伪装为真实采集值。"
+                "连续缺失超过 5 分钟",
+                "系统重试采集并标记异常；重试仍无数据→用最近可靠值形成临时估计，同时通知运维人员现场核查"
               ],
               [
                 "预测出现峰值风险",
-                "未来 30 分钟预测负荷达到或超过 1500kW。",
-                "生成削峰建议，进入边界校验及审批；低于 1500kW 则持续监测。"
+                "未来30分钟园区负荷预测 ≥ 1500 kW",
+                "判定峰值风险，生成削峰建议（调非关键空调、储能放电、限制充电功率），推送能源管理员确认后下发执行"
               ],
               [
-                "调度触及运行边界",
-                "预计使办公温度低于 24℃ 或高于 27℃，或涉及关键负荷自动削减。",
-                "拒绝越界方案并重新优化或交人工处理；消防、安防、数据机房等关键负荷不得自动削减。"
+                "调度方案触及运行边界",
+                "方案将使办公区域温度超出 24~27℃，或涉及消防/安防/数据机房等关键负荷",
+                "拒绝执行该方案（关键负荷不得自动削减），退回平台重新生成替代策略，并记录越界拦截事件"
               ],
               [
                 "控制指令执行失败",
-                "下发后 60 秒内未收到成功反馈，包括明确失败。",
-                "停止继续下发，恢复预先验证的安全策略，通知值班人员；核查设备实际状态，防止盲目重试。"
+                "指令发出后 60 秒内未收到成功反馈",
+                "停止继续下发指令，恢复安全策略（回退到调节前状态），通知值班人员处理，全程留痕"
               ]
             ],
             "title": "运行规则表"
@@ -1211,39 +1211,39 @@ Object.assign(SKILL_COURSES, {
         "id": "b3t2",
         "title": "实施与运营设计",
         "promptHTML": "<p>（1）计算并填写验收指标：最大用电负荷比现状降低 12%；月均电费比现状降低 8%；能源数据完整率达到 99% 以上；峰值风险平均响应时间缩短至 5 分钟以内。（2）制定三阶段实施计划（总周期 8 周）：数据接入与基线建立（第 1～2 周）、策略仿真与小范围试点（第 3～5 周）、推广上线与指标验收（第 6～8 周），写出各阶段关键任务、验收输出和主要责任人。（3）明确人机协作边界，说明智能系统和工作人员的工作边界。（4）制定运行风险控制措施，包括仪表离线或采集数据异常、负荷预测随季节和业态变化失准、控制指令未执行或设备状态异常。</p>",
-        "answerHTML": "<div><table><caption>验收指标表</caption><thead><tr><th>指标</th><th>上线前</th><th>建设目标</th><th>验收目标值</th></tr></thead><tbody><tr><td>最大用电负荷</td><td>1680kW</td><td>降低 12%</td><td>不高于 1478.4kW，削减至少 201.6kW。</td></tr><tr><td>月均电费</td><td>125 万元</td><td>降低 8%</td><td>不高于 115 万元，节省至少 10 万元。</td></tr><tr><td>能源数据完整率</td><td>91%</td><td>达到 99% 以上</td><td>不低于 99%，较现状提高至少 8 个百分点。</td></tr><tr><td>峰值风险平均响应时间</td><td>25 分钟</td><td>缩短至 5 分钟以内</td><td>平均不超过 5 分钟，较现状缩短至少 80%。</td></tr></tbody></table></div>\n<p>计算过程：1680×（1－12%）＝1478.4；125×（1－8%）＝115。1500kW 是风险触发阈值，1478.4kW 是最大负荷验收上限，二者用途不同。验收口径：最大负荷按与现状相同的计量时间粒度统计；电费按可比天气、工作日、业态和电价条件核对实际账单。数据完整率＝有效实测数据点数÷应采数据点数，临时估计不算真实完整采集。响应时间从风险事件生成至首次成功调节反馈，未成功事件单列并说明，不能删除失败记录后计算平均值；同时检查温度、关键负荷及安全约束达标情况。</p>\n<div><table><caption>三阶段实施计划表</caption><thead><tr><th>阶段名称</th><th>时间周期</th><th>关键任务</th><th>验收输出</th><th>主要责任人</th></tr></thead><tbody><tr><td>数据接入与基线建立</td><td>第1～2周</td><td>盘点设备和接口，统一时间与数据字典；建立采集、缺失重试、质量告警及原始基线；确认关键负荷白名单。</td><td>接入清单、数据质量报告、基线报告、运行约束和权限表。</td><td>数据接入负责人主责，运维及能源管理员确认。</td></tr><tr><td>策略仿真与小范围试点</td><td>第3～5周</td><td>训练预测模型；仿真负荷调节和温度边界；选非关键区域试点，验证审批、60 秒超时保护及回滚。</td><td>预测回测报告、试点报告、边界与故障测试记录、安全策略及操作规程。</td><td>算法负责人和控制工程师主责，能源管理员审批试点。</td></tr><tr><td>推广上线与指标验收</td><td>第6～8周</td><td>分批推广并监测实际效果，完成培训和应急演练，按统一口径核对负荷、电费、完整率与响应时长。</td><td>上线记录、验收报告、问题关闭清单、值班与运维交接资料。</td><td>项目经理主责，能源管理员和运维负责人共同验收。</td></tr></tbody></table></div>\n<p>8 周内若未覆盖完整账单周期或代表性季节，应保留阶段验收记录，月均电费及季节表现以完整可比周期补充复核，不能将短期节费直接认定为长期收益。人机协作边界：系统负责采集、质量标记、预测、约束校验、建议生成、授权范围内控制与留痕。工作人员负责设备故障排查、运行边界制定、高风险策略审批、异常接管和验收。算法不绕过温度或关键负荷约束，运维人员也不通过删除异常记录制造达标结果。风险控制一是仪表离线或数据异常，按超过 5 分钟重试及临时估计规则处理，并核对同回路数据、记录估计时效；持续异常时降级为保守策略和人工监测，待实测恢复后对账。风险控制二是季节与业态变化导致预测失准，按季节、时段和楼栋监测误差及峰值漏报，达到预设条件后用新数据回测、再训练和灰度发布，同时保留旧模型与人工策略。风险控制三是指令未执行或设备异常，采用指令编号、有效期、幂等和状态回读；60 秒内无成功反馈即停发、恢复安全策略并通知值班。安全策略恢复也要读取设备实际状态，无法确认时人工接管，避免反复下发造成储能或负荷冲击。</p><table><caption>人机协作边界与验收口径</caption><thead><tr><th>事项</th><th>工作边界或统计口径</th></tr></thead><tbody><tr><td>智能系统</td><td>采集、质量标记、预测、约束校验、建议生成、授权范围内控制与留痕。</td></tr><tr><td>工作人员</td><td>高风险策略审批、设备故障排查、运行边界制定、异常接管和验收。</td></tr><tr><td>数据完整率</td><td>有效实测数据点数÷应采数据点数；临时估计不计入有效实测。</td></tr><tr><td>风险响应时间</td><td>从风险事件生成到首次成功调节反馈；未成功事件单列，不删除失败记录。</td></tr></tbody></table><table><caption>运行风险控制措施表</caption><thead><tr><th>运行风险</th><th>控制措施</th></tr></thead><tbody><tr><td>仪表离线或采集异常</td><td>超过5分钟重试并标记，仍失败则用最近可靠值临时估计并通知运维；持续异常时保守降级，实测恢复后对账。</td></tr><tr><td>季节或业态变化导致预测失准</td><td>按季节、时段和楼栋监测误差及峰值漏报；达到预设条件后用新数据回测再训练并灰度发布，保留旧模型与人工策略。</td></tr><tr><td>指令未执行或设备异常</td><td>采用指令编号、有效期、幂等和状态回读；60秒无成功反馈即停发、恢复安全策略、通知值班，无法确认时人工接管。</td></tr><tr><td>电费及季节表现验收</td><td>采用完整可比账单周期，核对天气、工作日、业态和电价；8周未覆盖代表性季节时补充复核，不将短期收益直接认定为长期收益。</td></tr></tbody></table>",
+        "answerHTML": "<table><caption>验收指标表</caption><thead><tr><th>指标</th><th>上线前</th><th>建设目标</th><th>验收目标值（计算结果）</th></tr></thead><tbody><tr><td>最大用电负荷</td><td>1680 kW</td><td>降低 12%</td><td>≤ 1478.4 kW（1680 × (1−12%) = 1680 × 0.88）</td></tr><tr><td>月均电费</td><td>125 万元</td><td>降低 8%</td><td>≤ 115 万元（125 × (1−8%) = 125 × 0.92）</td></tr><tr><td>能源数据完整率</td><td>91%</td><td>达到 99% 以上</td><td>≥ 99%</td></tr><tr><td>峰值风险平均响应时间</td><td>25 分钟</td><td>缩短至 5 分钟以内</td><td>≤ 5 分钟</td></tr></tbody></table><table><caption>三阶段实施计划表</caption><thead><tr><th>阶段名称</th><th>时间周期</th><th>关键任务</th><th>验收输出</th><th>主要责任人</th></tr></thead><tbody><tr><td>数据接入与基线建立</td><td>第1~2周</td><td>部署 IoT 采集终端并接入电表/楼宇自控/储能/充电平台接口；建立数据质量监控（完整率、缺失告警）；收集历史负荷、天气、电价数据训练初版预测模型；测定负荷/电费/响应时间基线值</td><td>数据接入验收单；数据完整率≥99%的监测报告；基线测定报告；初版预测模型及回测精度报告</td><td>IoT 集成工程师、人工智能训练师、能源管理员</td></tr><tr><td>策略仿真与小范围试点</td><td>第3~5周</td><td>用历史数据仿真削峰策略效果；选定部分楼宇/充电区试点：预测→人工确认→网关执行→反馈闭环全流程跑通；演练数据缺失与指令失败两条异常路径；根据试点修正阈值与策略</td><td>仿真评估报告；试点运行报告（含响应时间实测≤5分钟、削峰量实测）；异常场景演练记录</td><td>人工智能训练师、能源管理员、值班运维</td></tr><tr><td>推广上线与指标验收</td><td>第6~8周</td><td>全园区推广上线；人员培训与值班制度落地；按四项验收指标连续观测并出具验收报告；建立月度复盘与模型迭代机制</td><td>上线报告；四项验收指标达成证明（负荷≤1478.4kW、电费≤115万、完整率≥99%、响应≤5分钟）；运维手册与培训记录</td><td>项目经理、能源管理员、人工智能训练师</td></tr></tbody></table><table><caption>人机协作边界</caption><thead><tr><th>责任主体</th><th>工作边界</th></tr></thead><tbody><tr><td>智能系统</td><td>7×24 数据采集与缺失兜底（重试/临时估计/告警）；负荷预测与峰值风险判定；生成调度方案并做运行边界校验；执行经确认的控制指令；60秒超时保护与自动恢复安全策略；全流程留痕与统计报表。</td></tr><tr><td>工作人员</td><td>能源管理员：高风险策略的审批确认、运行边界规则的调整；运维人员：仪表离线核查、设备故障处置；值班人员：执行失败时的人工接管与应急处置；管理层：验收指标认定与策略效果复盘。</td></tr></tbody></table><table><caption>运行风险控制措施表</caption><thead><tr><th>风险</th><th>控制措施</th></tr></thead><tbody><tr><td>仪表离线或采集数据异常</td><td>缺失超5分钟自动重试并标记异常；仍无数据用最近可靠值临时估计并显著标记为估计值（不用于结算口径），同时告警运维限时核查；每日输出数据完整率报表，低于99%触发专项整改；关键测点配置冗余采集链路。</td></tr><tr><td>负荷预测随季节和业态变化失准</td><td>建立预测误差监控（每日比对预测 vs 实际，如 MAPE 超阈值告警）；季节切换与业态变更（新商户入驻/大型活动）时触发模型再训练或人工修正；保留人工调整峰值阈值的权限，调整须审批留痕。</td></tr><tr><td>控制指令未执行或设备状态异常</td><td>60秒无成功反馈即停止下发、恢复安全策略并通知值班；执行前校验设备在线状态；定期对控制链路做演练测试；设备故障转入人工调度模式，故障记录纳入设备维护计划。</td></tr></tbody></table><p>系统“建议+执行被批准的方案”，人“决策+兜底”；任何触及安全边界的操作，系统只有拒绝权没有执行权。</p>",
         "answerTables": [
           {
             "headers": [
               "指标",
               "上线前",
               "建设目标",
-              "验收目标值"
+              "验收目标值（计算结果）"
             ],
             "rows": [
               [
                 "最大用电负荷",
-                "1680kW",
+                "1680 kW",
                 "降低 12%",
-                "不高于 1478.4kW，削减至少 201.6kW。"
+                "≤ 1478.4 kW（1680 × (1−12%) = 1680 × 0.88）"
               ],
               [
                 "月均电费",
                 "125 万元",
                 "降低 8%",
-                "不高于 115 万元，节省至少 10 万元。"
+                "≤ 115 万元（125 × (1−8%) = 125 × 0.92）"
               ],
               [
                 "能源数据完整率",
                 "91%",
                 "达到 99% 以上",
-                "不低于 99%，较现状提高至少 8 个百分点。"
+                "≥ 99%"
               ],
               [
                 "峰值风险平均响应时间",
                 "25 分钟",
                 "缩短至 5 分钟以内",
-                "平均不超过 5 分钟，较现状缩短至少 80%。"
+                "≤ 5 分钟"
               ]
             ],
             "title": "验收指标表",
@@ -1262,24 +1262,24 @@ Object.assign(SKILL_COURSES, {
             "rows": [
               [
                 "数据接入与基线建立",
-                "第1～2周",
-                "盘点设备和接口，统一时间与数据字典；建立采集、缺失重试、质量告警及原始基线；确认关键负荷白名单。",
-                "接入清单、数据质量报告、基线报告、运行约束和权限表。",
-                "数据接入负责人主责，运维及能源管理员确认。"
+                "第1~2周",
+                "部署 IoT 采集终端并接入电表/楼宇自控/储能/充电平台接口；建立数据质量监控（完整率、缺失告警）；收集历史负荷、天气、电价数据训练初版预测模型；测定负荷/电费/响应时间基线值",
+                "数据接入验收单；数据完整率≥99%的监测报告；基线测定报告；初版预测模型及回测精度报告",
+                "IoT 集成工程师、人工智能训练师、能源管理员"
               ],
               [
                 "策略仿真与小范围试点",
-                "第3～5周",
-                "训练预测模型；仿真负荷调节和温度边界；选非关键区域试点，验证审批、60 秒超时保护及回滚。",
-                "预测回测报告、试点报告、边界与故障测试记录、安全策略及操作规程。",
-                "算法负责人和控制工程师主责，能源管理员审批试点。"
+                "第3~5周",
+                "用历史数据仿真削峰策略效果；选定部分楼宇/充电区试点：预测→人工确认→网关执行→反馈闭环全流程跑通；演练数据缺失与指令失败两条异常路径；根据试点修正阈值与策略",
+                "仿真评估报告；试点运行报告（含响应时间实测≤5分钟、削峰量实测）；异常场景演练记录",
+                "人工智能训练师、能源管理员、值班运维"
               ],
               [
                 "推广上线与指标验收",
-                "第6～8周",
-                "分批推广并监测实际效果，完成培训和应急演练，按统一口径核对负荷、电费、完整率与响应时长。",
-                "上线记录、验收报告、问题关闭清单、值班与运维交接资料。",
-                "项目经理主责，能源管理员和运维负责人共同验收。"
+                "第6~8周",
+                "全园区推广上线；人员培训与值班制度落地；按四项验收指标连续观测并出具验收报告；建立月度复盘与模型迭代机制",
+                "上线报告；四项验收指标达成证明（负荷≤1478.4kW、电费≤115万、完整率≥99%、响应≤5分钟）；运维手册与培训记录",
+                "项目经理、能源管理员、人工智能训练师"
               ]
             ],
             "title": "三阶段实施计划表",
@@ -1290,54 +1290,42 @@ Object.assign(SKILL_COURSES, {
             ]
           },
           {
-            "title": "人机协作边界与验收口径",
             "headers": [
-              "事项",
-              "工作边界或统计口径"
+              "责任主体",
+              "工作边界"
             ],
             "rows": [
               [
                 "智能系统",
-                "采集、质量标记、预测、约束校验、建议生成、授权范围内控制与留痕。"
+                "7×24 数据采集与缺失兜底（重试/临时估计/告警）；负荷预测与峰值风险判定；生成调度方案并做运行边界校验；执行经确认的控制指令；60秒超时保护与自动恢复安全策略；全流程留痕与统计报表。"
               ],
               [
                 "工作人员",
-                "高风险策略审批、设备故障排查、运行边界制定、异常接管和验收。"
-              ],
-              [
-                "数据完整率",
-                "有效实测数据点数÷应采数据点数；临时估计不计入有效实测。"
-              ],
-              [
-                "风险响应时间",
-                "从风险事件生成到首次成功调节反馈；未成功事件单列，不删除失败记录。"
+                "能源管理员：高风险策略的审批确认、运行边界规则的调整；运维人员：仪表离线核查、设备故障处置；值班人员：执行失败时的人工接管与应急处置；管理层：验收指标认定与策略效果复盘。"
               ]
-            ]
+            ],
+            "title": "人机协作边界"
           },
           {
-            "title": "运行风险控制措施表",
             "headers": [
-              "运行风险",
+              "风险",
               "控制措施"
             ],
             "rows": [
               [
-                "仪表离线或采集异常",
-                "超过5分钟重试并标记，仍失败则用最近可靠值临时估计并通知运维；持续异常时保守降级，实测恢复后对账。"
+                "仪表离线或采集数据异常",
+                "缺失超5分钟自动重试并标记异常；仍无数据用最近可靠值临时估计并显著标记为估计值（不用于结算口径），同时告警运维限时核查；每日输出数据完整率报表，低于99%触发专项整改；关键测点配置冗余采集链路。"
               ],
               [
-                "季节或业态变化导致预测失准",
-                "按季节、时段和楼栋监测误差及峰值漏报；达到预设条件后用新数据回测再训练并灰度发布，保留旧模型与人工策略。"
+                "负荷预测随季节和业态变化失准",
+                "建立预测误差监控（每日比对预测 vs 实际，如 MAPE 超阈值告警）；季节切换与业态变更（新商户入驻/大型活动）时触发模型再训练或人工修正；保留人工调整峰值阈值的权限，调整须审批留痕。"
               ],
               [
-                "指令未执行或设备异常",
-                "采用指令编号、有效期、幂等和状态回读；60秒无成功反馈即停发、恢复安全策略、通知值班，无法确认时人工接管。"
-              ],
-              [
-                "电费及季节表现验收",
-                "采用完整可比账单周期，核对天气、工作日、业态和电价；8周未覆盖代表性季节时补充复核，不将短期收益直接认定为长期收益。"
+                "控制指令未执行或设备状态异常",
+                "60秒无成功反馈即停止下发、恢复安全策略并通知值班；执行前校验设备在线状态；定期对控制链路做演练测试；设备故障转入人工调度模式，故障记录纳入设备维护计划。"
               ]
-            ]
+            ],
+            "title": "运行风险控制措施表"
           }
         ],
         "providedAnswers": [
@@ -1353,43 +1341,43 @@ Object.assign(SKILL_COURSES, {
         "title": "连接三类智能产品",
         "goal": "明确采集终端、AI 平台、控制网关的数据流与职责。",
         "code": "IoT 终端 → {{}}。\nAI 平台 → {{}}。\n控制网关 → {{}}。",
-        "solution": "IoT 终端 → 标准化数据、质量标记与离线事件。\nAI 平台 → 未来30分钟预测、风险与削峰建议。\n控制网关 → 执行已校验策略并返回状态。",
+        "solution": "IoT 终端 → 标准化实时能源数据流。\nAI 平台 → 未来30分钟负荷预测。\n控制网关 → 60秒内执行状态反馈。",
         "slots": [
           {
-            "answer": "标准化数据、质量标记与离线事件",
+            "answer": "标准化实时能源数据流",
             "choices": [
-              "标准化数据、质量标记与离线事件",
+              "标准化实时能源数据流",
               "直接决定报废",
               "跳过数据质量"
             ],
-            "why": "采集端统一电表、楼控、储能和充电数据，提供质量标记。",
-            "accepted": [],
+            "why": "采集终端汇聚四类接口数据，输出带时间戳、测点ID和质量标记的标准化数据流，并提供缺失告警、补采与临时估计值。",
+            "accepted": [
+              "标准化数据、质量标记与离线事件"
+            ],
             "matchRule": {
               "groups": [
                 [
                   "标准化",
-                  "统一数据"
+                  "标准数据"
                 ],
                 [
-                  "质量",
-                  "异常标记"
-                ],
-                [
-                  "离线",
-                  "掉线"
+                  "数据流",
+                  "实时数据"
                 ]
               ]
             }
           },
           {
-            "answer": "未来30分钟预测、风险与削峰建议",
+            "answer": "未来30分钟负荷预测",
             "choices": [
-              "未来30分钟预测、风险与削峰建议",
+              "未来30分钟负荷预测",
               "未经校验直接控制所有负荷",
               "只做历史账单归档"
             ],
-            "why": "平台综合历史负荷、天气、工作日、活动和电价生成方案。",
-            "accepted": [],
+            "why": "平台使用历史负荷、天气、工作日、活动和电价，输出未来30分钟负荷预测、峰值风险与削峰方案。",
+            "accepted": [
+              "未来30分钟预测、风险与削峰建议"
+            ],
             "matchRule": {
               "groups": [
                 [
@@ -1397,45 +1385,41 @@ Object.assign(SKILL_COURSES, {
                   "半小时"
                 ],
                 [
+                  "负荷",
+                  "用电"
+                ],
+                [
                   "预测"
-                ],
-                [
-                  "风险",
-                  "预警"
-                ],
-                [
-                  "削峰",
-                  "调度建议"
                 ]
               ]
             }
           },
           {
-            "answer": "执行已校验策略并返回状态",
+            "answer": "60秒内执行状态反馈",
             "choices": [
-              "执行已校验策略并返回状态",
+              "60秒内执行状态反馈",
               "自行绕过审批",
               "用预测代替执行回执"
             ],
-            "why": "网关接收经过约束校验与必要审批的策略，并回传设备执行结果。",
-            "accepted": [],
+            "why": "网关接收经确认的调度策略，调节非关键空调、储能和充电功率；60秒内反馈执行状态，失败时恢复安全策略并告警。",
+            "accepted": [
+              "执行已校验策略并返回状态"
+            ],
             "matchRule": {
               "groups": [
                 [
-                  "已校验",
-                  "已批准",
-                  "审批通过",
-                  "已审核",
-                  "通过约束校验"
-                ],
-                [
-                  "执行",
-                  "下发"
+                  "60秒",
+                  "一分钟",
+                  "1分钟"
                 ],
                 [
                   "反馈",
                   "回传",
-                  "返回",
+                  "返回"
+                ],
+                [
+                  "执行状态",
+                  "执行结果",
                   "状态"
                 ]
               ]
@@ -1450,9 +1434,9 @@ Object.assign(SKILL_COURSES, {
           "table": 0,
           "rows": null,
           "cells": {
-            "0-3": "{{0}}；异常重试与运维通知。",
-            "1-3": "{{1}}、预期效果及审批任务。",
-            "2-3": "{{2}}；失败时停发、恢复安全策略并通知值班。"
+            "0-3": "{{0}}（含时间戳、测点ID、数据质量标记）；离线/缺失告警；数据补采与临时估计值",
+            "1-3": "{{1}}、峰值风险判定（≥1500kW）、推荐调度方案（削峰策略）；策略推送至确认与执行环节",
+            "2-3": "对非关键空调负荷、储能充放电、充电设施功率的调节指令；{{2}}；失败时恢复安全策略并告警"
           }
         }
       },
@@ -1504,8 +1488,8 @@ Object.assign(SKILL_COURSES, {
             0
           ],
           "cells": {
-            "0-1": "连续超过 {{0}} 分钟仍无数据。",
-            "0-2": "重试采集并标记异常；仍失败则用 {{1}} 临时估计，记录原值时间和估计标志，同时通知运维。"
+            "0-1": "连续缺失超过 {{0}} 分钟",
+            "0-2": "系统重试采集并标记异常；重试仍无数据→用{{1}}形成临时估计，同时通知运维人员现场核查"
           }
         }
       },
@@ -1549,7 +1533,7 @@ Object.assign(SKILL_COURSES, {
             1
           ],
           "cells": {
-            "1-1": "未来 {{0}} 分钟预测负荷达到或超过 {{1}} kW。"
+            "1-1": "未来{{0}}分钟园区负荷预测 ≥ {{1}} kW"
           }
         }
       },
@@ -1612,8 +1596,8 @@ Object.assign(SKILL_COURSES, {
             2
           ],
           "cells": {
-            "2-1": "预计办公温度低于 {{0}} ℃或高于 {{1}} ℃，或涉及关键负荷自动削减。",
-            "2-2": "关键负荷 {{2}}；拒绝越界方案并重新优化或交人工处理。"
+            "2-1": "方案将使办公区域温度超出 {{0}}~{{1}}℃，或涉及消防/安防/数据机房等关键负荷",
+            "2-2": "拒绝执行该方案（关键负荷{{2}}），退回平台重新生成替代策略，并记录越界拦截事件"
           }
         }
       },
@@ -1622,7 +1606,7 @@ Object.assign(SKILL_COURSES, {
         "title": "失败保护与审批留痕",
         "goal": "控制下发后没有成功反馈，不能继续盲目重试。",
         "code": "下发后 {{}} 秒内未收到成功反馈 → {{}}，通知值班人员。\n高风险策略必须由 {{}} 确认后执行。\n策略、审批人、指令、结果和时间全程记录。",
-        "solution": "下发后 60 秒内未收到成功反馈 → 停止继续下发并恢复安全策略，通知值班人员。\n高风险策略必须由 能源管理员 确认后执行。\n策略、审批人、指令、结果和时间全程记录。",
+        "solution": "下发后 60 秒内未收到成功反馈 → 停止继续下发指令，恢复安全策略，通知值班人员。\n高风险策略必须由 能源管理员 确认后执行。\n策略、审批人、指令、结果和时间全程记录。",
         "slots": [
           {
             "answer": "60",
@@ -1636,14 +1620,16 @@ Object.assign(SKILL_COURSES, {
             "matchRule": {}
           },
           {
-            "answer": "停止继续下发并恢复安全策略",
+            "answer": "停止继续下发指令，恢复安全策略",
             "choices": [
-              "停止继续下发并恢复安全策略",
+              "停止继续下发指令，恢复安全策略",
               "无限重发",
               "把无回执当成功"
             ],
             "why": "停止继续下发，核查设备实际状态，无法确认则人工接管。",
-            "accepted": [],
+            "accepted": [
+              "停止继续下发并恢复安全策略"
+            ],
             "matchRule": {
               "groups": [
                 [
@@ -1689,8 +1675,8 @@ Object.assign(SKILL_COURSES, {
             3
           ],
           "cells": {
-            "3-1": "下发后 {{0}} 秒内未收到成功反馈，包括明确失败。",
-            "3-2": "{{1}}，通知值班人员并核查设备实际状态；高风险策略必须由 {{2}} 确认后执行，全程留痕。"
+            "3-1": "指令发出后 {{0}} 秒内未收到成功反馈",
+            "3-2": "{{1}}（回退到调节前状态），通知值班人员处理，全程留痕；高风险策略须{{2}}确认后执行。"
           }
         }
       },
@@ -1793,7 +1779,7 @@ Object.assign(SKILL_COURSES, {
       {
         "id": "b3-7",
         "title": "计算四项验收目标",
-        "goal": "用题设基线计算目标，保留单位并区分百分比与百分点。",
+        "goal": "根据题目基线计算四项验收目标，保留单位与不等号方向。",
         "code": "最大负荷 ≤ {{}} kW（1680×0.88）。\n月均电费 ≤ {{}} 万元（125×0.92）。\n实测数据完整率 ≥ {{}}%。\n峰值风险平均响应时间 ≤ {{}} 分钟。",
         "solution": "最大负荷 ≤ 1478.4 kW（1680×0.88）。\n月均电费 ≤ 115 万元（125×0.92）。\n实测数据完整率 ≥ 99%。\n峰值风险平均响应时间 ≤ 5 分钟。",
         "slots": [
@@ -1826,7 +1812,7 @@ Object.assign(SKILL_COURSES, {
               "91",
               "8"
             ],
-            "why": "完整率至少 99%，比 91% 提高至少 8 个百分点；估计值不计入有效实测。",
+            "why": "老师参考答案为能源数据完整率≥99%。",
             "accepted": [],
             "matchRule": {}
           },
@@ -1837,7 +1823,7 @@ Object.assign(SKILL_COURSES, {
               "25",
               "60"
             ],
-            "why": "平均响应时间不超过 5 分钟，失败事件另行记录。",
+            "why": "老师参考答案为峰值风险平均响应时间≤5分钟。",
             "accepted": [],
             "matchRule": {}
           }
@@ -1850,10 +1836,10 @@ Object.assign(SKILL_COURSES, {
           "table": 0,
           "rows": null,
           "cells": {
-            "0-3": "不高于 {{0}} kW（1680×0.88），削减至少201.6 kW。",
-            "1-3": "不高于 {{1}} 万元（125×0.92），节省至少10万元。",
-            "2-3": "不低于 {{2}}%，提高至少8个百分点。",
-            "3-3": "平均不超过 {{3}} 分钟，缩短至少80%。"
+            "0-3": "≤ {{0}} kW（1680 × (1−12%) = 1680 × 0.88）",
+            "1-3": "≤ {{1}} 万元（125 × (1−8%) = 125 × 0.92）",
+            "2-3": "≥ {{2}}%",
+            "3-3": "≤ {{3}} 分钟"
           }
         }
       },
@@ -1861,8 +1847,8 @@ Object.assign(SKILL_COURSES, {
         "id": "b3-8",
         "title": "安排八周实施计划",
         "goal": "按照接入、试点、推广的顺序，明确任务、交付与责任人。",
-        "code": "第 {{}} 周：数据接入与基线建立，数据负责人主责。\n第 {{}} 周：策略仿真与小范围试点，算法及控制工程师主责。\n第 {{}} 周：推广上线与指标验收，项目经理主责。",
-        "solution": "第 1～2 周：数据接入与基线建立，数据负责人主责。\n第 3～5 周：策略仿真与小范围试点，算法及控制工程师主责。\n第 6～8 周：推广上线与指标验收，项目经理主责。",
+        "code": "第{{}}周：数据接入与基线建立。\n第{{}}周：策略仿真与小范围试点。\n第{{}}周：推广上线与指标验收。",
+        "solution": "第1～2周：数据接入与基线建立。\n第3～5周：策略仿真与小范围试点。\n第6～8周：推广上线与指标验收。",
         "slots": [
           {
             "answer": "1～2",
@@ -1871,7 +1857,7 @@ Object.assign(SKILL_COURSES, {
               "1～3",
               "1～5"
             ],
-            "why": "首阶段形成接口清单、质量报告、基线、权限和关键负荷约束。",
+            "why": "部署 IoT 采集终端并接入电表/楼宇自控/储能/充电平台接口；建立数据质量监控（完整率、缺失告警）；收集历史负荷、天气、电价数据训练初版预测模型；测定负荷/电费/响应时间基线值；验收输出：数据接入验收单；数据完整率≥99%的监测报告；基线测定报告；初版预测模型及回测精度报告；责任人：IoT 集成工程师、人工智能训练师、能源管理员。",
             "accepted": [
               "1-2",
               "1至2"
@@ -1885,7 +1871,7 @@ Object.assign(SKILL_COURSES, {
               "2～4",
               "3～8"
             ],
-            "why": "试点验证预测、边界、审批、60 秒保护和回滚，形成试点及故障测试记录。",
+            "why": "用历史数据仿真削峰策略效果；选定部分楼宇/充电区试点：预测→人工确认→网关执行→反馈闭环全流程跑通；演练数据缺失与指令失败两条异常路径；根据试点修正阈值与策略；验收输出：仿真评估报告；试点运行报告（含响应时间实测≤5分钟、削峰量实测）；异常场景演练记录；责任人：人工智能训练师、能源管理员、值班运维。",
             "accepted": [
               "3-5",
               "3至5"
@@ -1899,7 +1885,7 @@ Object.assign(SKILL_COURSES, {
               "5～7",
               "8～10"
             ],
-            "why": "推广阶段输出验收报告、问题关闭清单、培训和运维交接。",
+            "why": "全园区推广上线；人员培训与值班制度落地；按四项验收指标连续观测并出具验收报告；建立月度复盘与模型迭代机制；验收输出：上线报告；四项验收指标达成证明（负荷≤1478.4kW、电费≤115万、完整率≥99%、响应≤5分钟）；运维手册与培训记录；责任人：项目经理、能源管理员、人工智能训练师。",
             "accepted": [
               "6-8",
               "6至8"
@@ -1907,7 +1893,7 @@ Object.assign(SKILL_COURSES, {
             "matchRule": {}
           }
         ],
-        "hint": "三个阶段分别是 1～2、3～5、6～8 周。",
+        "hint": "按题目指定的三个阶段填写关键任务、验收输出和主要责任人。",
         "context": "",
         "taskIndex": 1,
         "examComments": "原题任务：实施与运营设计",
@@ -1915,91 +1901,86 @@ Object.assign(SKILL_COURSES, {
           "table": 1,
           "rows": null,
           "cells": {
-            "0-1": "第 {{0}} 周",
-            "1-1": "第 {{1}} 周",
-            "2-1": "第 {{2}} 周"
+            "0-1": "第{{0}}周",
+            "1-1": "第{{1}}周",
+            "2-1": "第{{2}}周"
           }
         }
       },
       {
         "id": "b3-9",
-        "title": "明确人机边界与验收口径",
-        "goal": "让系统自动做可授权的工作，把高风险判断和现场处置交给有权人员。",
-        "code": "系统：采集、质量标记、预测、校验、授权执行和留痕。\n人员：{{}}、故障排查、异常接管和验收。\n数据完整率分子只计 {{}}。\n响应时长统计从风险生成到 {{}}。",
-        "solution": "系统：采集、质量标记、预测、校验、授权执行和留痕。\n人员：高风险策略审批、故障排查、异常接管和验收。\n数据完整率分子只计 有效实测数据点。\n响应时长统计从风险生成到 首次成功调节反馈。",
+        "title": "明确人机协作边界",
+        "goal": "按老师参考答案区分系统自动工作与工作人员的审批、核查和应急职责。",
+        "code": "能源管理员：{{}}、运行边界规则调整。\n运维人员：{{}}。\n值班人员：执行失败时{{}}。\n管理层：验收指标认定与策略效果复盘。",
+        "solution": "能源管理员：高风险策略的审批确认、运行边界规则调整。\n运维人员：仪表离线核查、设备故障处置。\n值班人员：执行失败时人工接管与应急处置。\n管理层：验收指标认定与策略效果复盘。",
         "slots": [
           {
-            "answer": "高风险策略审批",
+            "answer": "高风险策略的审批确认",
             "choices": [
-              "高风险策略审批",
-              "随意删除异常",
-              "默认放弃安全边界"
+              "高风险策略的审批确认",
+              "自动绕过审批",
+              "删除异常记录"
             ],
-            "why": "人员负责高风险确认与现场判断，不得由算法替代审批。",
+            "accepted": [
+              "高风险策略审批"
+            ],
+            "why": "能源管理员负责高风险策略的审批确认及运行边界规则调整。",
+            "matchRule": {}
+          },
+          {
+            "answer": "仪表离线核查、设备故障处置",
+            "choices": [
+              "仪表离线核查、设备故障处置",
+              "自动批准高风险策略",
+              "取消设备维护"
+            ],
             "accepted": [],
+            "why": "运维人员负责仪表离线核查及设备故障处置。",
             "matchRule": {
               "groups": [
                 [
-                  "高风险"
+                  "离线",
+                  "仪表"
                 ],
                 [
-                  "审批",
-                  "批准",
-                  "确认"
+                  "核查",
+                  "检查"
+                ],
+                [
+                  "故障"
+                ],
+                [
+                  "处置",
+                  "处理"
                 ]
               ]
             }
           },
           {
-            "answer": "有效实测数据点",
+            "answer": "人工接管与应急处置",
             "choices": [
-              "有效实测数据点",
-              "临时估计点",
-              "所有填补值"
+              "人工接管与应急处置",
+              "忽略执行失败",
+              "继续盲目下发"
             ],
-            "why": "临时估计不等于实测完整，不能用填补数据制造达标。",
-            "accepted": [],
+            "accepted": [
+              "人工接管和应急处置"
+            ],
+            "why": "执行失败时，值班人员负责人工接管与应急处置。",
             "matchRule": {
               "groups": [
                 [
-                  "实测",
-                  "实际采集",
-                  "真实采集"
+                  "人工接管"
                 ],
                 [
-                  "有效",
-                  "合格"
-                ]
-              ]
-            }
-          },
-          {
-            "answer": "首次成功调节反馈",
-            "choices": [
-              "首次成功调节反馈",
-              "生成建议",
-              "发送指令"
-            ],
-            "why": "不能只统计系统发出建议的耗时；失败与未完成事件需单列。",
-            "accepted": [],
-            "matchRule": {
-              "groups": [
-                [
-                  "首次",
-                  "第一次"
-                ],
-                [
-                  "成功"
-                ],
-                [
-                  "反馈",
-                  "回执"
+                  "应急处置",
+                  "应急处理"
                 ]
               ]
             }
           }
         ],
-        "hint": "验收必须证明真实执行效果，不能只证明“发过指令”。",
+        "hint": "系统负责建议和执行经批准的方案；工作人员负责决策与兜底。",
         "context": "",
         "taskIndex": 1,
         "examComments": "原题任务：实施与运营设计",
@@ -2007,77 +1988,54 @@ Object.assign(SKILL_COURSES, {
           "table": 2,
           "rows": null,
           "cells": {
-            "1-1": "{{0}}、设备故障排查、运行边界制定、异常接管和验收。",
-            "2-1": "{{1}} ÷ 应采数据点数；临时估计不计入有效实测。",
-            "3-1": "风险事件生成至 {{2}}；未成功事件单列，不删除失败记录。"
+            "1-1": "能源管理员：{{0}}、运行边界规则的调整；运维人员：{{1}}；值班人员：执行失败时的{{2}}；管理层：验收指标认定与策略效果复盘。"
           }
         }
       },
       {
         "id": "b3-10",
-        "title": "建立运行风险闭环",
-        "goal": "针对采集异常、预测失准和指令失败，分别制定可操作措施。",
-        "code": "采集异常：重试、估计标记、运维核查和保守降级。\n预测失准：按季节／业态监测，{{}}。\n执行异常：有效期、幂等与状态回读，超时后停发并恢复安全策略。\n电费验收采用 {{}}，不把短期试点直接当长期收益。",
-        "solution": "采集异常：重试、估计标记、运维核查和保守降级。\n预测失准：按季节／业态监测，回测再训练并灰度发布。\n执行异常：有效期、幂等与状态回读，超时后停发并恢复安全策略。\n电费验收采用 完整可比账单周期，不把短期试点直接当长期收益。",
+        "title": "制定三类运行风险控制措施",
+        "goal": "围绕题目指定的采集异常、季节或业态变化、指令或设备异常三类风险填写控制措施。",
+        "code": "采集异常：缺失超过5分钟重试并标记；仍无数据用最近可靠值临时估计并通知运维。\n预测失准：监测预测误差，季节切换和业态变更时触发{{}}。\n指令或设备异常：60秒无成功反馈即停发、恢复安全策略并通知值班；设备故障转入{{}}。",
+        "solution": "采集异常：缺失超过5分钟重试并标记；仍无数据用最近可靠值临时估计并通知运维。\n预测失准：监测预测误差，季节切换和业态变更时触发模型再训练或人工修正。\n指令或设备异常：60秒无成功反馈即停发、恢复安全策略并通知值班；设备故障转入人工调度模式。",
         "slots": [
           {
-            "answer": "回测再训练并灰度发布",
+            "answer": "模型再训练或人工修正",
             "choices": [
-              "回测再训练并灰度发布",
-              "直接覆盖旧模型且不验证",
-              "只删掉预测误差"
+              "模型再训练或人工修正",
+              "删除预测误差",
+              "长期沿用失准模型"
             ],
-            "why": "保留旧模型和人工策略，达到预设触发条件后用新数据验证发布。",
-            "accepted": [],
+            "accepted": [
+              "模型再训练或人工调整"
+            ],
+            "why": "监测预测误差，在季节切换和业态变更时触发模型再训练或人工修正；阈值调整须审批留痕。",
             "matchRule": {
               "groups": [
                 [
-                  "回测",
-                  "验证"
-                ],
-                [
                   "再训练",
-                  "重新训练"
-                ],
-                [
-                  "灰度",
-                  "小流量",
-                  "试点"
+                  "重新训练",
+                  "人工修正",
+                  "人工调整"
                 ]
               ]
             }
           },
           {
-            "answer": "完整可比账单周期",
+            "answer": "人工调度模式",
             "choices": [
-              "完整可比账单周期",
-              "任意一天外推全年",
-              "只看最好的一小时"
+              "人工调度模式",
+              "无限重发指令",
+              "默认设备已经执行"
             ],
-            "why": "核对天气、工作日、业态、电价；8 周未覆盖代表性季节时应补充复核。",
-            "accepted": [],
-            "matchRule": {
-              "groups": [
-                [
-                  "完整",
-                  "整月",
-                  "全周期"
-                ],
-                [
-                  "可比",
-                  "同口径",
-                  "相同条件"
-                ],
-                [
-                  "账单",
-                  "电费",
-                  "计费周期"
-                ]
-              ]
-            }
+            "accepted": [
+              "人工调度"
+            ],
+            "why": "60秒无成功反馈即停发、恢复安全策略并通知值班；设备故障转入人工调度模式。",
+            "matchRule": {}
           }
         ],
-        "hint": "每项风险都有发现、处置、恢复验证和记录。",
+        "hint": "三类风险逐项对应，写清发现条件、控制动作和负责人员。",
         "context": "",
         "taskIndex": 1,
         "examComments": "原题任务：实施与运营设计",
@@ -2085,8 +2043,8 @@ Object.assign(SKILL_COURSES, {
           "table": 3,
           "rows": null,
           "cells": {
-            "1-1": "按季节、时段和楼栋监测误差及峰值漏报，达到预设条件后 {{0}}，保留旧模型与人工策略。",
-            "3-1": "采用 {{1}}，核对天气、工作日、业态和电价；8周未覆盖代表性季节时补充复核，不将短期收益直接认定为长期收益。"
+            "1-1": "建立预测误差监控（每日比对预测 vs 实际，如 MAPE 超阈值告警）；季节切换与业态变更（新商户入驻/大型活动）时触发{{0}}；保留人工调整峰值阈值的权限，调整须审批留痕。",
+            "2-1": "60秒无成功反馈即停止下发、恢复安全策略并通知值班；执行前校验设备在线状态；定期对控制链路做演练测试；设备故障转入{{1}}，故障记录纳入设备维护计划。"
           }
         }
       }
@@ -2095,7 +2053,7 @@ Object.assign(SKILL_COURSES, {
     "originalCode": "智能产品应用方案设计\n\n实施与运营设计",
     "referenceCode": "",
     "downloadPath": "materials/b3-reference.html",
-    "referenceHTML": "<h1>B3 · 智慧园区能源预测与智能调度解决方案设计</h1><p>参考解法（整理版），不代表唯一表述或官方评分细则。</p><h4>业务背景</h4>\n<p>你是某智慧园区运营企业的人工智能训练师，正在参与园区能源管理系统升级。园区包含办公楼、商业配套、地下车库、新能源汽车充电区和储能设备。经调研，目前能源管理存在以下问题：</p>\n<ol><li>园区最大用电负荷为 1680kW，高峰负荷主要依靠人工观察后处理，容易产生需量费用。</li><li>月均电费约 125 万元，空调、储能和充电设施缺少统一调度。</li><li>能源数据完整率为 91%，部分仪表离线后不能及时补偿或告警。</li><li>从发现高峰风险到执行调节的平均时间为 25 分钟，响应速度较慢。</li><li>设备数据、预测结果、控制指令和执行反馈分散，无法形成完整追溯记录。</li></ol>\n<p>企业计划应用以下 3 类智能产品：</p>\n<ul><li>能源 IoT 采集终端</li><li>AI 负荷预测与能源优化平台</li><li>智能控制网关</li></ul>\n<p>园区现有电表、楼宇自控系统、储能系统和充电平台均可通过接口交换数据。AI 平台可结合历史负荷、天气预报、工作日类型、园区活动和分时电价，输出未来 30 分钟负荷预测、峰值风险及推荐调度方案。智能控制网关可接收经过确认的策略，对非关键空调负荷、储能充放电和充电设施功率进行调节，并返回执行状态。</p>\n<h4>运行约束</h4>\n<ol><li>能源数据连续缺失超过 5 分钟时，系统重试采集并标记异常；重试后仍无数据则使用最近可靠值形成临时估计，同时通知运维人员核查。</li><li>预测未来 30 分钟园区负荷达到或超过 1500kW 时，系统判定为峰值风险并生成削峰建议。</li><li>办公区域温度应保持在 24～27℃，消防、安防、数据机房等关键负荷不得自动削减。</li><li>调节指令发出后 60 秒内未收到成功反馈，应停止继续下发，恢复安全策略并通知值班人员。</li><li>策略、审批人、设备指令、执行结果和时间必须完整留痕；高风险策略必须由能源管理员确认后执行。</li></ol><h2>智能产品应用方案设计</h2><p>（1）完成智能产品应用设计表，写明每类产品解决的业务问题、主要数据输入、系统输出或下游动作。（2）根据题目给出的约束，完成运行规则表，填写判断条件和处理动作，覆盖能源数据连续缺失、预测出现峰值风险、调度方案触及运行边界、控制指令执行失败。（3）绘制多产品协同流程图：体现产品之间的信息传递、业务判断及分支处理、人机协作和结果闭环，主要节点控制在 6～8 个。</p><div><table><caption>智能产品应用设计表</caption><thead><tr><th>智能产品</th><th>解决的业务问题</th><th>主要数据输入</th><th>系统输出或下游动作</th></tr></thead><tbody><tr><td>能源 IoT 采集终端</td><td>仪表离线发现慢，设备数据不统一。</td><td>电表、楼控、储能和充电平台的时间戳、功率、电量、温度、在线状态。</td><td>标准化数据、质量标记和离线事件；异常重试与运维通知。</td></tr><tr><td>AI 负荷预测与能源优化平台</td><td>高峰判断依赖人工，设备缺少协同调度。</td><td>历史和实时负荷、天气预报、工作日、活动、分时电价、设备能力和运行边界。</td><td>未来 30 分钟负荷预测、峰值风险、削峰方案、预期效果及审批任务。</td></tr><tr><td>智能控制网关</td><td>执行与反馈分散，异常缺少保护。</td><td>已通过约束校验及必要审批的策略、设备目标值、有效期和安全约束。</td><td>向非关键空调、储能及充电设施下发调节指令；返回状态，失败时停发、恢复安全策略并通知值班人员。</td></tr></tbody></table></div>\n<p>运行规则表如下。</p>\n<div><table><caption>运行规则表</caption><thead><tr><th>情况</th><th>判断条件</th><th>处理动作</th></tr></thead><tbody><tr><td>能源数据连续缺失</td><td>连续超过 5 分钟仍无数据。</td><td>重试采集并标记异常；重试仍失败则以最近可靠值临时估计，记录原值时间和估计标志，同时通知运维。估计不可伪装为真实采集值。</td></tr><tr><td>预测出现峰值风险</td><td>未来 30 分钟预测负荷达到或超过 1500kW。</td><td>生成削峰建议，进入边界校验及审批；低于 1500kW 则持续监测。</td></tr><tr><td>调度触及运行边界</td><td>预计使办公温度低于 24℃ 或高于 27℃，或涉及关键负荷自动削减。</td><td>拒绝越界方案并重新优化或交人工处理；消防、安防、数据机房等关键负荷不得自动削减。</td></tr><tr><td>控制指令执行失败</td><td>下发后 60 秒内未收到成功反馈，包括明确失败。</td><td>停止继续下发，恢复预先验证的安全策略，通知值班人员；核查设备实际状态，防止盲目重试。</td></tr></tbody></table></div>\n<p>高风险策略在发布前必须由能源管理员确认。所有策略均记录策略版本、审批人或审批依据、设备指令、执行结果及时间；审批尚未通过的高风险策略不得发给网关。流程图包含 8 个主要节点：持续采集 → 数据质量判断 → 负荷预测与峰值判断 → 生成削峰建议 → 运行边界校验 → 能源管理员审批（高风险）→ 网关执行 → 结果留痕与实际负荷复核，复核后回到持续采集。数据缺失处理保留估计标志；边界不满足时修改后重新校验；高风险审批未通过时不执行。</p><h4>规范业务流程图（参考方案）</h4><div class=\"flow-scroll\" tabindex=\"0\" aria-label=\"业务流程图，可横向滚动\"><div class=\"flow-canvas\" style=\"width:760px;height:1220px\"><svg class=\"flow-lines\" viewBox=\"0 0 760 1220\" aria-hidden=\"true\"><defs><marker id=\"arrow-b3\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10Z\" fill=\"#7296aa\"/></marker></defs><path d=\"M380 105V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M255 190H210\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"232\" y=\"178\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M120 134V110H380V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"175\" y=\"102\" text-anchor=\"middle\" class=\"flow-edge-label\">重试／降级校验</text><path d=\"M380 245V295\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"272\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 415V465\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"445\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M520 355H750V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"651\" y=\"343\" text-anchor=\"middle\" class=\"flow-edge-label\">否：记录后持续监测</text><path d=\"M380 555V600\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M520 510H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" stroke-dasharray=\"4 3\"/><text x=\"543\" y=\"495\" text-anchor=\"middle\" class=\"flow-edge-label\">约束</text><path d=\"M240 665H220V510H240\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"174\" y=\"545\" text-anchor=\"middle\" class=\"flow-edge-label\">否：修改后重审</text><path d=\"M380 730V780\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"758\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 850V900\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M380 1020V1062\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"1050\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M510 960H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"535\" y=\"948\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M650 1015V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"637\" y=\"1106\" text-anchor=\"middle\" class=\"flow-edge-label\">处置结果</text><path d=\"M380 1177V1190H15V60H250\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"145\" y=\"1180\" text-anchor=\"middle\" class=\"flow-edge-label\">持续监测与反馈闭环</text></svg><div class=\"flow-box flow-process\" style=\"left:250.0px;top:15.0px;width:260px;height:90px\"><div class=\"flow-text\">① IoT终端持续采集<br>电表／楼控／储能／充电数据<br>标准化数据、质量标记与离线事件</div></div><div class=\"flow-box flow-decision\" style=\"left:255.0px;top:135.0px;width:250px;height:110px\"><svg class=\"flow-shape\" viewBox=\"0 0 250 110\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"125.0,1 249,55.0 125.0,109 1,55.0\"/></svg><div class=\"flow-text\">② 数据是否可用？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:134.0px;width:180px;height:112px\"><div class=\"flow-text\">连续缺失 &gt;5分钟：重试<br>仍失败→最近可靠值估计<br>保留估计标志并通知运维<br>降级数据重新校验</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:295.0px;width:280px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,60.0 140.0,119 1,60.0\"/></svg><div class=\"flow-text\">③ AI预测未来30分钟<br>负荷 ≥1500kW？</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:465.0px;width:280px;height:90px\"><div class=\"flow-text\">④ AI平台生成削峰建议<br>未来30分钟预测、风险与削峰建议<br>运行边界校验</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:460.0px;width:180px;height:100px\"><div class=\"flow-text\">温度24～27℃<br>不得自动削减关键负荷<br>越界→修改／重新优化</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:600.0px;width:280px;height:130px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 130\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,65.0 140.0,129 1,65.0\"/></svg><div class=\"flow-text\">⑤ 边界合规且<br>必要审批已通过？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:613.0px;width:180px;height:104px\"><div class=\"flow-text\">高风险由能源管理员审批<br>未批准不得执行<br>低风险须在授权范围内</div></div><div class=\"flow-box flow-process\" style=\"left:250.0px;top:780.0px;width:260px;height:70px\"><div class=\"flow-text\">⑥ 控制网关执行<br>执行已校验策略并返回状态</div></div><div class=\"flow-box flow-decision\" style=\"left:250.0px;top:900.0px;width:260px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 260 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"130.0,1 259,60.0 130.0,119 1,60.0\"/></svg><div class=\"flow-text\">⑦ 60秒内收到<br>成功反馈？</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:905.0px;width:180px;height:110px\"><div class=\"flow-text\">明确失败或超时：<br>停止继续下发并恢复安全策略<br>通知值班<br>核对实际设备状态</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:1062.5px;width:280px;height:115px\"><div class=\"flow-text\">⑧ 结果留痕与实际负荷复核<br>记录策略、审批、指令与结果<br>反馈至持续采集与模型改进</div></div></div></div><h2>实施与运营设计</h2><p>（1）计算并填写验收指标：最大用电负荷比现状降低 12%；月均电费比现状降低 8%；能源数据完整率达到 99% 以上；峰值风险平均响应时间缩短至 5 分钟以内。（2）制定三阶段实施计划（总周期 8 周）：数据接入与基线建立（第 1～2 周）、策略仿真与小范围试点（第 3～5 周）、推广上线与指标验收（第 6～8 周），写出各阶段关键任务、验收输出和主要责任人。（3）明确人机协作边界，说明智能系统和工作人员的工作边界。（4）制定运行风险控制措施，包括仪表离线或采集数据异常、负荷预测随季节和业态变化失准、控制指令未执行或设备状态异常。</p><div><table><caption>验收指标表</caption><thead><tr><th>指标</th><th>上线前</th><th>建设目标</th><th>验收目标值</th></tr></thead><tbody><tr><td>最大用电负荷</td><td>1680kW</td><td>降低 12%</td><td>不高于 1478.4kW，削减至少 201.6kW。</td></tr><tr><td>月均电费</td><td>125 万元</td><td>降低 8%</td><td>不高于 115 万元，节省至少 10 万元。</td></tr><tr><td>能源数据完整率</td><td>91%</td><td>达到 99% 以上</td><td>不低于 99%，较现状提高至少 8 个百分点。</td></tr><tr><td>峰值风险平均响应时间</td><td>25 分钟</td><td>缩短至 5 分钟以内</td><td>平均不超过 5 分钟，较现状缩短至少 80%。</td></tr></tbody></table></div>\n<p>计算过程：1680×（1－12%）＝1478.4；125×（1－8%）＝115。1500kW 是风险触发阈值，1478.4kW 是最大负荷验收上限，二者用途不同。验收口径：最大负荷按与现状相同的计量时间粒度统计；电费按可比天气、工作日、业态和电价条件核对实际账单。数据完整率＝有效实测数据点数÷应采数据点数，临时估计不算真实完整采集。响应时间从风险事件生成至首次成功调节反馈，未成功事件单列并说明，不能删除失败记录后计算平均值；同时检查温度、关键负荷及安全约束达标情况。</p>\n<div><table><caption>三阶段实施计划表</caption><thead><tr><th>阶段名称</th><th>时间周期</th><th>关键任务</th><th>验收输出</th><th>主要责任人</th></tr></thead><tbody><tr><td>数据接入与基线建立</td><td>第1～2周</td><td>盘点设备和接口，统一时间与数据字典；建立采集、缺失重试、质量告警及原始基线；确认关键负荷白名单。</td><td>接入清单、数据质量报告、基线报告、运行约束和权限表。</td><td>数据接入负责人主责，运维及能源管理员确认。</td></tr><tr><td>策略仿真与小范围试点</td><td>第3～5周</td><td>训练预测模型；仿真负荷调节和温度边界；选非关键区域试点，验证审批、60 秒超时保护及回滚。</td><td>预测回测报告、试点报告、边界与故障测试记录、安全策略及操作规程。</td><td>算法负责人和控制工程师主责，能源管理员审批试点。</td></tr><tr><td>推广上线与指标验收</td><td>第6～8周</td><td>分批推广并监测实际效果，完成培训和应急演练，按统一口径核对负荷、电费、完整率与响应时长。</td><td>上线记录、验收报告、问题关闭清单、值班与运维交接资料。</td><td>项目经理主责，能源管理员和运维负责人共同验收。</td></tr></tbody></table></div>\n<p>8 周内若未覆盖完整账单周期或代表性季节，应保留阶段验收记录，月均电费及季节表现以完整可比周期补充复核，不能将短期节费直接认定为长期收益。人机协作边界：系统负责采集、质量标记、预测、约束校验、建议生成、授权范围内控制与留痕。工作人员负责设备故障排查、运行边界制定、高风险策略审批、异常接管和验收。算法不绕过温度或关键负荷约束，运维人员也不通过删除异常记录制造达标结果。风险控制一是仪表离线或数据异常，按超过 5 分钟重试及临时估计规则处理，并核对同回路数据、记录估计时效；持续异常时降级为保守策略和人工监测，待实测恢复后对账。风险控制二是季节与业态变化导致预测失准，按季节、时段和楼栋监测误差及峰值漏报，达到预设条件后用新数据回测、再训练和灰度发布，同时保留旧模型与人工策略。风险控制三是指令未执行或设备异常，采用指令编号、有效期、幂等和状态回读；60 秒内无成功反馈即停发、恢复安全策略并通知值班。安全策略恢复也要读取设备实际状态，无法确认时人工接管，避免反复下发造成储能或负荷冲击。</p><table><caption>人机协作边界与验收口径</caption><thead><tr><th>事项</th><th>工作边界或统计口径</th></tr></thead><tbody><tr><td>智能系统</td><td>采集、质量标记、预测、约束校验、建议生成、授权范围内控制与留痕。</td></tr><tr><td>工作人员</td><td>高风险策略审批、设备故障排查、运行边界制定、异常接管和验收。</td></tr><tr><td>数据完整率</td><td>有效实测数据点数÷应采数据点数；临时估计不计入有效实测。</td></tr><tr><td>风险响应时间</td><td>从风险事件生成到首次成功调节反馈；未成功事件单列，不删除失败记录。</td></tr></tbody></table><table><caption>运行风险控制措施表</caption><thead><tr><th>运行风险</th><th>控制措施</th></tr></thead><tbody><tr><td>仪表离线或采集异常</td><td>超过5分钟重试并标记，仍失败则用最近可靠值临时估计并通知运维；持续异常时保守降级，实测恢复后对账。</td></tr><tr><td>季节或业态变化导致预测失准</td><td>按季节、时段和楼栋监测误差及峰值漏报；达到预设条件后用新数据回测再训练并灰度发布，保留旧模型与人工策略。</td></tr><tr><td>指令未执行或设备异常</td><td>采用指令编号、有效期、幂等和状态回读；60秒无成功反馈即停发、恢复安全策略、通知值班，无法确认时人工接管。</td></tr><tr><td>电费及季节表现验收</td><td>采用完整可比账单周期，核对天气、工作日、业态和电价；8周未覆盖代表性季节时补充复核，不将短期收益直接认定为长期收益。</td></tr></tbody></table>"
+    "referenceHTML": "<h1>B3 · 智慧园区能源预测与智能调度解决方案设计</h1><p>参考解法（整理版），不代表唯一表述或官方评分细则。</p><h4>业务背景</h4>\n<p>你是某智慧园区运营企业的人工智能训练师，正在参与园区能源管理系统升级。园区包含办公楼、商业配套、地下车库、新能源汽车充电区和储能设备。经调研，目前能源管理存在以下问题：</p>\n<ol><li>园区最大用电负荷为 1680kW，高峰负荷主要依靠人工观察后处理，容易产生需量费用。</li><li>月均电费约 125 万元，空调、储能和充电设施缺少统一调度。</li><li>能源数据完整率为 91%，部分仪表离线后不能及时补偿或告警。</li><li>从发现高峰风险到执行调节的平均时间为 25 分钟，响应速度较慢。</li><li>设备数据、预测结果、控制指令和执行反馈分散，无法形成完整追溯记录。</li></ol>\n<p>企业计划应用以下 3 类智能产品：</p>\n<ul><li>能源 IoT 采集终端</li><li>AI 负荷预测与能源优化平台</li><li>智能控制网关</li></ul>\n<p>园区现有电表、楼宇自控系统、储能系统和充电平台均可通过接口交换数据。AI 平台可结合历史负荷、天气预报、工作日类型、园区活动和分时电价，输出未来 30 分钟负荷预测、峰值风险及推荐调度方案。智能控制网关可接收经过确认的策略，对非关键空调负荷、储能充放电和充电设施功率进行调节，并返回执行状态。</p>\n<h4>运行约束</h4>\n<ol><li>能源数据连续缺失超过 5 分钟时，系统重试采集并标记异常；重试后仍无数据则使用最近可靠值形成临时估计，同时通知运维人员核查。</li><li>预测未来 30 分钟园区负荷达到或超过 1500kW 时，系统判定为峰值风险并生成削峰建议。</li><li>办公区域温度应保持在 24～27℃，消防、安防、数据机房等关键负荷不得自动削减。</li><li>调节指令发出后 60 秒内未收到成功反馈，应停止继续下发，恢复安全策略并通知值班人员。</li><li>策略、审批人、设备指令、执行结果和时间必须完整留痕；高风险策略必须由能源管理员确认后执行。</li></ol><h2>智能产品应用方案设计</h2><p>（1）完成智能产品应用设计表，写明每类产品解决的业务问题、主要数据输入、系统输出或下游动作。（2）根据题目给出的约束，完成运行规则表，填写判断条件和处理动作，覆盖能源数据连续缺失、预测出现峰值风险、调度方案触及运行边界、控制指令执行失败。（3）绘制多产品协同流程图：体现产品之间的信息传递、业务判断及分支处理、人机协作和结果闭环，主要节点控制在 6～8 个。</p><table><caption>智能产品应用设计表</caption><thead><tr><th>智能产品</th><th>解决的业务问题</th><th>主要数据输入</th><th>系统输出或下游动作</th></tr></thead><tbody><tr><td>能源 IoT 采集终端</td><td>能源数据完整率仅91%、仪表离线不能及时补偿告警；数据分散无法追溯</td><td>电表计量数据、楼宇自控系统数据、储能系统状态、充电平台数据（经接口汇聚）</td><td>标准化实时能源数据流（含时间戳、测点ID、数据质量标记）；离线/缺失告警；数据补采与临时估计值</td></tr><tr><td>AI 负荷预测与能源优化平台</td><td>高峰负荷靠人工观察、需量费用高；空调/储能/充电缺少统一调度</td><td>历史负荷曲线、天气预报、工作日类型、园区活动日历、分时电价</td><td>未来30分钟负荷预测、峰值风险判定（≥1500kW）、推荐调度方案（削峰策略）；策略推送至确认与执行环节</td></tr><tr><td>智能控制网关</td><td>从发现风险到执行调节平均25分钟，响应慢；执行结果无反馈闭环</td><td>经确认（高风险策略须能源管理员批准）的调度策略指令</td><td>对非关键空调负荷、储能充放电、充电设施功率的调节指令；60秒内执行状态反馈；失败时恢复安全策略并告警</td></tr></tbody></table><table><caption>运行规则表</caption><thead><tr><th>情况</th><th>判断条件</th><th>处理动作</th></tr></thead><tbody><tr><td>能源数据连续缺失</td><td>连续缺失超过 5 分钟</td><td>系统重试采集并标记异常；重试仍无数据→用最近可靠值形成临时估计，同时通知运维人员现场核查</td></tr><tr><td>预测出现峰值风险</td><td>未来30分钟园区负荷预测 ≥ 1500 kW</td><td>判定峰值风险，生成削峰建议（调非关键空调、储能放电、限制充电功率），推送能源管理员确认后下发执行</td></tr><tr><td>调度方案触及运行边界</td><td>方案将使办公区域温度超出 24~27℃，或涉及消防/安防/数据机房等关键负荷</td><td>拒绝执行该方案（关键负荷不得自动削减），退回平台重新生成替代策略，并记录越界拦截事件</td></tr><tr><td>控制指令执行失败</td><td>指令发出后 60 秒内未收到成功反馈</td><td>停止继续下发指令，恢复安全策略（回退到调节前状态），通知值班人员处理，全程留痕</td></tr></tbody></table><h4>规范业务流程图（参考方案）</h4><div class=\"flow-scroll\" tabindex=\"0\" aria-label=\"业务流程图，可横向滚动\"><div class=\"flow-canvas\" style=\"width:760px;height:1220px\"><svg class=\"flow-lines\" viewBox=\"0 0 760 1220\" aria-hidden=\"true\"><defs><marker id=\"arrow-b3\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"7\" markerHeight=\"7\" orient=\"auto-start-reverse\"><path d=\"M0 0L10 5L0 10Z\" fill=\"#7296aa\"/></marker></defs><path d=\"M380 105V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M255 190H210\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"232\" y=\"178\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M120 134V110H380V135\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"175\" y=\"102\" text-anchor=\"middle\" class=\"flow-edge-label\">重试／降级校验</text><path d=\"M380 245V295\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"272\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 415V465\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"445\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M520 355H750V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"651\" y=\"343\" text-anchor=\"middle\" class=\"flow-edge-label\">否：记录后持续监测</text><path d=\"M380 555V600\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M520 510H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" stroke-dasharray=\"4 3\"/><text x=\"543\" y=\"495\" text-anchor=\"middle\" class=\"flow-edge-label\">约束</text><path d=\"M240 665H220V510H240\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"174\" y=\"545\" text-anchor=\"middle\" class=\"flow-edge-label\">否：修改后重审</text><path d=\"M380 730V780\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"758\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M380 850V900\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><path d=\"M380 1020V1062\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"395\" y=\"1050\" text-anchor=\"middle\" class=\"flow-edge-label\">是</text><path d=\"M510 960H560\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"535\" y=\"948\" text-anchor=\"middle\" class=\"flow-edge-label\">否</text><path d=\"M650 1015V1120H520\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"637\" y=\"1106\" text-anchor=\"middle\" class=\"flow-edge-label\">处置结果</text><path d=\"M380 1177V1190H15V60H250\" fill=\"none\" stroke=\"#7296aa\" stroke-width=\"1.6\" marker-end=\"url(#arrow-b3)\"/><text x=\"145\" y=\"1180\" text-anchor=\"middle\" class=\"flow-edge-label\">持续监测与反馈闭环</text></svg><div class=\"flow-box flow-process\" style=\"left:250.0px;top:15.0px;width:260px;height:90px\"><div class=\"flow-text\">① IoT终端持续采集<br>电表／楼控／储能／充电数据<br>标准化数据、质量标记与离线事件</div></div><div class=\"flow-box flow-decision\" style=\"left:255.0px;top:135.0px;width:250px;height:110px\"><svg class=\"flow-shape\" viewBox=\"0 0 250 110\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"125.0,1 249,55.0 125.0,109 1,55.0\"/></svg><div class=\"flow-text\">② 数据是否可用？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:134.0px;width:180px;height:112px\"><div class=\"flow-text\">连续缺失 &gt;5分钟：重试<br>仍失败→最近可靠值估计<br>保留估计标志并通知运维<br>降级数据重新校验</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:295.0px;width:280px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,60.0 140.0,119 1,60.0\"/></svg><div class=\"flow-text\">③ AI预测未来30分钟<br>负荷 ≥1500kW？</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:465.0px;width:280px;height:90px\"><div class=\"flow-text\">④ AI平台生成削峰建议<br>未来30分钟预测、风险与削峰建议<br>运行边界校验</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:460.0px;width:180px;height:100px\"><div class=\"flow-text\">温度24～27℃<br>不得自动削减关键负荷<br>越界→修改／重新优化</div></div><div class=\"flow-box flow-decision\" style=\"left:240.0px;top:600.0px;width:280px;height:130px\"><svg class=\"flow-shape\" viewBox=\"0 0 280 130\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"140.0,1 279,65.0 140.0,129 1,65.0\"/></svg><div class=\"flow-text\">⑤ 边界合规且<br>必要审批已通过？</div></div><div class=\"flow-box flow-annotation\" style=\"left:30.0px;top:613.0px;width:180px;height:104px\"><div class=\"flow-text\">高风险由能源管理员审批<br>未批准不得执行<br>低风险须在授权范围内</div></div><div class=\"flow-box flow-process\" style=\"left:250.0px;top:780.0px;width:260px;height:70px\"><div class=\"flow-text\">⑥ 控制网关执行<br>执行已校验策略并返回状态</div></div><div class=\"flow-box flow-decision\" style=\"left:250.0px;top:900.0px;width:260px;height:120px\"><svg class=\"flow-shape\" viewBox=\"0 0 260 120\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><polygon points=\"130.0,1 259,60.0 130.0,119 1,60.0\"/></svg><div class=\"flow-text\">⑦ 60秒内收到<br>成功反馈？</div></div><div class=\"flow-box flow-annotation\" style=\"left:560.0px;top:905.0px;width:180px;height:110px\"><div class=\"flow-text\">明确失败或超时：<br>停止继续下发并恢复安全策略<br>通知值班<br>核对实际设备状态</div></div><div class=\"flow-box flow-process\" style=\"left:240.0px;top:1062.5px;width:280px;height:115px\"><div class=\"flow-text\">⑧ 结果留痕与实际负荷复核<br>记录策略、审批、指令与结果<br>反馈至持续采集与模型改进</div></div></div></div><h2>实施与运营设计</h2><p>（1）计算并填写验收指标：最大用电负荷比现状降低 12%；月均电费比现状降低 8%；能源数据完整率达到 99% 以上；峰值风险平均响应时间缩短至 5 分钟以内。（2）制定三阶段实施计划（总周期 8 周）：数据接入与基线建立（第 1～2 周）、策略仿真与小范围试点（第 3～5 周）、推广上线与指标验收（第 6～8 周），写出各阶段关键任务、验收输出和主要责任人。（3）明确人机协作边界，说明智能系统和工作人员的工作边界。（4）制定运行风险控制措施，包括仪表离线或采集数据异常、负荷预测随季节和业态变化失准、控制指令未执行或设备状态异常。</p><table><caption>验收指标表</caption><thead><tr><th>指标</th><th>上线前</th><th>建设目标</th><th>验收目标值（计算结果）</th></tr></thead><tbody><tr><td>最大用电负荷</td><td>1680 kW</td><td>降低 12%</td><td>≤ 1478.4 kW（1680 × (1−12%) = 1680 × 0.88）</td></tr><tr><td>月均电费</td><td>125 万元</td><td>降低 8%</td><td>≤ 115 万元（125 × (1−8%) = 125 × 0.92）</td></tr><tr><td>能源数据完整率</td><td>91%</td><td>达到 99% 以上</td><td>≥ 99%</td></tr><tr><td>峰值风险平均响应时间</td><td>25 分钟</td><td>缩短至 5 分钟以内</td><td>≤ 5 分钟</td></tr></tbody></table><table><caption>三阶段实施计划表</caption><thead><tr><th>阶段名称</th><th>时间周期</th><th>关键任务</th><th>验收输出</th><th>主要责任人</th></tr></thead><tbody><tr><td>数据接入与基线建立</td><td>第1~2周</td><td>部署 IoT 采集终端并接入电表/楼宇自控/储能/充电平台接口；建立数据质量监控（完整率、缺失告警）；收集历史负荷、天气、电价数据训练初版预测模型；测定负荷/电费/响应时间基线值</td><td>数据接入验收单；数据完整率≥99%的监测报告；基线测定报告；初版预测模型及回测精度报告</td><td>IoT 集成工程师、人工智能训练师、能源管理员</td></tr><tr><td>策略仿真与小范围试点</td><td>第3~5周</td><td>用历史数据仿真削峰策略效果；选定部分楼宇/充电区试点：预测→人工确认→网关执行→反馈闭环全流程跑通；演练数据缺失与指令失败两条异常路径；根据试点修正阈值与策略</td><td>仿真评估报告；试点运行报告（含响应时间实测≤5分钟、削峰量实测）；异常场景演练记录</td><td>人工智能训练师、能源管理员、值班运维</td></tr><tr><td>推广上线与指标验收</td><td>第6~8周</td><td>全园区推广上线；人员培训与值班制度落地；按四项验收指标连续观测并出具验收报告；建立月度复盘与模型迭代机制</td><td>上线报告；四项验收指标达成证明（负荷≤1478.4kW、电费≤115万、完整率≥99%、响应≤5分钟）；运维手册与培训记录</td><td>项目经理、能源管理员、人工智能训练师</td></tr></tbody></table><table><caption>人机协作边界</caption><thead><tr><th>责任主体</th><th>工作边界</th></tr></thead><tbody><tr><td>智能系统</td><td>7×24 数据采集与缺失兜底（重试/临时估计/告警）；负荷预测与峰值风险判定；生成调度方案并做运行边界校验；执行经确认的控制指令；60秒超时保护与自动恢复安全策略；全流程留痕与统计报表。</td></tr><tr><td>工作人员</td><td>能源管理员：高风险策略的审批确认、运行边界规则的调整；运维人员：仪表离线核查、设备故障处置；值班人员：执行失败时的人工接管与应急处置；管理层：验收指标认定与策略效果复盘。</td></tr></tbody></table><table><caption>运行风险控制措施表</caption><thead><tr><th>风险</th><th>控制措施</th></tr></thead><tbody><tr><td>仪表离线或采集数据异常</td><td>缺失超5分钟自动重试并标记异常；仍无数据用最近可靠值临时估计并显著标记为估计值（不用于结算口径），同时告警运维限时核查；每日输出数据完整率报表，低于99%触发专项整改；关键测点配置冗余采集链路。</td></tr><tr><td>负荷预测随季节和业态变化失准</td><td>建立预测误差监控（每日比对预测 vs 实际，如 MAPE 超阈值告警）；季节切换与业态变更（新商户入驻/大型活动）时触发模型再训练或人工修正；保留人工调整峰值阈值的权限，调整须审批留痕。</td></tr><tr><td>控制指令未执行或设备状态异常</td><td>60秒无成功反馈即停止下发、恢复安全策略并通知值班；执行前校验设备在线状态；定期对控制链路做演练测试；设备故障转入人工调度模式，故障记录纳入设备维护计划。</td></tr></tbody></table><p>系统“建议+执行被批准的方案”，人“决策+兜底”；任何触及安全边界的操作，系统只有拒绝权没有执行权。</p>"
   },
   "b4": {
     "id": "b4",

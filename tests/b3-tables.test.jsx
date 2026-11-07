@@ -3,7 +3,7 @@ import { test, expect } from "vitest";
 import { render, fireEvent, cleanup } from "@testing-library/react";
 import Skills from "../src/SkillsPage";
 import { courses, readStore } from "../src/model";
-import { coverage } from "../src/matcher";
+import { coverage, check } from "../src/matcher";
 function start(mode, index = 0) {
   localStorage.setItem(
     "zhilian-skills-v1",
@@ -118,4 +118,33 @@ test("B3 complete table and flow entries are checked per task without requiring 
       document.querySelector(`#coverage-${task.id}`),
     ).not.toHaveTextContent("待自检");
   }
+});
+
+test("B3 follows the sample scope and teacher staffing without added acceptance work", () => {
+  const task = courses.b3.tasks[1];
+  expect(task.answerTables[2].rows.map((row) => row[0])).toEqual([
+    "智能系统",
+    "工作人员",
+  ]);
+  expect(task.answerTables[3].rows).toHaveLength(3);
+  expect(task.answerTables[1].rows.map((row) => row[4])).toEqual([
+    "IoT 集成工程师、人工智能训练师、能源管理员",
+    "人工智能训练师、能源管理员、值班运维",
+    "项目经理、能源管理员、人工智能训练师",
+  ]);
+  expect(JSON.stringify(task)).not.toMatch(
+    /完整可比账单周期|幂等|灰度发布|电费及季节表现验收/,
+  );
+  expect(courses.b3.steps[8].solution).not.toMatch(
+    /有效实测数据点|首次成功调节反馈/,
+  );
+  expect(courses.b3.steps[9].solution).not.toMatch(
+    /完整可比账单周期|幂等|灰度发布/,
+  );
+});
+
+test("B3 follows the teacher's alternative of retraining OR manual correction", () => {
+  const slot = courses.b3.steps[9].slots[0];
+  expect(check(slot, "季节变化时进行模型再训练").status).toBe("covered");
+  expect(check(slot, "业态变化时进行人工修正").status).toBe("covered");
 });

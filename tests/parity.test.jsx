@@ -146,10 +146,17 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     if (step.flowchartHTML)
       old.courses.b3.steps[index].flowchartHTML = step.flowchartHTML;
     else delete old.courses.b3.steps[index].flowchartHTML;
-    if (index === 0)
-      old.courses.b3.steps[index].slots[2].matchRule = step.slots[2].matchRule;
-    if (step.tablePractice)
-      old.courses.b3.steps[index].tablePractice = step.tablePractice;
+    // B3 now follows the supplied teacher's tables and required task scope.
+    for (const field of [
+      "slots",
+      "code",
+      "solution",
+      "title",
+      "goal",
+      "hint",
+      "tablePractice",
+    ])
+      if (field in step) old.courses.b3.steps[index][field] = step[field];
   }
   courses.b3.tasks.forEach((task, index) => {
     old.courses.b3.tasks[index].answerTables = task.answerTables;
