@@ -49,17 +49,19 @@ export function theoryState(search = "", saved = readStore("zhilian-v1")) {
   return s;
 }
 export function questionList(s) {
-  return questions.filter(
-    (q) =>
-      (s.view === "wrong"
-        ? s.records[q.id]?.correct === false
-        : s.view === "favorites"
-          ? s.favorites.includes(q.id)
-          : true) &&
-      (s.filter === "all" ||
-        !Array.isArray(s.filterIds) ||
-        s.filterIds.includes(q.id)),
-  );
+  return questions
+    .filter(
+      (q) =>
+        (s.view === "wrong"
+          ? s.records[q.id]?.correct === false
+          : s.view === "favorites"
+            ? s.favorites.includes(q.id)
+            : true) &&
+        (s.filter === "all" ||
+          !Array.isArray(s.filterIds) ||
+          s.filterIds.includes(q.id)),
+    )
+    .sort((a, b) => a.type - b.type || a.num - b.num);
 }
 export function courseState(id, saved = readStore("zhilian-skills-v1")[id]) {
   const c = courses[id],

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { theoryState } from "./model";
+import { questions, theoryState } from "./model";
 import ThemeControl from "./ThemeControl";
 const groups = [
   [
@@ -95,7 +95,10 @@ export default function Home() {
         >
           <div className="module-caption">
             <span>模块 A · 理论知识</span>
-            <span>83 道样卷原题</span>
+            <span>
+              {questions.filter((q) => !q.supplemental).length} 道原题 ·{" "}
+              {questions.filter((q) => q.supplemental).length} 道拓展
+            </span>
           </div>
           <div className="practice-hub">
             <a className="shortcut" href="theory.html?view=all&mode=study">
@@ -106,11 +109,15 @@ export default function Home() {
             <a
               className="practice-circle"
               href="theory.html?view=all&mode=answer"
-              style={{ "--progress": (records.length / 83) * 100 + "%" }}
+              style={{
+                "--progress": (records.length / questions.length) * 100 + "%",
+              }}
             >
               <span className="circle-inner">
                 <strong>顺序练习</strong>
-                <span id="home-progress">{records.length} / 83</span>
+                <span id="home-progress">
+                  {records.length} / {questions.length}
+                </span>
                 <small>继续学习 →</small>
               </span>
             </a>

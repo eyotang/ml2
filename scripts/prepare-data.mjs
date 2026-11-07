@@ -5,6 +5,7 @@ vm.createContext(context);
 for (const file of [
   "questions.js",
   "answers.js",
+  "supplemental-questions.js",
   "skill-content.js",
   "case-content.js",
   "study-tips.js",

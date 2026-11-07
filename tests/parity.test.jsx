@@ -17,6 +17,7 @@ import PythonRunner, { usePythonRuntime } from "../src/PythonRunner";
 import PythonEditor from "../src/PythonEditor";
 import {
   questions,
+  questionList,
   courses,
   tips,
   courseState,
@@ -157,13 +158,13 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     /<h4>规范业务流程图（参考方案）<\/h4>[\s\S]*?(?=<h2>)/,
     diagramHeading + b3Task.answerHTML.split(diagramHeading)[1],
   );
-  expect(questions).toEqual(old.questions);
+  expect(questions.slice(0, old.questions.length)).toEqual(old.questions);
   expect(normalizeFlowGeometry(courses)).toEqual(
     normalizeFlowGeometry(old.courses),
   );
   expect(
     questions.map((q) => q.type).reduce((a, t) => (a[t]++, a), [0, 0, 0, 0]),
-  ).toEqual([14, 56, 7, 6]);
+  ).toEqual([19, 67, 9, 6]);
   expect(
     Object.fromEntries(
       Object.entries(courses).map(([id, c]) => [id, c.steps.length]),
@@ -245,7 +246,7 @@ test("home navigation, restored summary, all six module links and hash changes",
     favorites: [1],
   });
   render(<Home />);
-  expect(document.querySelector("#home-progress")).toHaveTextContent("3 / 83");
+  expect(document.querySelector("#home-progress")).toHaveTextContent("3 / 101");
   expect(document.querySelector("#home-rate")).toHaveTextContent("50%");
   expect(
     document.querySelectorAll('[href^="skills.html?course="]'),
@@ -257,6 +258,20 @@ test("home navigation, restored summary, all six module links and hash changes",
   expect(document.querySelector("#review")).not.toHaveAttribute("hidden");
   expect(document.querySelector("#skills")).toHaveAttribute("hidden");
 });
+test("supplemental questions keep legacy IDs and appear with their question types", () => {
+  const ordered = questionList({ view: "all", filter: "all" });
+  expect(ordered.map((q) => q.type)).toEqual(
+    questions.map((q) => q.type).sort(),
+  );
+  expect(new Set(ordered.map((q) => q.text.replace(/\s+/g, ""))).size).toBe(
+    101,
+  );
+  for (const [index, q] of questions.entries()) expect(q.id).toBe(index);
+  expect(questions.filter((q) => q.supplemental).map((q) => q.id)).toEqual(
+    Array.from({ length: 18 }, (_, index) => index + 83),
+  );
+});
+
 describe("theory objective questions", () => {
   test.each(questions.filter((q) => q.type !== 3).map((q) => [q.id, q]))(
     "question %i accepts canonical answer and persists correct result",
