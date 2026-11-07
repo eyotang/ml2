@@ -1,4 +1,8 @@
 import "@testing-library/jest-dom/vitest";
+import data from "../src/generated/data.json";
+import { courses } from "../src/model";
+// Test every authored course; production loads just the selected one.
+Object.assign(courses, data.courses);
 import { afterEach, beforeEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 beforeEach(() => {

@@ -42,3 +42,20 @@ fs.writeFileSync(
   new URL("../src/generated/data.json", import.meta.url),
   JSON.stringify(data),
 );
+
+// Keep each course out of the shared startup bundle.
+for (const [name, value] of Object.entries({
+  questions: data.questions,
+  tips: data.tips,
+  ...Object.fromEntries(
+    Object.entries(data.courses).map(([id, course]) => [
+      "course-" + id,
+      course,
+    ]),
+  ),
+})) {
+  fs.writeFileSync(
+    new URL("../src/generated/" + name + ".json", import.meta.url),
+    JSON.stringify(value),
+  );
+}

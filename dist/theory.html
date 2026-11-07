@@ -1,7 +1,20 @@
-<!doctype html><html data-app-version="32b592302357dd90" lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#20afe4"><title>知练 · 人工智能训练师</title><script src="./theme-init.js"></script>  <script type="module" crossorigin src="./assets/theory-B0kkutvU.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/theme-8boldN30.js">
-  <link rel="modulepreload" crossorigin href="./assets/study-tips-CprTf8Dd.js">
+<!doctype html><html data-app-version="45fb979083df824f" lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#20afe4"><title>知练 · 人工智能训练师</title><script>// Apply the saved/system appearance before the page's styles and React load.
+(() => {
+  let mode = 'system';
+  try { const saved = localStorage.getItem('zhilian-theme'); if (['system', 'light', 'dark'].includes(saved)) mode = saved; } catch {}
+  const dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+  const theme = dark ? 'dark' : 'light', background = dark ? '#101820' : '#f7f9fb';
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+  document.documentElement.style.backgroundColor = background;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', background);
+})();
+</script>  <script type="module" crossorigin src="./assets/theory-CExFhSjw.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-WkwZ5CU-.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-DCTAcUCH.js">
+  <link rel="modulepreload" crossorigin href="./assets/theme-UpAoajI_.js">
+  <link rel="modulepreload" crossorigin href="./assets/study-tips-C0Udam3j.js">
   <link rel="stylesheet" crossorigin href="./assets/theme-0AyIx0CG.css">
   <link rel="stylesheet" crossorigin href="./assets/study-tips-DmB-9HOE.css">
   <link rel="stylesheet" crossorigin href="./assets/theory-CITKXuhY.css">
-<script src="./update-check.js"></script></head><body><div id="root"></div></body></html>
+<script defer src="./update-check.js"></script></head><body><div id="root"></div></body></html>

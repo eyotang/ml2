@@ -1,7 +1,20 @@
-<!doctype html><html data-app-version="32b592302357dd90" lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#20afe4"><title>知练 · 技能练习</title><script src="./theme-init.js"></script>  <script type="module" crossorigin src="./assets/skills-D40x7H-7.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/theme-8boldN30.js">
-  <link rel="modulepreload" crossorigin href="./assets/study-tips-CprTf8Dd.js">
+<!doctype html><html data-app-version="45fb979083df824f" lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#20afe4"><title>知练 · 技能练习</title><script>// Apply the saved/system appearance before the page's styles and React load.
+(() => {
+  let mode = 'system';
+  try { const saved = localStorage.getItem('zhilian-theme'); if (['system', 'light', 'dark'].includes(saved)) mode = saved; } catch {}
+  const dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+  const theme = dark ? 'dark' : 'light', background = dark ? '#101820' : '#f7f9fb';
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+  document.documentElement.style.backgroundColor = background;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', background);
+})();
+</script><script id="course-preload">(()=>{const files={"b11":"./assets/course-b11-ClOqge3R.js","b12":"./assets/course-b12-C9omhIQ1.js","b2":"./assets/course-b2-CAljJSjO.js","b3":"./assets/course-b3-BI773cri.js","b4":"./assets/course-b4-7cJPIgyX.js","c":"./assets/course-c-9EmhTTxw.js"},id=new URLSearchParams(location.search).get('course')||'b12',href=files[id];if(typeof href==='string'){const link=document.createElement('link');link.rel='modulepreload';link.crossOrigin='';link.href=href;document.head.append(link)}})();</script>  <script type="module" crossorigin src="./assets/skills-BXNoJ2y1.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-WkwZ5CU-.js">
+  <link rel="modulepreload" crossorigin href="./assets/vendor-DCTAcUCH.js">
+  <link rel="modulepreload" crossorigin href="./assets/theme-UpAoajI_.js">
+  <link rel="modulepreload" crossorigin href="./assets/study-tips-C0Udam3j.js">
   <link rel="stylesheet" crossorigin href="./assets/theme-0AyIx0CG.css">
   <link rel="stylesheet" crossorigin href="./assets/study-tips-DmB-9HOE.css">
   <link rel="stylesheet" crossorigin href="./assets/skills-DZh20jAa.css">
-<script src="./update-check.js"></script></head><body><div id="root"></div></body></html>
+<script defer src="./update-check.js"></script></head><body><div id="root"><p role="status" style="padding:24px;text-align:center;color:#7b909a">正在加载练习…</p></div></body></html>

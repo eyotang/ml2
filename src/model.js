@@ -1,6 +1,20 @@
-import data from "./generated/data.json";
+import questionData from "./generated/questions.json";
+import tipData from "./generated/tips.json";
 import { check as matchWritten } from "./matcher";
-export const { questions, courses, tips } = data;
+export const questions = questionData,
+  tips = tipData;
+export const courses = {};
+const courseFiles = import.meta.glob("./generated/course-*.json", {
+  import: "default",
+});
+export async function loadCourse(id) {
+  if (courses[id]) return courses[id];
+  const load = courseFiles[`./generated/course-${id}.json`];
+  if (!load) return null;
+  const course = await load();
+  courses[id] = course;
+  return course;
+}
 export const TYPES = ["判断题", "单选题", "多选题", "简答题"];
 export function readStore(key, fallback = {}) {
   try {

@@ -6,7 +6,18 @@ export default defineConfig({
   base: "./",
   plugins: [react(), release(), legacyCompatibility()],
   build: {
-    rollupOptions: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name(moduleId) {
+                return moduleId.includes("node_modules") ? "vendor" : null;
+              },
+            },
+          ],
+        },
+      },
       input: {
         home: "index.html",
         theory: "theory.html",

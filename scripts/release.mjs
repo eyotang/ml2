@@ -79,10 +79,38 @@ export function release() {
       for (const page of ["index.html", "theory.html", "skills.html"])
         collect(page);
     },
-    transformIndexHtml(html) {
-      return html
-        .replace("<html ", `<html data-app-version="${version}" `)
-        .replace("</head>", '<script src="./update-check.js"></script></head>');
+    transformIndexHtml: {
+      order: "post",
+      handler(html, context) {
+        const courseAssets = Object.fromEntries(
+          Object.values(context.bundle || {})
+            .filter(
+              (chunk) =>
+                chunk.type === "chunk" &&
+                /^course-(b11|b12|b2|b3|b4|c)$/.test(chunk.name),
+            )
+            .map((chunk) => [chunk.name.slice(7), "./" + chunk.fileName]),
+        );
+        const preload =
+          context.path.endsWith("skills.html") &&
+          Object.keys(courseAssets).length
+            ? `<script id="course-preload">(()=>{const files=${JSON.stringify(courseAssets)},id=new URLSearchParams(location.search).get('course')||'b12',href=files[id];if(typeof href==='string'){const link=document.createElement('link');link.rel='modulepreload';link.crossOrigin='';link.href=href;document.head.append(link)}})();</script>`
+            : "";
+        return html
+          .replace("<html ", `<html data-app-version="${version}" `)
+          .replace(
+            '<script src="./theme-init.js"></script>',
+            () =>
+              "<script>" +
+              fs.readFileSync("public/theme-init.js", "utf8") +
+              "</script>" +
+              preload,
+          )
+          .replace(
+            "</head>",
+            '<script defer src="./update-check.js"></script></head>',
+          );
+      },
     },
     configureServer(server) {
       server.middlewares.use("/version.json", (_, res) => {
