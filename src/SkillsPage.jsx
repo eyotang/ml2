@@ -114,7 +114,7 @@ export default function Skills({ courseId }) {
     mainRef = useRef(),
     modePositions = useRef(new Map()),
     restorePosition = useRef(null),
-    continueAtExercise = useRef(false);
+    positionAtExercise = useRef(false);
   const runtime = usePythonRuntime({
     courseId,
     editorRef,
@@ -158,7 +158,7 @@ export default function Skills({ courseId }) {
   }
   function go(index, atExercise = false) {
     if (!course.steps[index]) return;
-    continueAtExercise.current = atExercise;
+    positionAtExercise.current = atExercise;
     update((n) => {
       n.index = index;
       n.stepId = course.steps[index].id;
@@ -167,19 +167,19 @@ export default function Skills({ courseId }) {
     if (!atExercise) window.scrollTo(0, 0);
   }
   useLayoutEffect(() => {
-    if (!continueAtExercise.current) return;
-    continueAtExercise.current = false;
+    if (!positionAtExercise.current) return;
+    positionAtExercise.current = false;
 
     const main = mainRef.current;
     const exerciseTop = main
       .querySelector("#exercise")
       .getBoundingClientRect().top;
-    const modeHeight = main
-      .querySelector(".mode-row")
+    const headerHeight = main
+      .querySelector(".practice-header")
       .getBoundingClientRect().height;
-    const offset = exerciseTop - modeHeight - 12;
+    const offset = exerciseTop - headerHeight - 12;
 
-    // Leave enough room to align even a short exercise below the sticky mode bar.
+    // Leave enough room to align even a short exercise below the sticky practice header.
     const mainTop = main.getBoundingClientRect().top;
     main.style.minHeight = `calc(100dvh + ${Math.max(0, offset - mainTop)}px)`;
     window.scrollTo({
@@ -256,11 +256,12 @@ export default function Skills({ courseId }) {
       setActive(saved.active);
     }
   }
-  const swipe = useSwipe({
+  const { ref: exerciseRef, ...swipe } = useSwipe({
     identity: p.index + ":" + p.mode,
-    onNavigate: (d) => go(p.index + d),
+    onNavigate: (d) => go(p.index + d, true),
     canNavigate: (d) => !!course.steps[p.index + d],
     enabled: !original && !finished,
+    ignoreSelector: ".step-navigation, .case-rich, .runner-table",
   });
   function setValue(value, index = slotOrder[active]) {
     const next = [...values];
@@ -452,70 +453,49 @@ export default function Skills({ courseId }) {
         </button>
       </header>
       <main className="skill-main" ref={mainRef}>
-        <div className="progress-row">
-          <div className="track">
-            <i
-              id="skill-progress"
-              style={{ width: (reviewed / course.count) * 100 + "%" }}
-            />
+        <div className="practice-header">
+          <div className="progress-row">
+            <div className="track">
+              <i
+                id="skill-progress"
+                style={{ width: (reviewed / course.count) * 100 + "%" }}
+              />
+            </div>
+            <span id="step-count" aria-live="polite">
+              {original
+                ? "原题"
+                : `${currentTask.label} · ${p.index + 1} / ${course.count}`}
+            </span>
           </div>
-          <span id="step-count">
-            {original
-              ? "原题"
-              : `${currentTask.label} · ${p.index + 1} / ${course.count}`}
-          </span>
-        </div>
-        <div className="mode-row">
-          <div className="skill-modes">
-            {[
-              ["pick", isCase ? "点选要点" : "点选补全"],
-              ["type", "关键填空"],
-              ["original", isCase || course.tasks ? "原题答题" : "原题补全"],
-            ].map(([m, t]) => (
+          <div className="mode-row">
+            <div className="skill-modes">
+              {[
+                ["pick", isCase ? "点选要点" : "点选补全"],
+                ["type", "关键填空"],
+                ["original", isCase || course.tasks ? "原题答题" : "原题补全"],
+              ].map(([m, t]) => (
+                <button
+                  key={m}
+                  data-mode={m}
+                  className={p.mode === m ? "active" : ""}
+                  onClick={() => mode(m)}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            <div className="mode-progress">
+              <span id="mastered-count">已掌握 {mastered} 步</span>
               <button
-                key={m}
-                data-mode={m}
-                className={p.mode === m ? "active" : ""}
-                onClick={() => mode(m)}
+                id="reset-all-practice"
+                hidden={original}
+                onClick={resetAll}
               >
-                {t}
+                全部重置
               </button>
-            ))}
-          </div>
-          <div className="mode-progress">
-            <span id="mastered-count">已掌握 {mastered} 步</span>
-            <button
-              id="reset-all-practice"
-              hidden={original}
-              onClick={resetAll}
-            >
-              全部重置
-            </button>
+            </div>
           </div>
         </div>
-        <nav
-          className="step-navigation"
-          aria-label="切换练习步骤"
-          hidden={original}
-        >
-          <button
-            id="prev-step"
-            disabled={p.index === 0}
-            onClick={() => go(p.index - 1)}
-          >
-            ← 上一步
-          </button>
-          <span id="step-navigation-label">
-            第 {p.index + 1} 步 / {course.count} 步
-          </span>
-          <button
-            id="next-step"
-            disabled={p.index === course.count - 1}
-            onClick={() => go(p.index + 1)}
-          >
-            下一步 →
-          </button>
-        </nav>
         <section id="case-material">
           {isCase && (
             <details className="context case-task">
@@ -524,360 +504,388 @@ export default function Skills({ courseId }) {
             </details>
           )}
         </section>
-        <section id="exercise" hidden={finished} {...swipe}>
-          {original ? (
-            <>
-              <span className="task-tag">
-                {isCase ? "案例方案 · 独立作答" : "原始模板 · 独立补全"}
-              </span>
-              <h1>
-                {isCase
-                  ? "按原题任务组织完整方案"
-                  : course.tasks
-                    ? course.title.split(" · ")[0] + " · 三项任务独立作答"
-                    : "不看选项，再完整写一遍"}
-              </h1>
-              <p className="task-goal">
-                {isCase
-                  ? "保留原题要求。流程图已预先画好，可直接在节点内填写；表格及其他内容可在文本区逐项作答。开放方案不按措辞相同与否自动判错。"
-                  : "在下方原题模板中补全所有空白。完成后对照参考解法自检；原题允许等价的 Python 写法，本模式不按字符串直接判错。"}
-              </p>
-              {!isCase && course.tasks && (
-                <nav className="original-task-nav" aria-label="原题任务">
-                  <a href="#python-runner">
-                    {courseId === "b2"
-                      ? "任务一、二 · 代码运行"
-                      : "任务一 · 代码运行"}
-                  </a>
-                  {course.tasks.map((t) => (
-                    <a href={"#written-" + t.id} key={t.id}>
-                      {t.title}
+        <div
+          className="practice-surface"
+          data-paged={!original && !finished}
+          {...swipe}
+        >
+          <nav
+            className="step-navigation"
+            aria-label="切换练习步骤"
+            hidden={original || finished}
+          >
+            <button
+              id="prev-step"
+              aria-label="上一步"
+              disabled={p.index === 0}
+              onClick={() => go(p.index - 1, true)}
+            >
+              ‹
+            </button>
+            <button
+              id="next-step"
+              aria-label="下一步"
+              disabled={p.index === course.count - 1}
+              onClick={() => go(p.index + 1, true)}
+            >
+              ›
+            </button>
+          </nav>
+          <section id="exercise" ref={exerciseRef} hidden={finished}>
+            {original ? (
+              <>
+                <span className="task-tag">
+                  {isCase ? "案例方案 · 独立作答" : "原始模板 · 独立补全"}
+                </span>
+                <h1>
+                  {isCase
+                    ? "按原题任务组织完整方案"
+                    : course.tasks
+                      ? course.title.split(" · ")[0] + " · 三项任务独立作答"
+                      : "不看选项，再完整写一遍"}
+                </h1>
+                <p className="task-goal">
+                  {isCase
+                    ? "保留原题要求。流程图已预先画好，可直接在节点内填写；表格及其他内容可在文本区逐项作答。开放方案不按措辞相同与否自动判错。"
+                    : "在下方原题模板中补全所有空白。完成后对照参考解法自检；原题允许等价的 Python 写法，本模式不按字符串直接判错。"}
+                </p>
+                {!isCase && course.tasks && (
+                  <nav className="original-task-nav" aria-label="原题任务">
+                    <a href="#python-runner">
+                      {courseId === "b2"
+                        ? "任务一、二 · 代码运行"
+                        : "任务一 · 代码运行"}
                     </a>
-                  ))}
-                </nav>
-              )}
-              <div className="original-tools">
-                <span>{isCase ? "逐任务作答" : "原题代码"}</span>
-                <button
-                  id="open-practice-history"
-                  onClick={() => setHistory(true)}
-                >
-                  ▤ 查看前面练习
-                </button>
-              </div>
-              {!isCase && (
-                <>
-                  <PythonEditor
-                    editorRef={editorRef}
-                    value={p.originalDraft ?? course.originalCode}
-                    onChange={(v) =>
-                      update((n) => {
-                        n.originalDraft = v;
-                      })
-                    }
-                  />
-                  <PythonRunner runtime={runtime} />
+                    {course.tasks.map((t) => (
+                      <a href={"#written-" + t.id} key={t.id}>
+                        {t.title}
+                      </a>
+                    ))}
+                  </nav>
+                )}
+                <div className="original-tools">
+                  <span>{isCase ? "逐任务作答" : "原题代码"}</span>
                   <button
-                    className="task-check-button"
-                    data-check-task="code"
-                    onClick={() =>
-                      update((n) => {
-                        n.taskChecks ??= {};
-                        n.taskChecks.code = true;
-                      })
-                    }
+                    id="open-practice-history"
+                    onClick={() => setHistory(true)}
                   >
-                    {course.tasks ? "核对代码任务" : "核对本任务"}
+                    ▤ 查看前面练习
                   </button>
-                  {(checked || p.taskChecks?.code) && (
-                    <>
-                      <section className="solution">
-                        <h3>完整参考解法</h3>
-                        <pre>{course.referenceCode}</pre>
-                      </section>
-                      {course.websiteCode && (
-                        <details className="solution website-reference">
-                          <summary>对照指定网站的完整写法</summary>
-                          <p>{course.websiteNote}</p>
-                          <pre>{course.websiteCode}</pre>
-                          <a
-                            href={course.websiteURL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            查看参考来源 ↗
-                          </a>
-                        </details>
-                      )}
-                      <div className="feedback hint">
-                        <h3>完成自检</h3>
-                        <p>
-                          核对数据范围、字段、聚合方式、边界条件与模型参数。可下载参考
-                          Notebook 在原题数据上运行。
-                        </p>
-                        <div className="self-check">
-                          <button
-                            data-self="review"
-                            onClick={() => {
-                              update((n) => {
-                                n.originalSelf = "review";
-                              });
-                              setSelfSaved(true);
-                            }}
-                          >
-                            需要复习
-                          </button>
-                          <button
-                            data-self="done"
-                            onClick={() => {
-                              update((n) => {
-                                n.originalSelf = "done";
-                              });
-                              setSelfSaved(true);
-                            }}
-                          >
-                            已独立完成
-                          </button>
+                </div>
+                {!isCase && (
+                  <>
+                    <PythonEditor
+                      editorRef={editorRef}
+                      value={p.originalDraft ?? course.originalCode}
+                      onChange={(v) =>
+                        update((n) => {
+                          n.originalDraft = v;
+                        })
+                      }
+                    />
+                    <PythonRunner runtime={runtime} />
+                    <button
+                      className="task-check-button"
+                      data-check-task="code"
+                      onClick={() =>
+                        update((n) => {
+                          n.taskChecks ??= {};
+                          n.taskChecks.code = true;
+                        })
+                      }
+                    >
+                      {course.tasks ? "核对代码任务" : "核对本任务"}
+                    </button>
+                    {(checked || p.taskChecks?.code) && (
+                      <>
+                        <section className="solution">
+                          <h3>完整参考解法</h3>
+                          <pre>{course.referenceCode}</pre>
+                        </section>
+                        {course.websiteCode && (
+                          <details className="solution website-reference">
+                            <summary>对照指定网站的完整写法</summary>
+                            <p>{course.websiteNote}</p>
+                            <pre>{course.websiteCode}</pre>
+                            <a
+                              href={course.websiteURL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              查看参考来源 ↗
+                            </a>
+                          </details>
+                        )}
+                        <div className="feedback hint">
+                          <h3>完成自检</h3>
+                          <p>
+                            核对数据范围、字段、聚合方式、边界条件与模型参数。可下载参考
+                            Notebook 在原题数据上运行。
+                          </p>
+                          <div className="self-check">
+                            <button
+                              data-self="review"
+                              onClick={() => {
+                                update((n) => {
+                                  n.originalSelf = "review";
+                                });
+                                setSelfSaved(true);
+                              }}
+                            >
+                              需要复习
+                            </button>
+                            <button
+                              data-self="done"
+                              onClick={() => {
+                                update((n) => {
+                                  n.originalSelf = "done";
+                                });
+                                setSelfSaved(true);
+                              }}
+                            >
+                              已独立完成
+                            </button>
+                          </div>
+                          <p id="self-saved">{selfSaved ? "自评已保存" : ""}</p>
                         </div>
-                        <p id="self-saved">{selfSaved ? "自评已保存" : ""}</p>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-              {course.tasks &&
-                (isCase ? (
-                  <WrittenTasks
-                    course={course}
-                    p={p}
-                    update={update}
-                    checked={checked}
-                    isCase
-                  />
-                ) : (
-                  <section className="written-tasks">
-                    <h2>
-                      {courseId === "b2" ? "任务三" : "任务二、任务三"} ·
-                      独立作答
-                    </h2>
-                    <p className="task-goal">
-                      结合实际数据逐项作答，内容自动保存；核对参考答案时提供要点辅助检查。
-                    </p>
+                      </>
+                    )}
+                  </>
+                )}
+                {course.tasks &&
+                  (isCase ? (
                     <WrittenTasks
                       course={course}
                       p={p}
                       update={update}
                       checked={checked}
+                      isCase
                     />
-                  </section>
-                ))}
-            </>
-          ) : (
-            <>
-              <span className="task-tag">
-                {String(p.index + 1).padStart(2, "0")} ·{" "}
-                {p.mode === "pick"
-                  ? written
-                    ? "补全答题要点"
-                    : "补全代码"
-                  : written
-                    ? "回忆关键要点"
-                    : "回忆关键写法"}
-              </span>
-              <h1>{q.title}</h1>
-              <p className="task-goal">{q.goal}</p>
-              {written && (
-                <details className="context case-task">
-                  <summary>查看本步原题要求</summary>
-                  <Rich
-                    className="case-rich"
-                    html={course.tasks[q.taskIndex].promptHTML}
-                  />
-                </details>
-              )}
-              {q.context && (
-                <details className="context">
-                  <summary>查看已提供的代码</summary>
-                  <pre>{q.context}</pre>
-                </details>
-              )}
-              {["b2-18", "b2-19"].includes(q.id) ? (
-                <BusinessTables
-                  task={course.tasks[0]}
-                  step={q.id}
-                  field={field}
-                />
-              ) : ["b11-7", "b11-8"].includes(q.id) ? (
-                <BusinessTables
-                  task={course.tasks[2]}
-                  step={q.id}
-                  field={field}
-                />
-              ) : q.id === "b11-6" ? (
-                <BusinessTables
-                  task={course.tasks[1]}
-                  step={q.id}
-                  field={field}
-                />
-              ) : ["b11-1", "b11-2"].includes(q.id) ? (
-                <BusinessTables
-                  task={course.tasks[0]}
-                  step={q.id}
-                  field={field}
-                />
-              ) : q.id === "b4-1" ? (
-                <TrainingPlan task={course.tasks[0]} field={field} />
-              ) : hasFunctionCard(q) ? (
-                <FunctionCardStep q={q} field={field} />
-              ) : q.flowchartHTML ? (
-                <div className="flow-practice">
-                  <FlowChart html={q.flowchartHTML} field={field} />
-                </div>
-              ) : (
-                <div className="code-box">
-                  <div className="code-label">
-                    {written ? "答题要点" : "PYTHON"}{" "}
-                    <small>点击空位可切换或修改</small>
-                  </div>
-                  <pre
-                    className={`code-template ${written ? "case-template" : ""}`}
-                  >
-                    <Template code={q.code} field={field} />
-                  </pre>
-                </div>
-              )}
-              {/JSON/i.test(q.title) && q.code.trim().startsWith("{") && (
-                <JsonFeedback
-                  value={filledCode(q, values)}
-                  incomplete={values.some((v) => !v.trim())}
-                />
-              )}
-              {p.mode === "pick" ? (
-                <>
-                  <div className="bank-caption">
-                    第 {active + 1} 空 ·{" "}
-                    {written ? "选择合适的要点" : "选择合适的代码"}
-                  </div>
-                  <div className="code-bank">
-                    {choices(q.slots[slotOrder[active]].choices).map(
-                      (choice) => (
-                        <button
-                          data-choice={choice}
-                          key={choice}
-                          onClick={() => setValue(choice)}
-                        >
-                          {choice}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                </>
-              ) : (
-                <p className="type-note">
-                  {written
-                    ? "按近义表达与要点进行本地匹配；未识别不等同答错。关键数值和禁止事项仍需准确，请对照参考自检。"
-                    : "输入函数、字段或参数即可；引号样式和空格差异不影响检查。"}
-                </p>
-              )}
-            </>
-          )}
-        </section>
-        <section id="feedback" aria-live="polite">
-          {!finished &&
-            (hint ? (
-              <div className="feedback hint">
-                <h3>一点提示</h3>
-                <p>{q.hint}</p>
-              </div>
-            ) : original ? null : (
+                  ) : (
+                    <section className="written-tasks">
+                      <h2>
+                        {courseId === "b2" ? "任务三" : "任务二、任务三"} ·
+                        独立作答
+                      </h2>
+                      <p className="task-goal">
+                        结合实际数据逐项作答，内容自动保存；核对参考答案时提供要点辅助检查。
+                      </p>
+                      <WrittenTasks
+                        course={course}
+                        p={p}
+                        update={update}
+                        checked={checked}
+                      />
+                    </section>
+                  ))}
+              </>
+            ) : (
               <>
-                {feedback?.storage ? (
-                  <p className="warning">
-                    浏览器存储不可用，请勿关闭页面，以免丢失进度。
-                  </p>
-                ) : feedback?.empty ? (
-                  <div className="feedback warning">
-                    还有空位未填写，先补全再检查。
+                <span className="task-tag">
+                  {String(p.index + 1).padStart(2, "0")} ·{" "}
+                  {p.mode === "pick"
+                    ? written
+                      ? "补全答题要点"
+                      : "补全代码"
+                    : written
+                      ? "回忆关键要点"
+                      : "回忆关键写法"}
+                </span>
+                <h1>{q.title}</h1>
+                <p className="task-goal">{q.goal}</p>
+                {written && (
+                  <details className="context case-task">
+                    <summary>查看本步原题要求</summary>
+                    <Rich
+                      className="case-rich"
+                      html={course.tasks[q.taskIndex].promptHTML}
+                    />
+                  </details>
+                )}
+                {q.context && (
+                  <details className="context">
+                    <summary>查看已提供的代码</summary>
+                    <pre>{q.context}</pre>
+                  </details>
+                )}
+                {["b2-18", "b2-19"].includes(q.id) ? (
+                  <BusinessTables
+                    task={course.tasks[0]}
+                    step={q.id}
+                    field={field}
+                  />
+                ) : ["b11-7", "b11-8"].includes(q.id) ? (
+                  <BusinessTables
+                    task={course.tasks[2]}
+                    step={q.id}
+                    field={field}
+                  />
+                ) : q.id === "b11-6" ? (
+                  <BusinessTables
+                    task={course.tasks[1]}
+                    step={q.id}
+                    field={field}
+                  />
+                ) : ["b11-1", "b11-2"].includes(q.id) ? (
+                  <BusinessTables
+                    task={course.tasks[0]}
+                    step={q.id}
+                    field={field}
+                  />
+                ) : q.id === "b4-1" ? (
+                  <TrainingPlan task={course.tasks[0]} field={field} />
+                ) : hasFunctionCard(q) ? (
+                  <FunctionCardStep q={q} field={field} />
+                ) : q.flowchartHTML ? (
+                  <div className="flow-practice">
+                    <FlowChart html={q.flowchartHTML} field={field} />
                   </div>
                 ) : (
-                  feedback && (
-                    <div
-                      className={`feedback ${feedback.correct ? "success" : feedback.details?.some((r) => r.status === "review") || feedback.matches.some(Boolean) ? "partial" : "error"}`}
+                  <div className="code-box">
+                    <div className="code-label">
+                      {written ? "答题要点" : "PYTHON"}{" "}
+                      <small>点击空位可切换或修改</small>
+                    </div>
+                    <pre
+                      className={`code-template ${written ? "case-template" : ""}`}
                     >
-                      <h3>
-                        {feedback.correct
-                          ? written
-                            ? "✓ 已识别全部要点"
-                            : "✓ 补全正确"
-                          : written
-                            ? "请核对以下要点"
-                            : "还有几处需要调整"}
-                      </h3>
-                      <ul>
-                        {slotOrder.map((i, position) => (
-                          <li
-                            key={i}
-                            className={
-                              feedback.matches[i]
-                                ? "slot-correct"
-                                : feedback.details?.[i]?.status === "review"
-                                  ? "slot-review"
-                                  : "slot-incorrect"
-                            }
+                      <Template code={q.code} field={field} />
+                    </pre>
+                  </div>
+                )}
+                {/JSON/i.test(q.title) && q.code.trim().startsWith("{") && (
+                  <JsonFeedback
+                    value={filledCode(q, values)}
+                    incomplete={values.some((v) => !v.trim())}
+                  />
+                )}
+                {p.mode === "pick" ? (
+                  <>
+                    <div className="bank-caption">
+                      第 {active + 1} 空 ·{" "}
+                      {written ? "选择合适的要点" : "选择合适的代码"}
+                    </div>
+                    <div className="code-bank">
+                      {choices(q.slots[slotOrder[active]].choices).map(
+                        (choice) => (
+                          <button
+                            data-choice={choice}
+                            key={choice}
+                            onClick={() => setValue(choice)}
                           >
-                            <strong>
-                              {feedback.matches[i]
-                                ? "✓"
-                                : feedback.details?.[i]?.status === "review"
-                                  ? "?"
-                                  : "×"}{" "}
-                              第 {position + 1} 空
-                            </strong>
-                            ：
-                            {feedback.details?.[i]?.status === "review"
-                              ? "未充分识别你的表述，不等同答错。"
-                              : ""}
-                            {q.slots[i].why}
-                            {!feedback.matches[i] && (
-                              <>
-                                <br />
-                                <span className="answer-reference">
-                                  {written ? "参考表达" : "此处应填"}{" "}
-                                  <code>{q.slots[i].answer}</code>
-                                </span>
-                              </>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                      {!feedback.correct && (
-                        <button id="reveal-answer" onClick={reveal}>
-                          查看{written ? "本步参考答案" : "完整参考代码"}
-                        </button>
+                            {choice}
+                          </button>
+                        ),
                       )}
                     </div>
-                  )
-                )}
-                {(showSolution || feedback?.correct) && (
-                  <>
-                    <div className="solution">
-                      <h3>{written ? "本步参考答案" : "完整参考代码"}</h3>
-                      <Solution q={q} />
-                      {written && <AnswerNote summary={q.hint} />}
-                      <small>
-                        {written
-                          ? "可参考不同表述，重点核对业务约束与任务覆盖。"
-                          : "可用于对照理解；也可以回到原 Notebook 独立练习。"}
-                      </small>
-                    </div>
-                    {q.websiteReferences && (
-                      <WebsiteReference course={course} q={q} />
-                    )}
                   </>
+                ) : (
+                  <p className="type-note">
+                    {written
+                      ? "按近义表达与要点进行本地匹配；未识别不等同答错。关键数值和禁止事项仍需准确，请对照参考自检。"
+                      : "输入函数、字段或参数即可；引号样式和空格差异不影响检查。"}
+                  </p>
                 )}
               </>
-            ))}
-        </section>
+            )}
+          </section>
+          <section id="feedback" aria-live="polite">
+            {!finished &&
+              (hint ? (
+                <div className="feedback hint">
+                  <h3>一点提示</h3>
+                  <p>{q.hint}</p>
+                </div>
+              ) : original ? null : (
+                <>
+                  {feedback?.storage ? (
+                    <p className="warning">
+                      浏览器存储不可用，请勿关闭页面，以免丢失进度。
+                    </p>
+                  ) : feedback?.empty ? (
+                    <div className="feedback warning">
+                      还有空位未填写，先补全再检查。
+                    </div>
+                  ) : (
+                    feedback && (
+                      <div
+                        className={`feedback ${feedback.correct ? "success" : feedback.details?.some((r) => r.status === "review") || feedback.matches.some(Boolean) ? "partial" : "error"}`}
+                      >
+                        <h3>
+                          {feedback.correct
+                            ? written
+                              ? "✓ 已识别全部要点"
+                              : "✓ 补全正确"
+                            : written
+                              ? "请核对以下要点"
+                              : "还有几处需要调整"}
+                        </h3>
+                        <ul>
+                          {slotOrder.map((i, position) => (
+                            <li
+                              key={i}
+                              className={
+                                feedback.matches[i]
+                                  ? "slot-correct"
+                                  : feedback.details?.[i]?.status === "review"
+                                    ? "slot-review"
+                                    : "slot-incorrect"
+                              }
+                            >
+                              <strong>
+                                {feedback.matches[i]
+                                  ? "✓"
+                                  : feedback.details?.[i]?.status === "review"
+                                    ? "?"
+                                    : "×"}{" "}
+                                第 {position + 1} 空
+                              </strong>
+                              ：
+                              {feedback.details?.[i]?.status === "review"
+                                ? "未充分识别你的表述，不等同答错。"
+                                : ""}
+                              {q.slots[i].why}
+                              {!feedback.matches[i] && (
+                                <>
+                                  <br />
+                                  <span className="answer-reference">
+                                    {written ? "参考表达" : "此处应填"}{" "}
+                                    <code>{q.slots[i].answer}</code>
+                                  </span>
+                                </>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                        {!feedback.correct && (
+                          <button id="reveal-answer" onClick={reveal}>
+                            查看{written ? "本步参考答案" : "完整参考代码"}
+                          </button>
+                        )}
+                      </div>
+                    )
+                  )}
+                  {(showSolution || feedback?.correct) && (
+                    <>
+                      <div className="solution">
+                        <h3>{written ? "本步参考答案" : "完整参考代码"}</h3>
+                        <Solution q={q} />
+                        {written && <AnswerNote summary={q.hint} />}
+                        <small>
+                          {written
+                            ? "可参考不同表述，重点核对业务约束与任务覆盖。"
+                            : "可用于对照理解；也可以回到原 Notebook 独立练习。"}
+                        </small>
+                      </div>
+                      {q.websiteReferences && (
+                        <WebsiteReference course={course} q={q} />
+                      )}
+                    </>
+                  )}
+                </>
+              ))}
+          </section>
+        </div>
         <section id="finish" hidden={!finished}>
           <div className="finish-icon">✓</div>
           <h1>这一轮练习完成</h1>

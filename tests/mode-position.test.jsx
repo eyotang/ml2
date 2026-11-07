@@ -47,7 +47,7 @@ test("each mode restores its document position, editor scroll and selection, and
   switchMode("pick");
   expect(window.scrollTo).toHaveBeenCalledTimes(calls);
 });
-test("original flowchart horizontal position survives mode switches; step navigation keeps its normal top-of-page behavior", () => {
+test("original flowchart horizontal position survives mode switches; side navigation positions the next exercise below the sticky header", () => {
   render(<Skills courseId="b11" />);
   switchMode("original");
   const chart = document.querySelector(".flow-practice .flow-scroll");
@@ -64,8 +64,12 @@ test("original flowchart horizontal position survives mode switches; step naviga
     behavior: "instant",
   });
   switchMode("type");
-  fireEvent.click(screen.getByRole("button", { name: "下一步 →" }));
-  expect(window.scrollTo).toHaveBeenLastCalledWith(0, 0);
+  fireEvent.click(screen.getByRole("button", { name: "下一步" }));
+  expect(window.scrollTo).toHaveBeenLastCalledWith({
+    left: 0,
+    top: 1188,
+    behavior: "instant",
+  });
 });
 
 test.each(["pick", "type"])(
@@ -96,7 +100,7 @@ test.each(["pick", "type"])(
       "getBoundingClientRect",
     ).mockReturnValue({ top: -400 });
     vi.spyOn(
-      document.querySelector(".mode-row"),
+      document.querySelector(".practice-header"),
       "getBoundingClientRect",
     ).mockReturnValue({ height: 60 });
     fireEvent.click(document.querySelector("#next-button"));
