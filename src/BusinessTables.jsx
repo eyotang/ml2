@@ -1,5 +1,22 @@
 import React from "react";
 import { AutoBlank } from "./shared";
+// Keys follow the table rows and columns. Values are stable saved-answer indices.
+const traceSlots = {
+  "1-1-0": 0,
+  "io-0-1": 3,
+  "io-1-2": 4,
+  "io-1-3": 5,
+  "io-2-3": 2,
+  "io-3-3": 1,
+  "io-4-1": 6,
+  "io-4-3": 7,
+  "io-5-3": 8,
+};
+export function practiceSlotOrder(step) {
+  return step.id === "b11-2"
+    ? Object.values(traceSlots)
+    : step.slots.map((_, index) => index);
+}
 export function businessText(p, taskId = "b11t1") {
   return Object.values(p.businessDrafts?.[taskId] || {}).join("\n");
 }
@@ -40,17 +57,7 @@ export default function BusinessTables({ task, p, update, step, field }) {
         ? { "0-0-2": 0, "0-1-2": 1 }
         : step === "b11-1"
           ? { "0-0-0": 0, "0-2-0": 1, "0-3-0": 2 }
-          : {
-              "1-1-0": 0,
-              "io-3-3": 1,
-              "io-2-3": 2,
-              "io-0-1": 3,
-              "io-1-2": 4,
-              "io-1-3": 5,
-              "io-4-1": 6,
-              "io-4-3": 7,
-              "io-5-3": 8,
-            };
+          : traceSlots;
   return (
     <div
       className={`training-plan business-tables ${task.reviewTables ? "review-tables" : ""}`}

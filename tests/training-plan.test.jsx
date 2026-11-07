@@ -313,3 +313,34 @@ test("B2 conclusions use structured tables without adding code or exercises", ()
   click("#reset-practice");
   expect(readStore("zhilian-skills-v1").b2.businessDrafts).toEqual({});
 });
+
+test("B1-1 table picks and checks answers in visible order while saving the original slot indices", () => {
+  const q = courses.b11.steps[1];
+  localStorage.setItem(
+    "zhilian-skills-v1",
+    JSON.stringify({ b11: { answerSchema: 2, mode: "pick", index: 1 } }),
+  );
+  render(<Skills courseId="b11" />);
+  const blanks = [...document.querySelectorAll("#exercise [data-slot]")];
+  expect(blanks.map((blank) => blank.textContent)).toEqual(
+    blanks.map((_, index) => `空 ${index + 1}`),
+  );
+  for (const [index, blank] of blanks.entries()) {
+    expect(blank).toHaveClass("active");
+    expect(document.querySelector(".bank-caption")).toHaveTextContent(
+      `第 ${index + 1} 空`,
+    );
+    const answer = q.slots[Number(blank.dataset.slot)].answer;
+    fireEvent.click(
+      [...document.querySelectorAll("[data-choice]")].find(
+        (button) => button.dataset.choice === answer,
+      ),
+    );
+  }
+  click("#check-button");
+  const saved = readStore("zhilian-skills-v1").b11;
+  expect(saved.draftsByMode.pick[q.id]).toEqual(
+    q.slots.map((slot) => slot.answer),
+  );
+  expect(saved.records[q.id].correct).toBe(true);
+});

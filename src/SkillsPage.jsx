@@ -1,4 +1,7 @@
-import BusinessTables, { businessText } from "./BusinessTables";
+import BusinessTables, {
+  businessText,
+  practiceSlotOrder,
+} from "./BusinessTables";
 import TrainingPlan, { trainingPlanText } from "./TrainingPlan";
 import JsonFeedback, { validateJSON } from "./JsonFeedback";
 import {
@@ -129,6 +132,7 @@ export default function Skills({ courseId }) {
   const q = course.steps[p.index],
     written = isCase || q.kind === "case",
     values = courseValues(p, q),
+    slotOrder = practiceSlotOrder(q),
     original = p.mode === "original",
     passed =
       feedback?.correct ||
@@ -239,7 +243,7 @@ export default function Skills({ courseId }) {
     canNavigate: (d) => !!course.steps[p.index + d],
     enabled: !original && !finished,
   });
-  function setValue(value, index = active) {
+  function setValue(value, index = slotOrder[active]) {
     const next = [...values];
     next[index] = value;
     update((n) => {
@@ -252,7 +256,10 @@ export default function Skills({ courseId }) {
     setHint(false);
     setSolution(false);
     if (p.mode === "pick") {
-      const first = next.findIndex((v, i) => i > index && !v);
+      const position = slotOrder.indexOf(index);
+      const first = slotOrder.findIndex(
+        (slot, i) => i > position && !next[slot],
+      );
       if (first >= 0) setActive(first);
     }
   }
@@ -354,6 +361,7 @@ export default function Skills({ courseId }) {
     setLessons(false);
   }
   function field(i) {
+    const position = slotOrder.indexOf(i);
     const status = feedback?.matches
       ? feedback.matches[i]
         ? "correct"
@@ -363,29 +371,29 @@ export default function Skills({ courseId }) {
       : "";
     return p.mode === "pick" ? (
       <button
-        className={`blank ${active === i ? "active" : ""} ${status}`}
+        className={`blank ${active === position ? "active" : ""} ${status}`}
         data-slot={i}
-        aria-label={`第 ${i + 1} 空${status ? "，" + { correct: "正确", review: "待自检", incorrect: "错误" }[status] : ""}`}
-        onClick={() => setActive(i)}
+        aria-label={`第 ${position + 1} 空${status ? "，" + { correct: "正确", review: "待自检", incorrect: "错误" }[status] : ""}`}
+        onClick={() => setActive(position)}
       >
         {status && (
           <span className="blank-result" aria-hidden="true">
             {{ correct: "✓", review: "?", incorrect: "×" }[status]}
           </span>
         )}
-        {values[i] || `空 ${i + 1}`}
+        {values[i] || `空 ${position + 1}`}
       </button>
     ) : (
       <AutoBlank
         className={`blank code-input ${status}`}
         data-slot={i}
         value={values[i] || ""}
-        placeholder={`空 ${i + 1}`}
-        aria-label={`第 ${i + 1} 空`}
+        placeholder={`空 ${position + 1}`}
+        aria-label={`第 ${position + 1} 空`}
         spellCheck={false}
         autoComplete="off"
         autoCapitalize="off"
-        onFocus={() => setActive(i)}
+        onFocus={() => setActive(position)}
         onChange={(e) => setValue(e.target.value, i)}
       />
     );
@@ -732,15 +740,17 @@ export default function Skills({ courseId }) {
                     {written ? "选择合适的要点" : "选择合适的代码"}
                   </div>
                   <div className="code-bank">
-                    {choices(q.slots[active].choices).map((choice) => (
-                      <button
-                        data-choice={choice}
-                        key={choice}
-                        onClick={() => setValue(choice)}
-                      >
-                        {choice}
-                      </button>
-                    ))}
+                    {choices(q.slots[slotOrder[active]].choices).map(
+                      (choice) => (
+                        <button
+                          data-choice={choice}
+                          key={choice}
+                          onClick={() => setValue(choice)}
+                        >
+                          {choice}
+                        </button>
+                      ),
+                    )}
                   </div>
                 </>
               ) : (
@@ -785,7 +795,7 @@ export default function Skills({ courseId }) {
                             : "还有几处需要调整"}
                       </h3>
                       <ul>
-                        {q.slots.map((slot, i) => (
+                        {slotOrder.map((i, position) => (
                           <li
                             key={i}
                             className={
@@ -802,19 +812,19 @@ export default function Skills({ courseId }) {
                                 : feedback.details?.[i]?.status === "review"
                                   ? "?"
                                   : "×"}{" "}
-                              第 {i + 1} 空
+                              第 {position + 1} 空
                             </strong>
                             ：
                             {feedback.details?.[i]?.status === "review"
                               ? "未充分识别你的表述，不等同答错。"
                               : ""}
-                            {slot.why}
+                            {q.slots[i].why}
                             {!feedback.matches[i] && (
                               <>
                                 <br />
                                 <span className="answer-reference">
                                   {written ? "参考表达" : "此处应填"}{" "}
-                                  <code>{slot.answer}</code>
+                                  <code>{q.slots[i].answer}</code>
                                 </span>
                               </>
                             )}
@@ -1124,9 +1134,9 @@ export default function Skills({ courseId }) {
                     <AnswerNote summary={step.hint} />
                   )}
                   <ul>
-                    {step.slots.map((slot, j) => (
-                      <li key={j}>
-                        第 {j + 1} 空：{slot.why}
+                    {practiceSlotOrder(step).map((slot, j) => (
+                      <li key={slot}>
+                        第 {j + 1} 空：{step.slots[slot].why}
                       </li>
                     ))}
                   </ul>
