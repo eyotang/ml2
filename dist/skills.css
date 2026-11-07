@@ -178,9 +178,9 @@ body{overflow-x:hidden}
   width: 44px;
   min-height: 44px;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--theme-surface, #fff);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--accent);
   font: 26px/1 system-ui, sans-serif;
   pointer-events: auto;
@@ -191,7 +191,7 @@ body{overflow-x:hidden}
 }
 
 .step-navigation button:active:not(:disabled) {
-  background: var(--theme-soft, #e6f7fe);
+  opacity: 0.7;
   transform: scale(0.96);
 }
 
