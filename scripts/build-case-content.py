@@ -96,6 +96,16 @@ matching=json.loads((root/'scripts/case-matching.json').read_text())
 for c in courses.values():
  for step in c['steps']:
   for slot in step['slots']:slot['matchRule']=slot.get('matchRule',matching.get(slot['answer'],{}))
+ if c['id']=='b11':
+  module_step=c['steps'][0]
+  module_rows=c['tasks'][0]['businessTables'][0]['rows']
+  module_step['code']=module_step['code'].replace('视觉模型与规则分流',module_rows[1][0])
+  module_step['solution']=module_step['code']
+  for slot,row in zip(module_step['slots'],[0,2,3]):
+   slot['accepted'].append(slot['answer'])
+   slot['answer']=module_rows[row][0]
+   slot['choices'][0]=slot['answer']
+   module_step['solution']=module_step['solution'].replace('{{}}',slot['answer'],1)
  c['count']=len(c['steps'])
  c['originalCode']='\n\n'.join(t['title'] for t in c['tasks'])
  c['referenceCode']=''

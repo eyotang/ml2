@@ -158,6 +158,12 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
     /<h4>规范业务流程图（参考方案）<\/h4>[\s\S]*?(?=<h2>)/,
     diagramHeading + b3Task.answerHTML.split(diagramHeading)[1],
   );
+  old.courses.b11.steps[0] = {
+    ...old.courses.b11.steps[0],
+    code: courses.b11.steps[0].code,
+    solution: courses.b11.steps[0].solution,
+    slots: courses.b11.steps[0].slots,
+  };
   expect(questions.slice(0, old.questions.length)).toEqual(old.questions);
   expect(normalizeFlowGeometry(courses)).toEqual(
     normalizeFlowGeometry(old.courses),

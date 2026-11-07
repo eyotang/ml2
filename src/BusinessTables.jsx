@@ -85,7 +85,12 @@ export default function BusinessTables({ task, p, update, step, field }) {
           </details>
         )}
       {shown.map((g) => (
-        <table key={g}>
+        <table
+          key={g}
+          className={
+            task.businessTables && g === 0 ? "module-framework" : undefined
+          }
+        >
           <caption>{groups[g].title}</caption>
           <thead>
             <tr>
@@ -162,6 +167,11 @@ export default function BusinessTables({ task, p, update, step, field }) {
                       field(i)
                     );
                   }
+                  // Keep the previous action-column key after inserting the scene column.
+                  const draftKey =
+                    task.businessTables && g === 0
+                      ? `0-${r}-${[0, "scene", 1][c]}`
+                      : key;
                   return (
                     <td key={c}>
                       {update &&
@@ -171,15 +181,16 @@ export default function BusinessTables({ task, p, update, step, field }) {
                           !(task.businessTables && g === 2 && c === 0)) ? (
                         <AutoBlank
                           className="blank training-input"
-                          data-business-cell={key}
+                          data-business-cell={draftKey}
                           aria-label={`${groups[g].title}第${r + 1}行${groups[g].headers[c]}`}
                           placeholder={groups[g].headers[c]}
-                          value={p.businessDrafts?.[task.id]?.[key] || ""}
+                          value={p.businessDrafts?.[task.id]?.[draftKey] || ""}
                           onChange={(e) =>
                             update((n) => {
                               n.businessDrafts ??= {};
                               n.businessDrafts[task.id] ??= {};
-                              n.businessDrafts[task.id][key] = e.target.value;
+                              n.businessDrafts[task.id][draftKey] =
+                                e.target.value;
                               delete n.caseSelf?.[task.id];
                             })
                           }

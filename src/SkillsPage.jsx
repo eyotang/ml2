@@ -54,13 +54,7 @@ function Solution({ q }) {
   if (q.id === "b11-6")
     return <BusinessTables task={courses.b11.tasks[1]} step={q.id} />;
   if (["b11-1", "b11-2"].includes(q.id))
-    return (
-      <BusinessTables
-        task={courses.b11.tasks[0]}
-        step={q.id}
-        field={q.id === "b11-2" ? undefined : (i) => q.slots[i].answer}
-      />
-    );
+    return <BusinessTables task={courses.b11.tasks[0]} step={q.id} />;
   if (q.id === "b4-1")
     return (
       <TrainingPlan

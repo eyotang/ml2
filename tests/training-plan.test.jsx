@@ -107,6 +107,7 @@ test("B1-1 original framework uses three editable tables and preserves drafts th
         answerSchema: 2,
         mode: "original",
         caseDrafts: { b11t1: "旧答案" },
+        businessDrafts: { b11t1: { "0-0-1": "旧作用" } },
       },
     }),
   );
@@ -114,6 +115,16 @@ test("B1-1 original framework uses three editable tables and preserves drafts th
   expect(
     document.querySelectorAll("#written-b11t1 .business-tables table"),
   ).toHaveLength(3);
+  const table = document.querySelector("#written-b11t1 .module-framework");
+  expect(
+    [...table.querySelectorAll("th")].map((cell) => cell.textContent),
+  ).toEqual(["模块", "连接场景", "作用"]);
+  expect(table.querySelector("tbody tr td:nth-child(2) textarea")).toHaveValue(
+    "",
+  );
+  expect(table.querySelector("tbody tr td:nth-child(3) textarea")).toHaveValue(
+    "旧作用",
+  );
   fill('[data-business-cell="0-0-0"]', "现场采集与图像质量校验");
   expect(readStore("zhilian-skills-v1").b11.businessDrafts.b11t1["0-0-0"]).toBe(
     "现场采集与图像质量校验",
