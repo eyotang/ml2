@@ -58,6 +58,12 @@ export default function BusinessTables({ task, p, update, step, field }) {
         : step === "b11-1"
           ? { "0-0-0": 0, "0-2-0": 1, "0-3-0": 2 }
           : traceSlots;
+  const retiredBoundary =
+    update && task.businessTables
+      ? ["1-2-0", "1-2-1"]
+          .map((key) => p.businessDrafts?.[task.id]?.[key])
+          .filter(Boolean)
+      : [];
   return (
     <div
       className={`training-plan business-tables ${task.reviewTables ? "review-tables" : ""}`}
@@ -84,6 +90,12 @@ export default function BusinessTables({ task, p, update, step, field }) {
               ))}
           </details>
         )}
+      {retiredBoundary.length > 0 && (
+        <details>
+          <summary>查看旧版职责补充填写</summary>
+          <p>{retiredBoundary.join("：")}</p>
+        </details>
+      )}
       {shown.map((g) => (
         <table
           key={g}

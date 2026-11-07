@@ -107,7 +107,7 @@ test("B1-1 original framework uses three editable tables and preserves drafts th
         answerSchema: 2,
         mode: "original",
         caseDrafts: { b11t1: "旧答案" },
-        businessDrafts: { b11t1: { "0-0-1": "旧作用" } },
+        businessDrafts: { b11t1: { "0-0-1": "旧作用", "1-2-1": "旧职责补充" } },
       },
     }),
   );
@@ -115,6 +115,17 @@ test("B1-1 original framework uses three editable tables and preserves drafts th
   expect(
     document.querySelectorAll("#written-b11t1 .business-tables table"),
   ).toHaveLength(3);
+  expect(
+    document.querySelectorAll(
+      "#written-b11t1 .business-tables table:nth-last-child(2) tbody tr",
+    ),
+  ).toHaveLength(2);
+  expect(
+    courses.b11.tasks[0].businessTables[1].rows.map(([role]) => role),
+  ).toEqual(["系统", "质检人员"]);
+  expect(document.querySelector("#written-b11t1")).toHaveTextContent(
+    "旧职责补充",
+  );
   const table = document.querySelector("#written-b11t1 .module-framework");
   expect(
     [...table.querySelectorAll("th")].map((cell) => cell.textContent),
