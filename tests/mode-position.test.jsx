@@ -2,6 +2,7 @@ import React from "react";
 import { test, expect, vi } from "vitest";
 import { render, fireEvent, screen } from "@testing-library/react";
 import Skills from "../src/SkillsPage";
+import { courses } from "../src/model";
 const switchMode = (mode) =>
   fireEvent.click(document.querySelector(`[data-mode="${mode}"]`));
 test("each mode restores its document position, editor scroll and selection, and open reference content", () => {
@@ -66,3 +67,46 @@ test("original flowchart horizontal position survives mode switches; step naviga
   fireEvent.click(screen.getByRole("button", { name: "下一步 →" }));
   expect(window.scrollTo).toHaveBeenLastCalledWith(0, 0);
 });
+
+test.each(["pick", "type"])(
+  "continuing in %s positions the new question below the mode bar",
+  (mode) => {
+    render(<Skills courseId="b11" />);
+    switchMode(mode);
+    for (const [
+      index,
+      { answer: value },
+    ] of courses.b11.steps[0].slots.entries()) {
+      const blank = document.querySelector(`#exercise [data-slot="${index}"]`);
+      if (mode === "type") fireEvent.change(blank, { target: { value } });
+      else {
+        fireEvent.click(blank);
+        fireEvent.click(
+          [...document.querySelectorAll("[data-choice]")].find(
+            (button) => button.dataset.choice === value,
+          ),
+        );
+      }
+    }
+    fireEvent.click(document.querySelector("#check-button"));
+    expect(document.querySelector("#next-button")).toBeVisible();
+    vi.spyOn(window, "scrollY", "get").mockReturnValue(650);
+    vi.spyOn(
+      document.querySelector("#exercise"),
+      "getBoundingClientRect",
+    ).mockReturnValue({ top: -400 });
+    vi.spyOn(
+      document.querySelector(".mode-row"),
+      "getBoundingClientRect",
+    ).mockReturnValue({ height: 60 });
+    fireEvent.click(document.querySelector("#next-button"));
+    expect(document.querySelector("#exercise h1")).toHaveTextContent(
+      "人机边界与追溯记录",
+    );
+    expect(window.scrollTo).toHaveBeenLastCalledWith({
+      left: 0,
+      top: 178,
+      behavior: "instant",
+    });
+  },
+);

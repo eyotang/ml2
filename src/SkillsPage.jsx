@@ -113,7 +113,8 @@ export default function Skills({ courseId }) {
   const editorRef = useRef(),
     mainRef = useRef(),
     modePositions = useRef(new Map()),
-    restorePosition = useRef(null);
+    restorePosition = useRef(null),
+    continueAtExercise = useRef(false);
   const runtime = usePythonRuntime({
     courseId,
     editorRef,
@@ -155,15 +156,39 @@ export default function Skills({ courseId }) {
     restorePosition.current = null;
     go(index);
   }
-  function go(index) {
+  function go(index, atExercise = false) {
     if (!course.steps[index]) return;
+    continueAtExercise.current = atExercise;
     update((n) => {
       n.index = index;
       n.stepId = course.steps[index].id;
     });
     clear();
-    window.scrollTo(0, 0);
+    if (!atExercise) window.scrollTo(0, 0);
   }
+  useLayoutEffect(() => {
+    if (!continueAtExercise.current) return;
+    continueAtExercise.current = false;
+
+    const main = mainRef.current;
+    const exerciseTop = main
+      .querySelector("#exercise")
+      .getBoundingClientRect().top;
+    const modeHeight = main
+      .querySelector(".mode-row")
+      .getBoundingClientRect().height;
+    const offset = exerciseTop - modeHeight - 12;
+
+    // Leave enough room to align even a short exercise below the sticky mode bar.
+    const mainTop = main.getBoundingClientRect().top;
+    main.style.minHeight = `calc(100dvh + ${Math.max(0, offset - mainTop)}px)`;
+    window.scrollTo({
+      left: 0,
+      top: Math.max(0, window.scrollY + offset),
+      behavior: "instant",
+    });
+    return () => main.style.removeProperty("min-height");
+  }, [q.id, p.mode, finished]);
   useLayoutEffect(() => {
     const saved = restorePosition.current;
     if (!saved) return;
@@ -963,7 +988,7 @@ export default function Skills({ courseId }) {
           className="check-button"
           hidden={finished || original || !passed}
           onClick={() => {
-            if (p.index < course.count - 1) go(p.index + 1);
+            if (p.index < course.count - 1) go(p.index + 1, true);
             else {
               setFinished(true);
               setHint(false);
