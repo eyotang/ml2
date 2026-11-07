@@ -107,3 +107,30 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .business-tables table.module-framework:has(thead th:nth-child(3)) th:nth-child(1) { width: 27%; }
 .business-tables table.module-framework:has(thead th:nth-child(3)) th:nth-child(2) { width: 22%; }
 .business-tables table.module-framework:has(thead th:nth-child(3)) th:nth-child(3) { width: 51%; }
+
+/* Keep blanks in the same line as their surrounding table text. */
+.business-tables button.blank[data-slot] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.business-tables .answer-field:has(textarea[data-slot]) {
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+  margin: 2px 0;
+}
+
+.business-tables .answer-field:has(textarea[data-slot]) .blank {
+  font: inherit;
+  line-height: 1.6;
+  padding: 4px 8px;
+  min-height: 32px;
+  text-align: center;
+}
