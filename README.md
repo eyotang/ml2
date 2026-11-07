@@ -32,6 +32,8 @@ python3 -m http.server 8765 --bind 127.0.0.1 --directory dist
 
 将 **整个 `dist/` 的内容** 上传至静态托管空间，首页为 `index.html`。WorkBuddy 继续发布本项目的 `theory-practice/dist` 目录，复用原应用和演示链接。不要上传 `src/` 代替构建产物，也不需要上传 `node_modules`。
 
+发布前在 **Ego Lite** 中打开本次构建的本地 `dist/`，检查电脑、iPad 和手机尺寸下的相关功能。涉及旧版 Safari 时，补做 WebKit 或可用真机检查，并记录验证范围。兼容性检查通过后再发布同一份构建产物。
+
 保留 `theory.html?view=...&mode=...`、`skills.html?course=...`、首页 `#theory` / `#skills` / `#review` 等原链接。使用相对资源路径，支持部署在子目录，无需单页应用的路由回退配置。
 
 构建后的 JS/CSS 文件名带内容指纹，题目或代码变化后会使用新文件。还保留旧 HTML 所请求的资源名，由兼容入口启动当前 React 页面，避免旧页面缓存直接报资源缺失。托管平台若允许设置响应头，HTML 和旧名称的兼容入口应每次重新验证缓存，`assets/` 中的指纹文件可长期缓存；HTTP 缓存是否立即更新最终取决于托管平台设置。

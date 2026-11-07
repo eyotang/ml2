@@ -93,41 +93,46 @@ body{overflow-x:hidden}.step-navigation{display:flex;align-items:center;justify-
 .business-tables td { font-size: 14px; }
 .business-tables .training-input, .business-tables .answer-measure { font-size: 14px; padding: 6px; }
 @media (max-width:600px) { .business-tables th, .business-tables td { padding: 6px; } }
-.business-tables table:has(thead th:nth-child(4)) th:nth-child(1) { width: 14%; }
-.business-tables table:has(thead th:nth-child(4)) th:nth-child(2) { width: 20%; }
-.business-tables table:has(thead th:nth-child(4)) th:nth-child(3) { width: 23%; }
-.business-tables table:has(thead th:nth-child(4)) th:nth-child(4) { width: 43%; }
-.business-tables table:has(thead th:nth-child(3)):not(:has(thead th:nth-child(4))) th:nth-child(1) { width: 16%; }
-.business-tables table:has(thead th:nth-child(3)):not(:has(thead th:nth-child(4))) th:nth-child(2) { width: 28%; }
-.business-tables table:has(thead th:nth-child(3)):not(:has(thead th:nth-child(4))) th:nth-child(3) { width: 56%; }
-.review-tables table:has(thead th:nth-child(3)) th:nth-child(1) { width: 26%; }
-.review-tables table:has(thead th:nth-child(3)) th:nth-child(2), .review-tables table:has(thead th:nth-child(3)) th:nth-child(3) { width: 37%; }
+.business-tables table.table-columns-4 th:nth-child(1) { width: 14%; }
+.business-tables table.table-columns-4 th:nth-child(2) { width: 20%; }
+.business-tables table.table-columns-4 th:nth-child(3) { width: 23%; }
+.business-tables table.table-columns-4 th:nth-child(4) { width: 43%; }
+.business-tables table.table-columns-3 th:nth-child(1) { width: 16%; }
+.business-tables table.table-columns-3 th:nth-child(2) { width: 28%; }
+.business-tables table.table-columns-3 th:nth-child(3) { width: 56%; }
+.review-tables table.table-columns-3 th:nth-child(1) { width: 26%; }
+.review-tables table.table-columns-3 th:nth-child(2), .review-tables table.table-columns-3 th:nth-child(3) { width: 37%; }
 
 .flow-scroll:has(#arrow-b3) .flow-box .answer-field{display:inline-block;width:auto}.flow-scroll:has(#arrow-b3) .flow-box .blank{min-width:0}
-.business-tables table.module-framework:has(thead th:nth-child(3)) th:nth-child(1) { width: 27%; }
-.business-tables table.module-framework:has(thead th:nth-child(3)) th:nth-child(2) { width: 22%; }
-.business-tables table.module-framework:has(thead th:nth-child(3)) th:nth-child(3) { width: 51%; }
+.business-tables table.module-framework.table-columns-3 th:nth-child(1) { width: 27%; }
+.business-tables table.module-framework.table-columns-3 th:nth-child(2) { width: 22%; }
+.business-tables table.module-framework.table-columns-3 th:nth-child(3) { width: 51%; }
 
-/* Keep blanks in the same line as their surrounding table text. */
-.business-tables button.blank[data-slot] {
+/* Align the wrapper to the text line independently of the native control. */
+.business-tables .table-blank {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: middle;
+  position: relative;
+  bottom: 0.12em;
+}
+
+.business-tables .table-blank button.blank {
   -webkit-appearance: none;
   appearance: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
+  display: block;
+  line-height: 20px;
+  padding-block: 5px;
   text-align: center;
   overflow-wrap: anywhere;
 }
 
-.business-tables .answer-field:has(textarea[data-slot]) {
-  display: inline-block;
+.business-tables .table-blank .answer-field {
   width: auto;
-  vertical-align: middle;
-  margin: 2px 0;
+  margin: 0;
 }
 
-.business-tables .answer-field:has(textarea[data-slot]) .blank {
+.business-tables .table-blank .answer-field .blank {
   font: inherit;
   line-height: 1.6;
   padding: 4px 8px;

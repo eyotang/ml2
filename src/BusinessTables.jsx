@@ -99,9 +99,7 @@ export default function BusinessTables({ task, p, update, step, field }) {
       {shown.map((g) => (
         <table
           key={g}
-          className={
-            task.businessTables && g === 0 ? "module-framework" : undefined
-          }
+          className={`table-columns-${groups[g].headers.length}${task.businessTables && g === 0 ? " module-framework" : ""}`}
         >
           <caption>{groups[g].title}</caption>
           <thead>
@@ -121,62 +119,65 @@ export default function BusinessTables({ task, p, update, step, field }) {
                   let content = value;
                   if (field && slots[key] !== undefined) {
                     const i = slots[key];
+                    const blank = (
+                      <span className="table-blank">{field(i)}</span>
+                    );
                     content = task.conclusionTables ? (
-                      field(i)
+                      blank
                     ) : task.reviewTables ? (
                       step === "b11-7" ? (
                         i === 0 ? (
                           <>
-                            用{field(i)}
+                            用{blank}
                             比较缺陷召回率与漏检率，验证实际漏放风险。
                           </>
                         ) : (
-                          <>采集已核实的{field(i)}回流训练，并改善光照。</>
+                          <>采集已核实的{blank}回流训练，并改善光照。</>
                         )
                       ) : (
                         <>
                           {i === 0
                             ? "经独立抽检确认实际不合格的自动放行件数"
                             : "质量人员最终确认合格的自动隔离件数"}{" "}
-                          ÷ {field(i)}
+                          ÷ {blank}
                         </>
                       )
                     ) : task.pathTables ? (
                       i === 0 ? (
                         <>
-                          图像模糊→旧分数作废→{field(i)}
+                          图像模糊→旧分数作废→{blank}
                           ；补拍可用则按新分数分流，仍不可用则实物检查，按人工结论处置。
                         </>
                       ) : (
                         <>
-                          图像清晰且0.12&lt;0.20→{field(i)}
+                          图像清晰且0.12&lt;0.20→{blank}
                           →包装前状态校验；暴露细小凹陷漏检风险。
                         </>
                       )
                     ) : step === "b11-2" && i === 1 ? (
                       <>
-                        产品编号、{field(i)}
+                        产品编号、{blank}
                         （已放行/已隔离/待检）、状态更新时间
                       </>
                     ) : step === "b11-2" && i === 2 ? (
                       <>
                         产品编号、复核结论（合格/不合格/待定）、
-                        {field(i)}。
+                        {blank}。
                       </>
                     ) : step === "b11-2" && i === 5 ? (
-                      <>{field(i)}、缺陷分数、推理时间、模型版本号</>
+                      <>{blank}、缺陷分数、推理时间、模型版本号</>
                     ) : step === "b11-2" && i === 7 ? (
                       <>
                         产品编号、处置决定（放行/返工/报废）、处置人、时间；
-                        {field(i)}
+                        {blank}
                       </>
                     ) : step === "b11-2" && i === 8 ? (
                       <>
-                        图像ID、模型原分数、人工最终结论、{field(i)}
+                        图像ID、模型原分数、人工最终结论、{blank}
                         、关联模型版本
                       </>
                     ) : (
-                      field(i)
+                      blank
                     );
                   }
                   // Keep the previous action-column key after inserting the scene column.
