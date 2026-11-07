@@ -89,6 +89,8 @@ add('b4',2,'设定考核与训后复查','考核应覆盖正常、错误、依�
 # All flowchart exercises use the same professional shape and connector model.
 from flowcharts import diagrams, CSS as FLOW_CSS
 diagrams(courses)
+from b3_tables import build as build_b3_tables
+build_b3_tables(courses['b3'])
 (root/'src/styles/flowcharts.css').write_text(FLOW_CSS)
 from c_review import build as build_review
 courses['c']=build_review()

@@ -216,3 +216,14 @@ body{overflow-x:hidden}
     inset-inline: -54px;
   }
 }
+
+.answer-table-scroll { overflow-x: auto; }
+.table-scroll-hint { display: none; }
+.answer-tables .table-columns-5 th { width: 24%; }
+.answer-tables .table-columns-5 th:nth-child(1) { width: 18%; }
+.answer-tables .table-columns-5 th:nth-child(2) { width: 10%; }
+@media (max-width: 600px) {
+  .table-scroll-hint { display: block; color: var(--muted); margin-block: 8px; }
+  .answer-tables .table-columns-4,
+  .answer-tables .table-columns-5 { min-width: 600px; }
+}

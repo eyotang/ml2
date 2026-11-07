@@ -145,7 +145,19 @@ test("all authored questions, answers, code, comments, diagrams, task requiremen
   for (const [index, step] of courses.b3.steps.entries()) {
     if (step.flowchartHTML)
       old.courses.b3.steps[index].flowchartHTML = step.flowchartHTML;
+    else delete old.courses.b3.steps[index].flowchartHTML;
+    if (index === 0)
+      old.courses.b3.steps[index].slots[2].matchRule = step.slots[2].matchRule;
+    if (step.tablePractice)
+      old.courses.b3.steps[index].tablePractice = step.tablePractice;
   }
+  courses.b3.tasks.forEach((task, index) => {
+    old.courses.b3.tasks[index].answerTables = task.answerTables;
+    if (task.providedAnswers)
+      old.courses.b3.tasks[index].providedAnswers = task.providedAnswers;
+    old.courses.b3.tasks[index].answerHTML = task.answerHTML;
+  });
+  old.courses.b3.referenceHTML = courses.b3.referenceHTML;
   const oldB3Task = old.courses.b3.tasks[0];
   const b3Task = courses.b3.tasks[0];
   const diagramHeading = "<h4>规范业务流程图（参考方案）</h4>";

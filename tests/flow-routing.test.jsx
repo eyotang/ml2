@@ -75,7 +75,7 @@ test("B3 uses the original task diagram for every flow exercise", () => {
   const full = fill(task.flowchart.html, task.flowchart.slots);
   expect(task.answerHTML).toContain(full);
   const steps = courses.b3.steps.filter((step) => step.flowchartHTML);
-  expect(steps).toHaveLength(6);
+  expect(steps).toHaveLength(1);
   for (const step of steps) {
     expect(
       [...step.flowchartHTML.matchAll(/\{\{(\d+)\}\}/g)]

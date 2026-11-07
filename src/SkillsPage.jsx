@@ -1,3 +1,4 @@
+import AnswerTables from "./AnswerTables";
 import BusinessTables, {
   businessText,
   practiceSlotOrder,
@@ -47,6 +48,8 @@ const esc = (s) =>
       ],
   );
 function Solution({ q }) {
+  if (q.tablePractice)
+    return <AnswerTables task={courses.b3.tasks[q.taskIndex]} step={q} />;
   if (["b2-18", "b2-19"].includes(q.id))
     return <BusinessTables task={courses.b2.tasks[0]} step={q.id} />;
   if (["b11-7", "b11-8"].includes(q.id))
@@ -261,7 +264,8 @@ export default function Skills({ courseId }) {
     onNavigate: (d) => go(p.index + d, true),
     canNavigate: (d) => !!course.steps[p.index + d],
     enabled: !original && !finished,
-    ignoreSelector: ".step-navigation, .case-rich, .runner-table",
+    ignoreSelector:
+      ".step-navigation, .case-rich, .runner-table, .answer-table-scroll",
   });
   function setValue(value, index = slotOrder[active]) {
     const next = [...values];
@@ -546,7 +550,9 @@ export default function Skills({ courseId }) {
                 </h1>
                 <p className="task-goal">
                   {isCase
-                    ? "保留原题要求。流程图已预先画好，可直接在节点内填写；表格及其他内容可在文本区逐项作答。开放方案不按措辞相同与否自动判错。"
+                    ? course.tasks.some((task) => task.answerTables)
+                      ? "按原题顺序逐格填写表格，再完成流程图节点；其他说明可在补充区填写。答案自动保存，可按任务分别核对。"
+                      : "保留原题要求。流程图已预先画好，可直接在节点内填写；表格及其他内容可在文本区逐项作答。开放方案不按措辞相同与否自动判错。"
                     : "在下方原题模板中补全所有空白。完成后对照参考解法自检；原题允许等价的 Python 写法，本模式不按字符串直接判错。"}
                 </p>
                 {!isCase && course.tasks && (
@@ -708,7 +714,13 @@ export default function Skills({ courseId }) {
                     <pre>{q.context}</pre>
                   </details>
                 )}
-                {["b2-18", "b2-19"].includes(q.id) ? (
+                {q.tablePractice ? (
+                  <AnswerTables
+                    task={course.tasks[q.taskIndex]}
+                    step={q}
+                    field={field}
+                  />
+                ) : ["b2-18", "b2-19"].includes(q.id) ? (
                   <BusinessTables
                     task={course.tasks[0]}
                     step={q.id}
@@ -1182,7 +1194,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
     const taskChecked = checked || !!p.taskChecks?.[task.id];
     const functionTask = task.id === "ct1";
     const trainingTask = !!task.trainingPlan;
-    const businessTask = !!task.businessTables;
+    const businessTask = !!task.businessTables || !!task.answerTables;
     const jsonTask = task.id === "ct2";
     const jsonValue = p.jsonDrafts?.[task.id] || "";
     const flowValues = p.flowDrafts?.[task.id] || [],
@@ -1193,6 +1205,8 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
             (p.caseDrafts?.[task.id] || "") +
               "\n" +
               flowValues.join("\n") +
+              "\n" +
+              (task.providedAnswers || []).join("\n") +
               (functionTask ? "\n" + functionCardsText(p) : "") +
               (trainingTask ? "\n" + trainingPlanText(task, p) : "") +
               (businessTask ||
@@ -1220,6 +1234,9 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
           {task.title}
         </h2>
         <Rich className="case-rich" html={task.promptHTML} />
+        {task.answerTables && (
+          <AnswerTables task={task} p={p} update={update} />
+        )}
         {task.flowchart && (
           <div className="flow-practice">
             <h3>业务流程图 · 节点填空</h3>
@@ -1288,7 +1305,7 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
         )}
         {functionTask || trainingTask || businessTask ? (
           <>
-            {businessTask ? (
+            {task.answerTables ? null : businessTask ? (
               <BusinessTables task={task} p={p} update={update} />
             ) : trainingTask ? (
               <TrainingPlan task={task} p={p} update={update} />
@@ -1393,7 +1410,9 @@ function WrittenTasks({ course, p, update, checked, isCase = false }) {
                 </ul>
               </section>
             </div>
-            {businessTask ? (
+            {task.answerTables ? (
+              <Rich className="case-rich" html={task.answerHTML} />
+            ) : businessTask ? (
               <BusinessTables task={task} />
             ) : trainingTask ? (
               <>
